@@ -1,1 +1,2 @@
 # TxOfKindness
+# zakat-miniapp
