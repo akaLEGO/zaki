@@ -17,13 +17,11 @@ import {
   CheckoutScreen, QRPayment, BankTransfer, SuccessScreen,
 } from './ZakiPayment';
 import type { PayMethod, Summary } from './ZakiPayment';
-import {
-  ORG_LIST, ASNAF, ASNAF_RECIPIENTS, CAMPAIGNS,
-  QURBAN_OPTIONS, QURBAN_LOCATIONS, KAFFARAH_TYPES,
-} from '../shared/data';
 import type { AsnafId } from '../shared/types';
 import type { Tab } from './ZakiUI';
 import { TweaksPanel, TweakSection, TweakRadio, useTweaks } from './TweaksPanel';
+import { useData } from '../lib/data-context';
+import { apiFetch } from '../lib/api';
 
 type Screen =
   | 'home' | 'history' | 'profile' | 'faq'
@@ -64,6 +62,13 @@ interface Tweaks {
 }
 
 export function App() {
+  const data = useData();
+  const {
+    orgs: ORG_LIST, campaigns: CAMPAIGNS,
+    asnaf: ASNAF, recipients: ASNAF_RECIPIENTS,
+    qurbanOptions: QURBAN_OPTIONS, qurbanLocations: QURBAN_LOCATIONS,
+    kaffarahTypes: KAFFARAH_TYPES,
+  } = data;
   const [tweaks, setTweak] = useTweaks<Tweaks>({
     compulsoryWording: 'wajib',
     homeLayout: 'stacked',
@@ -148,6 +153,7 @@ export function App() {
         };
       case 'kaffarah': {
         const k = KAFFARAH_TYPES.find(x => x.id === kaffType) || KAFFARAH_TYPES[0];
+        if (!k) return { amount: 0, type: '—', dest: '—', niyyah: '', shortImpact: '' };
         return {
           amount: k.amount,
           type: 'Kaffarah · กัฟฟารอฮ์',
@@ -200,6 +206,26 @@ export function App() {
   const goHome = () => { setScreen('home'); setTab('home'); setNiyyahConfirmed(false); setActiveFlow(null); };
   const goCheckout = (flow: ActiveFlow) => { setActiveFlow(flow); setNiyyahConfirmed(false); setScreen('checkout'); };
   const goPay = () => setScreen(payMethod === 'bank' ? 'pay-bank' : 'pay-qr');
+
+  const recordDonation = async () => {
+    if (!activeFlow) return;
+    try {
+      await apiFetch('/api/donations', {
+        method: 'POST',
+        body: JSON.stringify({
+          flow: activeFlow,
+          amount: summary.amount,
+          destination: summary.dest,
+          payMethod,
+          status: 'completed',
+          niyyah: summary.niyyah,
+        }),
+      });
+      void data.refresh();
+    } catch (e) {
+      console.error('donation save failed', e);
+    }
+  };
 
   const handleTab = (t: Tab) => {
     setTab(t);
@@ -317,10 +343,10 @@ export function App() {
       />;
       break;
     case 'pay-qr':
-      view = <QRPayment amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={() => setScreen('success')} />;
+      view = <QRPayment amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={() => { void recordDonation(); setScreen('success'); }} />;
       break;
     case 'pay-bank':
-      view = <BankTransfer amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={() => setScreen('success')} />;
+      view = <BankTransfer amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={() => { void recordDonation(); setScreen('success'); }} />;
       break;
     case 'success':
       view = <SuccessScreen summary={{ ...summary, payMethod }} onHome={goHome} />;

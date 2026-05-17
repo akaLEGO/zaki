@@ -1,15 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   AZ, AIcon, ABtn, KPI, Pill, ACard, Field, TextInput, TextArea, Toggle, Drawer,
   PBar, fmtTHB, fmtNumber, pct,
 } from './AdminUI';
 import type { IconName } from './AdminUI';
-import {
-  ORG_LIST, ASNAF, ASNAF_RECIPIENTS, CAMPAIGNS,
-  QURBAN_OPTIONS, QURBAN_LOCATIONS,
-} from '../shared/data';
 import type { Org, Campaign as CampaignT, OrgIcon, AsnafId, Recipient } from '../shared/types';
+import { useData } from '../lib/data-context';
+import { apiFetch } from '../lib/api';
 
 type ScreenId = 'dashboard' | 'campaigns' | 'orgs' | 'rates' | 'transactions' | 'shariah' | 'settings';
 
@@ -62,6 +60,7 @@ function BigChart({ values }: { values: number[] }) {
 }
 
 export function AdminDashboard({ onNav }: { onNav: (s: ScreenId) => void }) {
+  const { campaigns: CAMPAIGNS } = useData();
   const today = '17 พ.ค. 2569 · พฤหัสบดี';
 
   type ActivityKind = 'donate' | 'edit' | 'approve' | 'rate';
@@ -250,12 +249,8 @@ interface CampaignRow extends CampaignT {
 }
 
 export function AdminCampaigns() {
-  const [items, setItems] = useState<CampaignRow[]>(() => CAMPAIGNS.map(c => ({
-    ...c,
-    status: c.featured ? 'live-featured' : 'live',
-    updatedAt: '15 พ.ค.',
-    shariah: 'approved',
-  })));
+  const { campaigns, refresh } = useData();
+  const items = campaigns as unknown as CampaignRow[];
   const [drawer, setDrawer] = useState<string | null>(null);
   const [draft, setDraft] = useState<CampaignRow | null>(null);
   const [q, setQ] = useState('');
@@ -278,20 +273,30 @@ export function AdminCampaigns() {
     });
     setDrawer('new');
   };
-  const save = () => {
+  const save = async () => {
     if (!draft) return;
-    if (drawer === 'new') {
-      setItems([...items, { ...draft, id: draft.id || ('c-' + Math.random().toString(36).slice(2, 7)) }]);
-    } else {
-      setItems(items.map(x => x.id === drawer ? draft : x));
-    }
-    setDrawer(null);
-  };
-  const remove = () => {
-    if (!draft) return;
-    if (confirm('ลบแคมเปญ ' + draft.title + '?')) {
-      setItems(items.filter(x => x.id !== drawer));
+    try {
+      if (drawer === 'new') {
+        const id = draft.id || ('c-' + Math.random().toString(36).slice(2, 7));
+        await apiFetch('/api/campaigns', { method: 'POST', body: JSON.stringify({ ...draft, id }) });
+      } else {
+        await apiFetch(`/api/campaigns/${drawer}`, { method: 'PATCH', body: JSON.stringify(draft) });
+      }
+      await refresh();
       setDrawer(null);
+    } catch (e) {
+      alert('บันทึกไม่สำเร็จ: ' + e);
+    }
+  };
+  const remove = async () => {
+    if (!draft || !drawer || drawer === 'new') return;
+    if (!confirm('ลบแคมเปญ ' + draft.title + '?')) return;
+    try {
+      await apiFetch(`/api/campaigns/${drawer}`, { method: 'DELETE' });
+      await refresh();
+      setDrawer(null);
+    } catch (e) {
+      alert('ลบไม่สำเร็จ: ' + e);
     }
   };
 
@@ -512,6 +517,7 @@ function CampaignForm({ draft, setDraft }: { draft: CampaignRow; setDraft: (c: C
 }
 
 export function AdminOrgs() {
+  const { orgs, recipients, qurbanLocations } = useData();
   const [tab, setTab] = useState<'orgs' | 'recipients' | 'qurban'>('orgs');
   return (
     <div style={{ padding: '22px 28px 40px' }}>
@@ -525,9 +531,9 @@ export function AdminOrgs() {
 
       <div style={{ display: 'flex', gap: 4, background: '#fff', padding: 4, borderRadius: 10, border: `1px solid ${AZ.line}`, marginBottom: 14, width: 'fit-content' }}>
         {([
-          { id: 'orgs', label: 'Riba Orgs', count: ORG_LIST.length },
-          { id: 'recipients', label: '8 Asnaf Recipients', count: Object.values(ASNAF_RECIPIENTS).flat().length },
-          { id: 'qurban', label: 'Qurban Locations', count: QURBAN_LOCATIONS.length },
+          { id: 'orgs', label: 'Riba Orgs', count: orgs.length },
+          { id: 'recipients', label: '8 Asnaf Recipients', count: Object.values(recipients).flat().length },
+          { id: 'qurban', label: 'Qurban Locations', count: qurbanLocations.length },
         ] as const).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             padding: '8px 16px', borderRadius: 7,
@@ -555,7 +561,7 @@ export function AdminOrgs() {
 }
 
 function OrgsTable() {
-  const [list, setList] = useState<Org[]>(ORG_LIST.map(o => ({ ...o })));
+  const { orgs: list, refresh } = useData();
   const [drawer, setDrawer] = useState<string | null>(null);
   const [draft, setDraft] = useState<Org | null>(null);
   const types: Record<OrgIcon, string> = {
@@ -621,16 +627,28 @@ function OrgsTable() {
         title={drawer === 'new' ? 'เพิ่มองค์กร' : `แก้ไของค์กร: ${draft?.name}`}
         footer={
           <>
-            {drawer !== 'new' && <ABtn kind="danger" icon="trash" onClick={() => {
-              if (confirm('ลบองค์กร?')) { setList(list.filter(x => x.id !== drawer)); setDrawer(null); }
+            {drawer !== 'new' && <ABtn kind="danger" icon="trash" onClick={async () => {
+              if (!confirm('ลบองค์กร?')) return;
+              try {
+                await apiFetch(`/api/orgs/${drawer}`, { method: 'DELETE' });
+                await refresh();
+                setDrawer(null);
+              } catch (e) { alert('ลบไม่สำเร็จ: ' + e); }
             }}>ลบ</ABtn>}
             <div style={{ flex: 1 }} />
             <ABtn kind="ghost" onClick={() => setDrawer(null)}>ยกเลิก</ABtn>
-            <ABtn kind="primary" icon="check" onClick={() => {
+            <ABtn kind="primary" icon="check" onClick={async () => {
               if (!draft) return;
-              if (drawer === 'new') setList([...list, { ...draft, id: draft.id || 'o-' + Math.random().toString(36).slice(2, 7) }]);
-              else setList(list.map(x => x.id === drawer ? draft : x));
-              setDrawer(null);
+              try {
+                if (drawer === 'new') {
+                  const id = draft.id || 'o-' + Math.random().toString(36).slice(2, 7);
+                  await apiFetch('/api/orgs', { method: 'POST', body: JSON.stringify({ ...draft, id }) });
+                } else {
+                  await apiFetch(`/api/orgs/${drawer}`, { method: 'PATCH', body: JSON.stringify(draft) });
+                }
+                await refresh();
+                setDrawer(null);
+              } catch (e) { alert('บันทึกไม่สำเร็จ: ' + e); }
             }}>บันทึก</ABtn>
           </>
         }
@@ -676,14 +694,12 @@ const chipBtn = (active: boolean) => ({
 });
 
 function RecipientsTable() {
-  const [list] = useState<(Recipient & { asnaf: AsnafId; id: string })[]>(() => {
-    const all: (Recipient & { asnaf: AsnafId; id: string })[] = [];
-    for (const [asnafId, recipients] of Object.entries(ASNAF_RECIPIENTS)) {
-      if (!recipients) continue;
-      for (const r of recipients) all.push({ ...r, asnaf: asnafId as AsnafId, id: 'r-' + Math.random().toString(36).slice(2, 8) });
-    }
-    return all;
-  });
+  const { asnaf: ASNAF, recipients } = useData();
+  const list: (Recipient & { asnaf: AsnafId; id: number })[] = [];
+  for (const [asnafId, rs] of Object.entries(recipients)) {
+    if (!rs) continue;
+    for (const r of rs) list.push({ ...(r as Recipient & { id: number }), asnaf: asnafId as AsnafId });
+  }
   const [filter, setFilter] = useState<'all' | AsnafId>('all');
   const filtered = filter === 'all' ? list : list.filter(r => r.asnaf === filter);
 
@@ -737,6 +753,7 @@ function RecipientsTable() {
 }
 
 function QurbanTable() {
+  const { qurbanOptions: QURBAN_OPTIONS, qurbanLocations: QURBAN_LOCATIONS } = useData();
   return (
     <>
       <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>

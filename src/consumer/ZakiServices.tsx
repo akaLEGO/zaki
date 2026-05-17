@@ -3,11 +3,8 @@ import {
   Z, Icon, GoldButton, ForestHeader, StickyBottom,
   Card, ProgressBar, MoneyField, Stepper, Chip, TrustBadge, fmtTHB, fmtPct,
 } from './ZakiUI';
-import {
-  ORG_LIST, ASNAF, ASNAF_RECIPIENTS, CAMPAIGNS,
-  QURBAN_OPTIONS, QURBAN_LOCATIONS, KAFFARAH_TYPES,
-} from '../shared/data';
 import type { AsnafId } from '../shared/types';
+import { useData } from '../lib/data-context';
 
 export function RibaEntry({ amount, setAmount, onBack, onNext }: {
   amount: number; setAmount: (n: number) => void; onBack: () => void; onNext: () => void;
@@ -82,6 +79,7 @@ export function RibaEntry({ amount, setAmount, onBack, onNext }: {
 export function RibaOrgSelect({ amount, selectedOrg, setSelectedOrg, onBack, onNext }: {
   amount: number; selectedOrg: string | null; setSelectedOrg: (id: string) => void; onBack: () => void; onNext: () => void;
 }) {
+  const { orgs: ORG_LIST } = useData();
   const [expanded, setExpanded] = useState<string | null>(null);
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
@@ -270,6 +268,7 @@ export function ZakatAsnaf({ zakatAmount, asnaf, setAsnaf, recipient, setRecipie
   recipient: number | null; setRecipient: (i: number | null) => void;
   onBack: () => void; onNext: () => void;
 }) {
+  const { asnaf: ASNAF, recipients: ASNAF_RECIPIENTS } = useData();
   const recipients = ASNAF_RECIPIENTS[asnaf] || [];
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
@@ -383,6 +382,7 @@ export function CompulsoryScreen({
   kaffType: KaffType; setKaffType: (k: KaffType) => void;
   onBack: () => void; onNext: () => void;
 }) {
+  const { kaffarahTypes: KAFFARAH_TYPES } = useData();
   const tabs: { id: CompulsorySub; label: string; sub: string }[] = [
     { id: 'fitrah', label: 'Fitrah', sub: 'ฟิฏร' },
     { id: 'fidyah', label: 'Fidyah', sub: 'ฟิดยะห์' },
@@ -425,7 +425,7 @@ export function CompulsoryScreen({
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px' }}>
         {subtab === 'fitrah' && <FitrahPanel count={fitrahCount} setCount={setFitrahCount} />}
         {subtab === 'fidyah' && <FidyahPanel days={fidyahDays} setDays={setFidyahDays} />}
-        {subtab === 'kaffarah' && <KaffarahPanel type={kaffType} setType={setKaffType} />}
+        {subtab === 'kaffarah' && <KaffarahPanel type={kaffType} setType={setKaffType} types={KAFFARAH_TYPES} />}
       </div>
 
       <StickyBottom>
@@ -506,7 +506,10 @@ function FidyahPanel({ days, setDays }: { days: number; setDays: (n: number) => 
   );
 }
 
-function KaffarahPanel({ type, setType }: { type: KaffType; setType: (k: KaffType) => void }) {
+function KaffarahPanel({ type, setType, types: KAFFARAH_TYPES }: {
+  type: KaffType; setType: (k: KaffType) => void;
+  types: Array<{ id: KaffType; label: string; amount: number; sub: string }>;
+}) {
   return (
     <div>
       <div style={{ fontSize: 18, fontWeight: 700, color: Z.forest, lineHeight: 1.3 }}>
@@ -569,6 +572,7 @@ export function QurbanPrices({ selected, setSelected, animal, setAnimal, onBack,
   animal: QurbanAnimal; setAnimal: (a: QurbanAnimal) => void;
   onBack: () => void; onNext: () => void;
 }) {
+  const { qurbanOptions: QURBAN_OPTIONS } = useData();
   const animals: { id: QurbanAnimal; label: string; sub: string }[] = [
     { id: 'goat', label: 'แพะ 1 ตัว', sub: '1 ครอบครัว' },
     { id: 'cow', label: 'วัว 1/7 ส่วน', sub: 'ร่วม 7 คน' },
@@ -699,6 +703,7 @@ export function QurbanPrices({ selected, setSelected, animal, setAnimal, onBack,
 export function QurbanLocation({ location, setLocation, onBack, onNext }: {
   location: string | null; setLocation: (id: string) => void; onBack: () => void; onNext: () => void;
 }) {
+  const { qurbanLocations: QURBAN_LOCATIONS } = useData();
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
       <ForestHeader onBack={onBack} title="เลือกพื้นที่แจกจ่าย" sub="เนื้อกุรบ่านจะแจกในวันอีดิลอัฎฮา" compact />
@@ -747,8 +752,16 @@ export function SadaqahCampaigns({ campaign, setCampaign, iftarMeals, setIftarMe
   iftarMeals: number; setIftarMeals: (n: number) => void;
   onBack: () => void; onNext: () => void;
 }) {
-  const featured = CAMPAIGNS.find(c => c.featured)!;
+  const { campaigns: CAMPAIGNS } = useData();
+  const featured = CAMPAIGNS.find(c => c.featured);
   const others = CAMPAIGNS.filter(c => !c.featured);
+  if (!featured) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center', color: Z.muted }}>
+        ยังไม่มีแคมเปญในระบบ
+      </div>
+    );
+  }
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
