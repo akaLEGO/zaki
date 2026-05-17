@@ -1,6 +1,6 @@
 import { verifyToken } from '@clerk/backend';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql } from './db';
+import { sql } from './db.js';
 
 export interface AuthedUser {
   userId: string;

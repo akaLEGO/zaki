@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql } from './_lib/db';
-import { withErrors } from './_lib/handler';
-import { optionalAuth, requireAdmin } from './_lib/auth';
-import { audit } from './_lib/audit';
-import { validate } from './_lib/validate';
-import { cors } from './_lib/cors';
-import { rateLimit } from './_lib/ratelimit';
+import { sql } from './_lib/db.js';
+import { withErrors } from './_lib/handler.js';
+import { optionalAuth, requireAdmin } from './_lib/auth.js';
+import { audit } from './_lib/audit.js';
+import { validate } from './_lib/validate.js';
+import { cors } from './_lib/cors.js';
+import { rateLimit } from './_lib/ratelimit.js';
 
 const FLOWS = ['riba','zakat','fitrah','fidyah','kaffarah','qurban','sadaqah'] as const;
 const METHODS = ['qr','bank','usdc'] as const;

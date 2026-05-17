@@ -16,7 +16,7 @@ async function tryLoad(label: string, loader: () => Promise<unknown>) {
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
   const results = [];
-  results.push(await tryLoad('./_lib/db', () => import('./_lib/db')));
+  results.push(await tryLoad('./_lib/db.js', () => import('./_lib/db.js')));
   results.push(await tryLoad('./_lib/auth', () => import('./_lib/auth')));
   results.push(await tryLoad('./_lib/audit', () => import('./_lib/audit')));
   results.push(await tryLoad('./_lib/validate', () => import('./_lib/validate')));

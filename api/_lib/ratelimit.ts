@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql } from './db';
+import { sql } from './db.js';
 
 interface Opts {
   // Identifier scope (e.g. 'donations'). Combined with caller IP into the bucket key.
