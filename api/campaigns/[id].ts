@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '../_lib/db';
+import { withErrors } from '../_lib/handler';
 import { requireAdmin } from '../_lib/auth';
 import { audit } from '../_lib/audit';
 import { validate } from '../_lib/validate';
@@ -9,7 +10,7 @@ import { rateLimit } from '../_lib/ratelimit';
 const STATUSES = ['draft','live','live-featured','archived'] as const;
 const SHARIAH = ['approved','pending'] as const;
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default withErrors(async function handler(req: VercelRequest, res: VercelResponse) {
   if (!cors(req, res)) return;
   const id = String(req.query.id);
   if (req.method === 'PATCH') {
@@ -69,4 +70,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   res.setHeader('Allow', 'PATCH, DELETE');
   return res.status(405).end();
-}
+});

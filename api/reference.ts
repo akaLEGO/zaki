@@ -5,8 +5,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from './_lib/db';
 import { cors } from './_lib/cors';
 import { rateLimit } from './_lib/ratelimit';
+import { withErrors } from './_lib/handler';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default withErrors(async function handler(req: VercelRequest, res: VercelResponse) {
   if (!cors(req, res)) return;
   if (!(await rateLimit(req, res, { scope: 'read', max: 120, windowSeconds: 60 }))) return;
   const [asnaf, recipients, qurbanOptions, qurbanLocations, kaffarahTypes] = await Promise.all([
@@ -32,4 +33,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     qurbanLocations,
     kaffarahTypes,
   });
-}
+});

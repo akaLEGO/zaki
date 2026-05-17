@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '../_lib/db';
+import { withErrors } from '../_lib/handler';
 import { requireAdmin } from '../_lib/auth';
 import { audit } from '../_lib/audit';
 import { validate } from '../_lib/validate';
@@ -9,7 +10,7 @@ import { rateLimit } from '../_lib/ratelimit';
 const STATUSES = ['draft','live','live-featured','archived'] as const;
 const SHARIAH = ['approved','pending'] as const;
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default withErrors(async function handler(req: VercelRequest, res: VercelResponse) {
   if (!cors(req, res)) return;
   if (req.method === 'GET') {
     if (!(await rateLimit(req, res, { scope: 'read', max: 120, windowSeconds: 60 }))) return;
@@ -61,4 +62,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   res.setHeader('Allow', 'GET, POST');
   return res.status(405).end();
-}
+});

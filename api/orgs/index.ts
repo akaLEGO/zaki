@@ -5,8 +5,9 @@ import { audit } from '../_lib/audit';
 import { validate } from '../_lib/validate';
 import { cors } from '../_lib/cors';
 import { rateLimit } from '../_lib/ratelimit';
+import { withErrors } from '../_lib/handler';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default withErrors(async function handler(req: VercelRequest, res: VercelResponse) {
   if (!cors(req, res)) return;
   if (req.method === 'GET') {
     if (!(await rateLimit(req, res, { scope: 'read', max: 120, windowSeconds: 60 }))) return;
@@ -43,4 +44,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   res.setHeader('Allow', 'GET, POST');
   return res.status(405).end();
-}
+});
