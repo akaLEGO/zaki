@@ -1,9 +1,24 @@
 import { verifyToken } from '@clerk/backend';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { sql } from './db';
 
 export interface AuthedUser {
   userId: string;
   sessionId: string;
+}
+
+export async function requireAdmin(
+  req: VercelRequest,
+  res: VercelResponse,
+): Promise<AuthedUser | null> {
+  const user = await requireAuth(req, res);
+  if (!user) return null;
+  const rows = await sql`SELECT 1 FROM admin_users WHERE user_id = ${user.userId} LIMIT 1`;
+  if (rows.length === 0) {
+    res.status(403).json({ error: 'admin access required' });
+    return null;
+  }
+  return user;
 }
 
 export async function requireAuth(

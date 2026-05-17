@@ -1,12 +1,38 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '../_lib/db';
-import { requireAuth } from '../_lib/auth';
+import { requireAdmin } from '../_lib/auth';
+import { audit } from '../_lib/audit';
+import { validate } from '../_lib/validate';
+import { cors } from '../_lib/cors';
+import { rateLimit } from '../_lib/ratelimit';
+
+const STATUSES = ['draft','live','live-featured','archived'] as const;
+const SHARIAH = ['approved','pending'] as const;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!cors(req, res)) return;
   const id = String(req.query.id);
   if (req.method === 'PATCH') {
-    if (!(await requireAuth(req, res))) return;
-    const b = req.body || {};
+    if (!(await rateLimit(req, res, { scope: 'write', max: 30, windowSeconds: 60 }))) return;
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+    const v = validate(req.body, {
+      tag:      { type: 'string', max: 32 },
+      emoji:    { type: 'string', max: 8 },
+      title:    { type: 'string', max: 200 },
+      sub:      { type: 'string', max: 300 },
+      raised:   { type: 'int', min: 0, max: 1_000_000_000 },
+      target:   { type: 'int', min: 0, max: 1_000_000_000 },
+      unit:     { type: 'string', max: 16 },
+      color:    { type: 'string', max: 16, pattern: /^#?[0-9a-fA-F]{3,8}$/ },
+      pitch:    { type: 'string', max: 2000 },
+      featured: { type: 'bool' },
+      perUnit:  { type: 'int', min: 0, max: 1_000_000 },
+      status:   { type: 'string', oneOf: STATUSES },
+      shariah:  { type: 'string', oneOf: SHARIAH },
+    });
+    if (!v.ok) return res.status(400).json({ error: v.error });
+    const b = v.value as Record<string, unknown>;
     const [row] = await sql`
       UPDATE campaigns SET
         tag      = COALESCE(${b.tag ?? null}, tag),
@@ -29,12 +55,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 to_char(updated_at, 'DD Mon') AS "updatedAt"
     `;
     if (!row) return res.status(404).json({ error: 'not found' });
+    await audit(req, 'campaigns.update', id, admin.userId, b);
     return res.json(row);
   }
   if (req.method === 'DELETE') {
-    if (!(await requireAuth(req, res))) return;
+    if (!(await rateLimit(req, res, { scope: 'write', max: 30, windowSeconds: 60 }))) return;
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
     const result = await sql`DELETE FROM campaigns WHERE id = ${id}`;
     if (result.length === 0) return res.status(404).json({ error: 'not found' });
+    await audit(req, 'campaigns.delete', id, admin.userId, null);
     return res.status(204).end();
   }
   res.setHeader('Allow', 'PATCH, DELETE');
