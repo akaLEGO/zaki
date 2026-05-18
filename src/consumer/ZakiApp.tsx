@@ -106,6 +106,7 @@ export function App() {
       case 'riba': {
         const org = ORG_LIST.find(o => o.id === selectedOrg);
         return {
+          flow: activeFlow || "",
           amount: ribaAmount,
           type: 'Riba · ดอกเบี้ย',
           dest: org ? org.name : '—',
@@ -123,6 +124,7 @@ export function App() {
         const r = zakatRecipient !== null ? recipients[zakatRecipient] : undefined;
         const asnafLabel = ASNAF.find(a => a.id === asnaf)?.label || '';
         return {
+          flow: activeFlow || "",
           amount,
           type: 'Zakat · ซะกาต',
           dest: r ? r.name : asnafLabel,
@@ -135,6 +137,7 @@ export function App() {
       }
       case 'fitrah':
         return {
+          flow: activeFlow || "",
           amount: fitrahCount * 30,
           type: 'Fitrah · ฟิฏร',
           dest: `${fitrahCount} คน ในครอบครัว`,
@@ -144,6 +147,7 @@ export function App() {
         };
       case 'fidyah':
         return {
+          flow: activeFlow || "",
           amount: fidyahDays * 15,
           type: 'Fidyah · ฟิดยะห์',
           dest: `${fidyahDays} วัน · เลี้ยงผู้ขัดสน`,
@@ -153,8 +157,9 @@ export function App() {
         };
       case 'kaffarah': {
         const k = KAFFARAH_TYPES.find(x => x.id === kaffType) || KAFFARAH_TYPES[0];
-        if (!k) return { amount: 0, type: '—', dest: '—', niyyah: '', shortImpact: '' };
+        if (!k) return { flow: '', amount: 0, type: '—', dest: '—', niyyah: '', shortImpact: '' };
         return {
+          flow: activeFlow || "",
           amount: k.amount,
           type: 'Kaffarah · กัฟฟารอฮ์',
           dest: 'แจกผู้ขัดสน · ไม่ระบุชื่อ',
@@ -174,6 +179,7 @@ export function App() {
           rohingya:    'แจกจ่ายเนื้อให้ผู้ลี้ภัยโรฮิงยากว่า 35 ครอบครัว',
         };
         return {
+          flow: activeFlow || "",
           amount: q ? q.price : 0,
           type: 'Qurban · กุรบ่าน',
           dest: loc ? loc.name : (q ? q.country : '—'),
@@ -186,6 +192,7 @@ export function App() {
         const c = CAMPAIGNS.find(x => x.id === campaign);
         const amount = campaign === 'iftar' ? iftarMeals * 60 : 200;
         return {
+          flow: activeFlow || "",
           amount,
           type: 'Sadaqah · ศ่อดะเกาะฮ์',
           dest: c ? c.title : '—',
@@ -199,7 +206,7 @@ export function App() {
         };
       }
       default:
-        return { amount: 0, type: '—', dest: '—', niyyah: '', shortImpact: '' };
+        return { flow: '', amount: 0, type: '—', dest: '—', niyyah: '', shortImpact: '' };
     }
   }, [activeFlow, ribaAmount, selectedOrg, zakatValues, asnaf, zakatRecipient, fitrahCount, fidyahDays, kaffType, qurbanCountry, qurbanLocation, campaign, iftarMeals]);
 

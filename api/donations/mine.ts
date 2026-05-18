@@ -16,8 +16,8 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
   if (!user) return;
 
   const rows = await sql`
-    SELECT id, ref, flow, amount, destination,
-           pay_method AS "payMethod", status, niyyah,
+    SELECT id, ref, flow, amount, fee_amount AS "feeAmount",
+           destination, pay_method AS "payMethod", status, niyyah,
            to_char(created_at, 'DD Mon YYYY') AS "createdAt",
            created_at AS "createdAtRaw"
     FROM donations

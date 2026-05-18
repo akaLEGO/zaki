@@ -6,6 +6,7 @@ import { audit } from './_lib/audit.js';
 import { validate } from './_lib/validate.js';
 import { cors } from './_lib/cors.js';
 import { rateLimit } from './_lib/ratelimit.js';
+import { amilFee } from './_lib/fee.js';
 
 const FLOWS = ['riba','zakat','fitrah','fidyah','kaffarah','qurban','sadaqah'] as const;
 const METHODS = ['qr','bank','usdc'] as const;
@@ -22,7 +23,8 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
     const admin = await requireAdmin(req, res);
     if (!admin) return;
     const rows = await sql`
-      SELECT id, ref, user_id AS "userId", flow, amount, destination,
+      SELECT id, ref, user_id AS "userId", flow, amount,
+             fee_amount AS "feeAmount", destination,
              pay_method AS "payMethod", status, niyyah,
              to_char(created_at, 'DD Mon YYYY HH24:MI') AS "createdAt"
       FROM donations
@@ -45,12 +47,15 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
     });
     if (!v.ok) return res.status(400).json({ error: v.error });
     const b = v.value as Record<string, unknown>;
+    const flow = b.flow as string;
+    const amount = b.amount as number;
+    const fee = amilFee(flow, amount);
     const [row] = await sql`
-      INSERT INTO donations (ref, user_id, flow, amount, destination, pay_method, status, niyyah)
-      VALUES (${newRef()}, ${auth?.userId || null}, ${b.flow as string}, ${b.amount as number},
+      INSERT INTO donations (ref, user_id, flow, amount, fee_amount, destination, pay_method, status, niyyah)
+      VALUES (${newRef()}, ${auth?.userId || null}, ${flow}, ${amount}, ${fee},
               ${(b.destination as string) ?? null}, ${(b.payMethod as string) ?? null},
               ${(b.status as string) || 'completed'}, ${(b.niyyah as string) ?? null})
-      RETURNING id, ref, flow, amount, destination,
+      RETURNING id, ref, flow, amount, fee_amount AS "feeAmount", destination,
                 pay_method AS "payMethod", status, niyyah,
                 to_char(created_at, 'DD Mon YYYY HH24:MI') AS "createdAt"
     `;

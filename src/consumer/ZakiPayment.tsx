@@ -4,11 +4,13 @@ import {
   Z, Icon, GoldButton, ForestHeader, StickyBottom, NiyyahBox, ZakiMark, fmtTHB,
 } from './ZakiUI';
 import type { ZIconName } from './ZakiUI';
+import { amilFee, AMIL_FEE_RATE } from '../lib/fee';
 
 export type PayMethod = 'qr' | 'bank' | 'usdc';
 
 export interface Summary {
-  amount: number;
+  flow: string;            // 'riba' | 'zakat' | 'fitrah' | … — drives the fee policy
+  amount: number;          // gross — what the donor pays
   type: string;
   dest: string;
   niyyah: string;
@@ -47,7 +49,7 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
           <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${Z.line}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
             <Row label="ประเภท" value={summary.type} />
             <Row label="ไปที่" value={summary.dest} />
-            <Row label="ค่าธรรมเนียม" value="฿0" sub="(เก็บจากองค์กร 5%)" valueColor={Z.sage} />
+            <FeeRows flow={summary.flow} amount={summary.amount} />
           </div>
         </div>
 
@@ -123,6 +125,35 @@ function Row({ label, value, sub, valueColor }: { label: string; value: ReactNod
         {sub && <div style={{ fontSize: 11, color: Z.muted, marginTop: 1 }}>{sub}</div>}
       </div>
     </div>
+  );
+}
+
+// Flow-aware fee breakdown.
+// Riba: org absorbs the 5%; donor pays gross, no Kaff cut.
+// Zakat / Fitrah / Fidyah / Kaffarah / Qurban / Sadaqah: Kaff takes 5% as Amil
+// (one of the 8 Asnaf), recipient gets 95%.
+function FeeRows({ flow, amount }: { flow: string; amount: number }) {
+  const rate = AMIL_FEE_RATE[flow] ?? 0;
+  if (rate === 0) {
+    return <Row label="ค่าธรรมเนียม" value="฿0" sub="(เก็บจากองค์กรปลายทาง 5%)" valueColor={Z.sage} />;
+  }
+  const fee = amilFee(flow, amount);
+  const net = amount - fee;
+  return (
+    <>
+      <Row
+        label="ผู้รับ"
+        value={fmtTHB(net)}
+        sub={`95% ของยอดบริจาค`}
+        valueColor={Z.ink}
+      />
+      <Row
+        label="ค่าใช้จ่ายอามิล"
+        value={fmtTHB(fee)}
+        sub="5% · ทีม Kaff ในฐานะ Amil (1 ใน 8 อัศนาฟ)"
+        valueColor={Z.gold}
+      />
+    </>
   );
 }
 
