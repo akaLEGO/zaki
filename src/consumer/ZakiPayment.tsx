@@ -159,7 +159,12 @@ export function QRPayment({ amount, onBack, onConfirm }: { amount: number; onBac
           }}>
             <span style={{ color: '#fff' }}>■ THAI QR PAYMENT</span>
           </div>
-          <FakeQR size={200} style={{ marginTop: 14 }} />
+          <img
+            src={`/api/promptpay/qr?amount=${encodeURIComponent(amount)}`}
+            alt={`PromptPay QR ฿${amount}`}
+            width={220} height={220}
+            style={{ marginTop: 14, borderRadius: 6 }}
+          />
           <div style={{ marginTop: 14, fontSize: 12, color: Z.muted, textAlign: 'center' }}>
             ผู้รับ: <b style={{ color: Z.ink }}>Kaff Trust Account</b><br />
             อ้างอิง: <span style={{ fontVariantNumeric: 'tabular-nums', color: Z.ink }}>KF-{Math.floor(Math.random() * 9000 + 1000)}-58</span>
