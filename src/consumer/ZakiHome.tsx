@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useUser, useClerk, SignInButton } from '@clerk/clerk-react';
 import {
-  Z, Icon, ForestHeader, BottomNav, ZakiMark,
+  Z, Icon, ForestHeader, BottomNav, ZakiMark, GoldButton,
 } from './ZakiUI';
 import type { Tab, ZIconName } from './ZakiUI';
+import { apiFetch } from '../lib/api';
 
 export type ServiceId = 'riba' | 'zakat' | 'compulsory' | 'qurban' | 'sadaqah';
 
@@ -40,6 +42,7 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib', homeLayout = 'stacked' }: HomeScreenProps) {
+  const { isSignedIn } = useUser();
   const [focused, setFocused] = useState<ServiceId | null>(null);
 
   const deck = SERVICE_DECK.map(s => {
@@ -138,12 +141,24 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
             <div style={{ fontSize: 10, color: Z.muted, letterSpacing: '0.04em', marginTop: 3, fontWeight: 500 }}>เปลี่ยนทุกการให้ ให้บริสุทธิ์</div>
           </div>
         </div>
-        <button style={{
-          height: 34, padding: '0 12px', borderRadius: 999,
-          background: '#fff', color: Z.forest,
-          border: `1px solid ${Z.line}`,
-          fontSize: 12, fontWeight: 700, letterSpacing: '0.05em',
-        }}>EN</button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {!isSignedIn && (
+            <SignInButton mode="modal">
+              <button style={{
+                height: 34, padding: '0 14px', borderRadius: 999,
+                background: Z.forest, color: Z.gold,
+                border: `1px solid ${Z.forest}`,
+                fontSize: 12, fontWeight: 700, letterSpacing: '0.03em',
+              }}>เข้าสู่ระบบ</button>
+            </SignInButton>
+          )}
+          <button style={{
+            height: 34, padding: '0 12px', borderRadius: 999,
+            background: '#fff', color: Z.forest,
+            border: `1px solid ${Z.line}`,
+            fontSize: 12, fontWeight: 700, letterSpacing: '0.05em',
+          }}>EN</button>
+        </div>
       </div>
 
       {homeLayout === 'stacked' && (
@@ -231,14 +246,67 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
   );
 }
 
+interface DonationRow {
+  id: number; ref: string; flow: string; amount: number;
+  destination: string | null; payMethod: string | null;
+  status: string; niyyah: string | null; createdAt: string;
+}
+
+const FLOW_LABEL: Record<string, string> = {
+  riba: 'Riba', zakat: 'Zakat', fitrah: 'Fitrah', fidyah: 'Fidyah',
+  kaffarah: 'Kaffarah', qurban: 'Qurban', sadaqah: 'Sadaqah',
+};
+
 export function HistoryScreen({ onBack }: { onBack: () => void }) {
-  const items = [
-    { date: '15 พ.ค.', type: 'Riba', amount: 350, dest: 'มูลนิธิรามาธิบดี', status: 'สำเร็จ' },
-    { date: '08 พ.ค.', type: 'Sadaqah', amount: 200, dest: 'น้ำสะอาด โรฮิงญา', status: 'สำเร็จ' },
-    { date: '02 พ.ค.', type: 'Zakat', amount: 650, dest: 'ครอบครัวอามีนะห์ · ปัตตานี', status: 'สำเร็จ' },
-    { date: '14 เม.ย.', type: 'Fitrah', amount: 120, dest: 'มัสยิดบ้านท่าด่าน', status: 'สำเร็จ' },
-    { date: '01 เม.ย.', type: 'Riba', amount: 80, dest: 'กลุ่มอาสาฯ ปัตตานี', status: 'สำเร็จ' },
-  ];
+  const { isSignedIn, isLoaded } = useUser();
+  const [items, setItems] = useState<DonationRow[]>([]);
+  const [ytd, setYtd] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) { setLoading(false); return; }
+    apiFetch<{ items: DonationRow[]; ytd: number }>('/api/donations/mine')
+      .then(d => { setItems(d.items); setYtd(d.ytd); })
+      .catch(e => setErr(String(e)))
+      .finally(() => setLoading(false));
+  }, [isLoaded, isSignedIn]);
+
+  if (!isLoaded || loading) {
+    return (
+      <div style={{ width: '100%', height: '100%', background: Z.surface, position: 'relative' }}>
+        <ForestHeader onBack={onBack} title="ประวัติการบริจาค" compact />
+        <div style={{ padding: 40, textAlign: 'center', color: Z.muted, fontSize: 13 }}>กำลังโหลด…</div>
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div style={{ width: '100%', height: '100%', background: Z.surface, position: 'relative' }}>
+        <ForestHeader onBack={onBack} title="ประวัติการบริจาค" sub="เข้าสู่ระบบเพื่อดูประวัติการบริจาคของคุณ" compact />
+        <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+          <div style={{ fontSize: 14, color: Z.muted, marginBottom: 18, lineHeight: 1.55 }}>
+            ทุกอย่างเป็นความลับ — เก็บประวัติไว้ในบัญชีของคุณ ดาวน์โหลดใบเสร็จได้ทุกเมื่อ
+          </div>
+          <SignInButton mode="modal">
+            <GoldButton full={false}>เข้าสู่ระบบ / สมัครใหม่</GoldButton>
+          </SignInButton>
+        </div>
+      </div>
+    );
+  }
+
+  if (err) {
+    return (
+      <div style={{ width: '100%', height: '100%', background: Z.surface, position: 'relative' }}>
+        <ForestHeader onBack={onBack} title="ประวัติการบริจาค" compact />
+        <div style={{ padding: 40, color: '#c0392b', fontSize: 13 }}>โหลดไม่สำเร็จ: {err}</div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ width: '100%', height: '100%', background: Z.surface, overflowY: 'auto', position: 'relative' }}>
       <ForestHeader onBack={onBack} title="ประวัติการบริจาค" sub="ทุกอย่างเป็นความลับ · ดาวน์โหลดใบเสร็จได้ทุกเมื่อ" compact />
@@ -247,21 +315,10 @@ export function HistoryScreen({ onBack }: { onBack: () => void }) {
           background: '#fff', borderRadius: 22, padding: 18,
           border: `1.5px solid ${Z.line}`,
         }}>
-          <div style={{ fontSize: 12, color: Z.muted, letterSpacing: '0.08em', fontWeight: 600 }}>YEAR-TO-DATE · 2569</div>
+          <div style={{ fontSize: 12, color: Z.muted, letterSpacing: '0.08em', fontWeight: 600 }}>YEAR-TO-DATE</div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 4 }}>
-            <div style={{ fontSize: 32, fontWeight: 800, color: Z.forest, letterSpacing: '-0.02em' }}>฿8,470</div>
-            <div style={{ fontSize: 13, color: Z.sage, fontWeight: 600 }}>+24% YoY</div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 6, marginTop: 14, alignItems: 'end' }}>
-            {[20, 45, 30, 55, 80].map((h, i) => (
-              <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <div style={{
-                  height: h, background: i === 4 ? Z.gold : Z.sage, opacity: i === 4 ? 1 : 0.55,
-                  borderRadius: 6,
-                }} />
-                <div style={{ fontSize: 10, color: Z.muted, textAlign: 'center' }}>{['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.'][i]}</div>
-              </div>
-            ))}
+            <div style={{ fontSize: 32, fontWeight: 800, color: Z.forest, letterSpacing: '-0.02em' }}>฿{ytd.toLocaleString()}</div>
+            <div style={{ fontSize: 13, color: Z.muted, fontWeight: 600 }}>{items.length} ครั้ง</div>
           </div>
         </div>
 
@@ -270,45 +327,92 @@ export function HistoryScreen({ onBack }: { onBack: () => void }) {
           <div style={{ fontSize: 12, color: Z.muted }}>{items.length} รายการ</div>
         </div>
 
-        <div style={{ background: '#fff', borderRadius: 20, border: `1.5px solid ${Z.line}` }}>
-          {items.map((it, i) => (
-            <div key={i} style={{
-              padding: '14px 16px',
-              borderTop: i ? `1px solid ${Z.line}` : 'none',
-              display: 'flex', alignItems: 'center', gap: 12,
-            }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: 12,
-                background: it.type === 'Riba' ? Z.forest : it.type === 'Zakat' ? Z.gold : Z.sage,
-                color: '#fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 11, fontWeight: 700, letterSpacing: '0.05em',
-              }}>{it.type.slice(0,3).toUpperCase()}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, color: Z.ink, fontWeight: 600, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{it.dest}</div>
-                <div style={{ fontSize: 11.5, color: Z.muted, marginTop: 1 }}>{it.date} · {it.type}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: 700, color: Z.ink, fontVariantNumeric: 'tabular-nums' }}>฿{it.amount.toLocaleString()}</div>
-                <div style={{ fontSize: 11, color: Z.sage, fontWeight: 600 }}>✓ {it.status}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+        {items.length === 0 ? (
+          <div style={{ padding: '40px 20px', background: '#fff', borderRadius: 20, border: `1.5px solid ${Z.line}`, textAlign: 'center', color: Z.muted, fontSize: 13 }}>
+            ยังไม่มีรายการ — บริจาคครั้งแรกได้จากหน้าหลัก
+          </div>
+        ) : (
+          <div style={{ background: '#fff', borderRadius: 20, border: `1.5px solid ${Z.line}` }}>
+            {items.map((it, i) => {
+              const type = FLOW_LABEL[it.flow] || it.flow;
+              return (
+                <div key={it.id} style={{
+                  padding: '14px 16px',
+                  borderTop: i ? `1px solid ${Z.line}` : 'none',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 12,
+                    background: it.flow === 'riba' ? Z.forest : it.flow === 'zakat' ? Z.gold : Z.sage,
+                    color: '#fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, fontWeight: 700, letterSpacing: '0.05em',
+                  }}>{type.slice(0,3).toUpperCase()}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, color: Z.ink, fontWeight: 600, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{it.destination || '—'}</div>
+                    <div style={{ fontSize: 11.5, color: Z.muted, marginTop: 1 }}>{it.createdAt} · {type} · {it.ref}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 700, color: Z.ink, fontVariantNumeric: 'tabular-nums' }}>฿{it.amount.toLocaleString()}</div>
+                    <div style={{ fontSize: 11, color: Z.sage, fontWeight: 600 }}>✓ สำเร็จ</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 export function ProfileScreen({ tab, onTab, onHistory }: { tab: Tab; onTab: (t: Tab) => void; onHistory: () => void }) {
+  const { user, isSignedIn, isLoaded } = useUser();
+  const { signOut } = useClerk();
+  const [ytd, setYtd] = useState<number | null>(null);
+  const [count, setCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isSignedIn) return;
+    apiFetch<{ items: unknown[]; ytd: number }>('/api/donations/mine')
+      .then(d => { setYtd(d.ytd); setCount(d.items.length); })
+      .catch(() => { /* silently fail; stats just stay null */ });
+  }, [isSignedIn]);
+
+  if (isLoaded && !isSignedIn) {
+    return (
+      <div style={{ width: '100%', height: '100%', background: Z.surface, position: 'relative' }}>
+        <ForestHeader compact>
+          <div style={{ marginTop: 14, fontSize: 22, fontWeight: 700 }}>ยินดีต้อนรับ</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginTop: 4 }}>
+            เข้าสู่ระบบเพื่อเก็บประวัติการบริจาคและใบเสร็จลดหย่อนภาษี
+          </div>
+        </ForestHeader>
+        <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+          <SignInButton mode="modal">
+            <GoldButton full={false}>เข้าสู่ระบบ / สมัครใหม่</GoldButton>
+          </SignInButton>
+          <div style={{ marginTop: 16, fontSize: 12, color: Z.muted }}>
+            หรือบริจาคแบบไม่ระบุชื่อต่อได้จากหน้าหลัก
+          </div>
+        </div>
+        <BottomNav tab={tab} onTab={onTab} />
+      </div>
+    );
+  }
+
+  const name = user?.firstName || user?.username || user?.primaryEmailAddress?.emailAddress?.split('@')[0] || 'ผู้ใช้';
+  const initial = name.charAt(0).toUpperCase();
+  const memberSince = user?.createdAt ? new Date(user.createdAt).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }) : '';
+
   const rows = [
-    { label: 'ตั้งค่าโปรไฟล์', sub: 'ชื่อ · เบอร์โทร · LINE' },
-    { label: 'ที่ปรึกษาชะรีอะฮ์', sub: 'อ่านคำชี้แจง · ถามคำถาม' },
-    { label: 'องค์กรที่ติดตาม', sub: '8 องค์กร · 12 แคมเปญ' },
-    { label: 'ตั้งค่าความเป็นส่วนตัว', sub: 'ค่าเริ่มต้น: ไม่ระบุชื่อ' },
-    { label: 'ใบเสร็จลดหย่อนภาษี', sub: 'ดาวน์โหลด PDF รวมทั้งปี' },
-    { label: 'ภาษา · Language', sub: 'ไทย / English / العربية' },
-    { label: 'ออกจากระบบ', sub: '' },
+    { label: 'ตั้งค่าโปรไฟล์', sub: user?.primaryEmailAddress?.emailAddress || 'ชื่อ · อีเมล · LINE', onClick: () => {} },
+    { label: 'ที่ปรึกษาชะรีอะฮ์', sub: 'อ่านคำชี้แจง · ถามคำถาม', onClick: () => {} },
+    { label: 'องค์กรที่ติดตาม', sub: 'จัดการรายชื่อ', onClick: () => {} },
+    { label: 'ตั้งค่าความเป็นส่วนตัว', sub: 'ค่าเริ่มต้น: ไม่ระบุชื่อ', onClick: () => {} },
+    { label: 'ใบเสร็จลดหย่อนภาษี', sub: 'ดาวน์โหลด PDF รวมทั้งปี', onClick: () => {} },
+    { label: 'ภาษา · Language', sub: 'ไทย / English', onClick: () => {} },
+    { label: 'ออกจากระบบ', sub: '', onClick: () => signOut() },
   ];
   return (
     <div style={{ width: '100%', height: '100%', background: Z.surface, overflowY: 'auto', position: 'relative' }}>
@@ -319,13 +423,10 @@ export function ProfileScreen({ tab, onTab, onHistory }: { tab: Tab; onTab: (t: 
             background: 'linear-gradient(135deg, #2EC27E 0%, #1F8A5B 100%)',
             color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 28, fontWeight: 700, fontFamily: 'Sarabun',
-          }}>ก</div>
+          }}>{initial}</div>
           <div>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>คุณกัสมา (Kasma)</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>สมาชิก Zaki · ตั้งแต่ ม.ค. 2569</div>
-            <div style={{ marginTop: 6, display: 'inline-flex', gap: 6, padding: '4px 10px', borderRadius: 999, background: 'rgba(201,169,74,0.16)', color: Z.gold, fontSize: 11, fontWeight: 700, letterSpacing: '0.04em' }}>
-              <Icon name="sparkle" size={12} /> NIYYAH STREAK · 4 เดือน
-            </div>
+            <div style={{ fontSize: 20, fontWeight: 700 }}>{name}</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>สมาชิก Zaki{memberSince ? ` · ตั้งแต่ ${memberSince}` : ''}</div>
           </div>
         </div>
       </ForestHeader>
@@ -356,7 +457,9 @@ export function ProfileScreen({ tab, onTab, onHistory }: { tab: Tab; onTab: (t: 
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: Z.ink, letterSpacing: '-0.005em' }}>ประวัติการบริจาค</div>
-            <div style={{ fontSize: 12, color: Z.muted, marginTop: 2 }}>5 รายการล่าสุด · ยอดรวม ฿8,470 ปีนี้</div>
+            <div style={{ fontSize: 12, color: Z.muted, marginTop: 2 }}>
+              {count !== null && ytd !== null ? `${count} รายการ · ยอดรวม ฿${ytd.toLocaleString()} ปีนี้` : 'ดูประวัติทั้งหมด'}
+            </div>
           </div>
           <div style={{ color: Z.muted, transform: 'rotate(-90deg)' }}><Icon name="chevDown" size={18} /></div>
         </button>
@@ -366,34 +469,31 @@ export function ProfileScreen({ tab, onTab, onHistory }: { tab: Tab; onTab: (t: 
           display: 'flex', gap: 14,
         }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, color: Z.muted, fontWeight: 600 }}>บริจาคทั้งหมด</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: Z.forest }}>฿8,470</div>
+            <div style={{ fontSize: 11, color: Z.muted, fontWeight: 600 }}>บริจาคทั้งหมดปีนี้</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: Z.forest, fontVariantNumeric: 'tabular-nums' }}>฿{(ytd ?? 0).toLocaleString()}</div>
           </div>
           <div style={{ width: 1, background: Z.line }} />
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, color: Z.muted, fontWeight: 600 }}>ครอบครัวช่วยแล้ว</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: Z.forest }}>28</div>
-          </div>
-          <div style={{ width: 1, background: Z.line }} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, color: Z.muted, fontWeight: 600 }}>Sadaqah</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: Z.forest }}>12</div>
+            <div style={{ fontSize: 11, color: Z.muted, fontWeight: 600 }}>จำนวนครั้ง</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: Z.forest, fontVariantNumeric: 'tabular-nums' }}>{count ?? 0}</div>
           </div>
         </div>
 
         <div style={{ marginTop: 18, background: '#fff', borderRadius: 20, border: `1.5px solid ${Z.line}` }}>
           {rows.map((r, i) => (
-            <div key={i} style={{
+            <button key={i} onClick={r.onClick} style={{
+              width: '100%', textAlign: 'left',
               padding: '14px 16px',
               borderTop: i ? `1px solid ${Z.line}` : 'none',
               display: 'flex', alignItems: 'center', gap: 12,
+              cursor: 'pointer', background: 'transparent',
             }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, color: i === rows.length - 1 ? '#c0392b' : Z.ink, fontWeight: 600 }}>{r.label}</div>
                 {r.sub && <div style={{ fontSize: 12, color: Z.muted, marginTop: 1 }}>{r.sub}</div>}
               </div>
               <div style={{ color: Z.muted, transform: 'rotate(-90deg)' }}><Icon name="chevDown" size={16} /></div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
