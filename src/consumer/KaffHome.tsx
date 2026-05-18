@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useUser, useClerk, SignInButton } from '@clerk/clerk-react';
 import {
-  Z, Icon, ForestHeader, BottomNav, ZakiMark, GoldButton,
-} from './ZakiUI';
-import type { Tab, ZIconName } from './ZakiUI';
+  Z, Icon, ForestHeader, BottomNav, KaffMark, GoldButton,
+} from './KaffUI';
+import type { Tab, ZIconName } from './KaffUI';
 import { apiFetch } from '../lib/api';
 
 export type ServiceId = 'riba' | 'zakat' | 'compulsory' | 'qurban' | 'sadaqah';
@@ -135,7 +135,7 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
         background: 'linear-gradient(180deg, #F2F5F2 65%, rgba(242,245,242,0) 100%)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <ZakiMark size={28} />
+          <KaffMark size={28} />
           <div>
             <div style={{ fontWeight: 700, fontSize: 17, color: Z.forest, letterSpacing: '-0.01em', lineHeight: 1 }}>Kaff</div>
             <div style={{ fontSize: 10, color: Z.muted, letterSpacing: '0.04em', marginTop: 3, fontWeight: 500 }}>มือที่พร้อมให้ ในหนทางที่ถูกต้อง</div>

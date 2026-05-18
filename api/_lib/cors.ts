@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // Allowlist of origins that may call the API from a browser.
-// `*.vercel.app` for the zaki deploys + the prod custom domain if you add one.
+// Custom domain + *.vercel.app deploys.
 const STATIC_ALLOW = new Set<string>([
-  // Add your custom domain here when you set one up:
-  // 'https://zaki.app',
+  'https://kaff.me',
+  'https://www.kaff.me',
 ]);
 
 const VERCEL_SUFFIX = '.vercel.app';

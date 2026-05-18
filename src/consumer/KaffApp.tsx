@@ -2,23 +2,23 @@ import { useState, useMemo } from 'react';
 import { IOSDevice } from './IosFrame';
 import {
   HomeScreen, HistoryScreen, ProfileScreen,
-} from './ZakiHome';
-import type { ServiceId, CompulsoryWording, HomeLayout } from './ZakiHome';
-import { FAQScreen } from './ZakiFaq';
+} from './KaffHome';
+import type { ServiceId, CompulsoryWording, HomeLayout } from './KaffHome';
+import { FAQScreen } from './KaffFaq';
 import {
   RibaEntry, RibaOrgSelect,
   ZakatCalc, ZakatAsnaf,
   CompulsoryScreen,
   QurbanPrices, QurbanLocation,
   SadaqahCampaigns,
-} from './ZakiServices';
-import type { ZakatValues, CompulsorySub, KaffType, QurbanAnimal } from './ZakiServices';
+} from './KaffServices';
+import type { ZakatValues, CompulsorySub, KaffType, QurbanAnimal } from './KaffServices';
 import {
   CheckoutScreen, QRPayment, BankTransfer, SuccessScreen,
-} from './ZakiPayment';
-import type { PayMethod, Summary } from './ZakiPayment';
+} from './KaffPayment';
+import type { PayMethod, Summary } from './KaffPayment';
 import type { AsnafId } from '../shared/types';
-import type { Tab } from './ZakiUI';
+import type { Tab } from './KaffUI';
 import { TweaksPanel, TweakSection, TweakRadio, useTweaks } from './TweaksPanel';
 import { useData } from '../lib/data-context';
 import { apiFetch } from '../lib/api';

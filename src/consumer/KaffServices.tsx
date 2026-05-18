@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Z, Icon, GoldButton, ForestHeader, StickyBottom,
   Card, ProgressBar, MoneyField, Stepper, Chip, TrustBadge, fmtTHB, fmtPct,
-} from './ZakiUI';
+} from './KaffUI';
 import type { AsnafId } from '../shared/types';
 import { useData } from '../lib/data-context';
 

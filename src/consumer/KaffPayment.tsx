@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import {
-  Z, Icon, GoldButton, ForestHeader, StickyBottom, NiyyahBox, ZakiMark, fmtTHB,
-} from './ZakiUI';
-import type { ZIconName } from './ZakiUI';
+  Z, Icon, GoldButton, ForestHeader, StickyBottom, NiyyahBox, KaffMark, fmtTHB,
+} from './KaffUI';
+import type { ZIconName } from './KaffUI';
 import { amilFee, AMIL_FEE_RATE } from '../lib/fee';
 
 export type PayMethod = 'qr' | 'bank' | 'usdc';
@@ -418,7 +418,7 @@ export function SuccessScreen({ summary, onHome }: { summary: Summary; onHome: (
               <div style={{ fontSize: 10, color: Z.muted, fontWeight: 700, letterSpacing: '0.08em' }}>ใบเสร็จ · RECEIPT</div>
               <div style={{ fontSize: 13, color: Z.ink, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{refNo}</div>
             </div>
-            <ZakiMark size={32} />
+            <KaffMark size={32} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 12 }}>
             <Row label="วันที่" value={dateStr} />

@@ -402,6 +402,3 @@ export function KaffMark({ size = 30, light = false }: { size?: number; light?: 
     </div>
   );
 }
-
-// Backwards-compat alias — kept so other modules importing the old name keep working.
-export const ZakiMark = KaffMark;

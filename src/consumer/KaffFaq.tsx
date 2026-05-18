@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Z, Icon, ForestHeader, BottomNav } from './ZakiUI';
-import type { Tab, ZIconName } from './ZakiUI';
+import { Z, Icon, ForestHeader, BottomNav } from './KaffUI';
+import type { Tab, ZIconName } from './KaffUI';
 
 interface FaqItem { q: string; a: string }
 interface FaqGroup { id: string; title: string; icon: ZIconName; color: string; qs: FaqItem[] }

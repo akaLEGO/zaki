@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { ClerkProvider } from '@clerk/clerk-react';
-import { App } from './ZakiApp';
+import { App } from './KaffApp';
 import { DataProvider } from '../lib/data-context';
 import { ClerkTokenBridge } from '../lib/clerk-token-bridge';
 
