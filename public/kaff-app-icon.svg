@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Kaff app icon">
+  <title>Kaff app icon</title>
+  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="#2A6041"></rect>
+  <g transform="translate(307, 256) scale(3.42)" fill="#FAF8F3">
+    <rect x="30" y="10" width="7" height="20" rx="3.5"></rect>
+    <rect x="44" y="6" width="7" height="24" rx="3.5"></rect>
+    <rect x="58" y="6" width="7" height="24" rx="3.5"></rect>
+    <rect x="72" y="10" width="7" height="20" rx="3.5"></rect>
+  </g>
+  <text x="468" y="826" text-anchor="middle" font-family="&#39;IBM Plex Sans Arabic&#39;, &#39;Cairo&#39;, sans-serif" font-size="630" font-weight="500" fill="#FAF8F3">ك</text>
+</svg>

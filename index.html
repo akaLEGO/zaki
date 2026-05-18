@@ -4,15 +4,22 @@
 <meta charset="utf-8" />
 <title>Kaff — Be the Upper Hand</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Kaff — Be the Upper Hand. Islamic Finance OS for Thai Muslims." />
+<meta property="og:title" content="Kaff — Be the Upper Hand" />
+<meta property="og:description" content="Give with dignity. Riba · Zakat · Wajib · Qurban · Sadaqah — in one app." />
+<meta property="og:type" content="website" />
+<link rel="icon" type="image/svg+xml" href="/kaff-favicon.svg" />
+<link rel="apple-touch-icon" href="/kaff-app-icon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   html, body {
     margin: 0; padding: 0;
-    background: #E9EFEA;
-    font-family: 'Sarabun', 'Inter', system-ui, -apple-system, sans-serif;
-    color: #0A0A0A;
+    background: #F5F1E8;
+    /* Manrope for Latin, Sarabun for Thai (auto-fallback), Arabic font for ك */
+    font-family: 'Manrope', 'Sarabun', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+    color: #0E1A14;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
@@ -21,24 +28,24 @@
   input { font-family: inherit; }
 
   :root {
-    --forest: #0D3B2E;
-    --forest-deep: #082A21;
+    --forest: #2A6041;
+    --forest-deep: #0E1A14;
     --sage: #2EC27E;
-    --sage-soft: #DCF0E5;
-    --gold: #C9A94A;
-    --gold-soft: #F5EDD3;
-    --surface: #F5F8F5;
+    --sage-soft: #E6EDE8;
+    --gold: #D4AF37;
+    --gold-soft: #F4E4B7;
+    --surface: #F5F1E8;
     --paper: #FFFFFF;
-    --ink: #0A0A0A;
-    --muted: #6B7280;
-    --line: #E6ECE7;
+    --ink: #0E1A14;
+    --muted: #6B6B6B;
+    --line: #E6DFCF;
   }
 
   .stage {
     min-height: 100vh;
     display: flex; align-items: center; justify-content: center;
     padding: 48px 24px;
-    background: radial-gradient(1200px 700px at 20% 0%, #DDE8DE 0%, #E9EFEA 60%, #E2EAE3 100%);
+    background: radial-gradient(1200px 700px at 20% 0%, #EFE9D9 0%, #F5F1E8 60%, #E8E3D2 100%);
   }
   .wrap {
     display: flex; gap: 64px; align-items: center;
@@ -46,17 +53,17 @@
   }
   .credits {
     max-width: 320px;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Manrope', system-ui, sans-serif;
     color: #2c3a32;
   }
   .credits .logo {
     display: inline-flex; align-items: center; gap: 10px;
-    font-weight: 700; font-size: 22px; letter-spacing: -0.01em;
+    font-weight: 700; font-size: 22px; letter-spacing: -0.04em;
   }
   .credits .logo .dot {
     width: 30px; height: 30px; border-radius: 9px; background: var(--forest);
     color: var(--gold); display:flex; align-items:center; justify-content:center;
-    font-family: 'Sarabun'; font-weight: 800; font-size: 18px;
+    font-family: 'IBM Plex Sans Arabic', 'Cairo', sans-serif; font-weight: 500; font-size: 22px;
   }
   .credits h1 {
     font-size: 38px; line-height: 1.1; letter-spacing: -0.02em;
@@ -81,9 +88,9 @@
   }
   .screen-buttons button {
     text-align: left; padding: 8px 10px; border-radius: 8px;
-    background: rgba(255,255,255,0.5); border: 1px solid rgba(13,59,46,0.08);
+    background: rgba(255,255,255,0.5); border: 1px solid rgba(42,96,65,0.12);
     font-size: 12px; color: var(--forest); cursor: pointer;
-    font-family: 'Inter', system-ui;
+    font-family: 'Manrope', system-ui;
     transition: all .15s;
   }
   .screen-buttons button:hover { background: var(--forest); color: var(--gold); }

@@ -3,6 +3,7 @@ import { AZ, AIcon, ABtn } from './AdminUI';
 import type { IconName } from './AdminUI';
 import { ChromeWindow } from './BrowserWindow';
 import { AdminDashboard, AdminCampaigns, AdminOrgs } from './AdminScreens';
+import { KaffGlyph } from '../lib/brand';
 
 type ScreenId = 'dashboard' | 'campaigns' | 'orgs' | 'rates' | 'transactions' | 'shariah' | 'settings';
 
@@ -37,7 +38,7 @@ function Sidebar({ screen, setScreen }: { screen: ScreenId; setScreen: (s: Scree
   return (
     <div style={{
       width: 230, flexShrink: 0,
-      background: 'linear-gradient(180deg, #0D3B2E 0%, #082A21 100%)',
+      background: `linear-gradient(180deg, ${AZ.forest} 0%, ${AZ.forestDeep} 100%)`,
       color: '#fff', display: 'flex', flexDirection: 'column',
       borderRight: '1px solid rgba(0,0,0,0.2)',
     }}>
@@ -46,8 +47,7 @@ function Sidebar({ screen, setScreen }: { screen: ScreenId; setScreen: (s: Scree
           width: 32, height: 32, borderRadius: 9,
           background: AZ.gold, color: AZ.forest,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontWeight: 800, fontSize: 18, fontFamily: 'Sarabun',
-        }}>ك</div>
+        }}><KaffGlyph size={22} /></div>
         <div>
           <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.01em' }}>Kaff Admin</div>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', fontWeight: 600, marginTop: 1 }}>BACK OFFICE</div>

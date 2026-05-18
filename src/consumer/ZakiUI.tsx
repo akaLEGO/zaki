@@ -1,17 +1,18 @@
 import type { CSSProperties, ReactNode } from 'react';
 
+// Brand tokens — sourced from the Kaff brand handoff (Brand Handoff.html).
 export const Z = {
-  forest: '#0D3B2E',
-  forestDeep: '#082A21',
-  sage: '#2EC27E',
-  sageSoft: '#DCF0E5',
-  gold: '#C9A94A',
-  goldSoft: '#F5EDD3',
-  surface: '#F5F8F5',
+  forest: '#2A6041',       // primary green
+  forestDeep: '#0E1A14',   // ink-dark for gradients
+  sage: '#2EC27E',         // accent — progress + success
+  sageSoft: '#E6EDE8',     // green-soft from brand
+  gold: '#D4AF37',         // gold accent
+  goldSoft: '#F4E4B7',     // soft gold for tinted backgrounds
+  surface: '#F5F1E8',      // paper
   paper: '#FFFFFF',
-  ink: '#0A0A0A',
-  muted: '#6B7280',
-  line: '#E6ECE7',
+  ink: '#0E1A14',
+  muted: '#6B6B6B',
+  line: '#E6DFCF',         // hair — paper-toned borders
 };
 
 export type ZIconName =
@@ -376,16 +377,31 @@ export function BottomNav({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void })
   );
 }
 
-export function ZakiMark({ size = 30, light = false }: { size?: number; light?: boolean }) {
+// Brand mark — inline SVG (matches /public/kaff-icon.svg). Uses currentColor so
+// the surrounding tile can recolor it. `light=true` swaps the colorway.
+export function KaffMark({ size = 30, light = false }: { size?: number; light?: boolean }) {
+  const tileBg = light ? '#fff' : Z.forest;
+  const fg = light ? Z.forest : Z.gold;
   return (
     <div style={{
       width: size, height: size, borderRadius: size * 0.3,
-      background: light ? '#fff' : Z.forest,
-      color: light ? Z.forest : Z.gold,
+      background: tileBg, color: fg,
       display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-      fontWeight: 800, fontSize: size * 0.5,
-      fontFamily: 'Sarabun, system-ui',
-      letterSpacing: '-0.04em',
-    }}>ك</div>
+    }}>
+      <svg width={size * 0.72} height={size * 0.72} viewBox="0 0 120 120" aria-label="Kaff">
+        <g fill="currentColor">
+          <rect x="30" y="10" width="7" height="20" rx="3.5" />
+          <rect x="44" y="6"  width="7" height="24" rx="3.5" />
+          <rect x="58" y="6"  width="7" height="24" rx="3.5" />
+          <rect x="72" y="10" width="7" height="20" rx="3.5" />
+        </g>
+        <text x="55" y="108" textAnchor="middle"
+              fontFamily="'IBM Plex Sans Arabic', 'Cairo', 'Sarabun', sans-serif"
+              fontSize="92" fontWeight="500" fill="currentColor">ك</text>
+      </svg>
+    </div>
   );
 }
+
+// Backwards-compat alias — kept so other modules importing the old name keep working.
+export const ZakiMark = KaffMark;

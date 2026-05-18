@@ -4,15 +4,17 @@
 <meta charset="utf-8" />
 <title>Kaff Admin · Back Office</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/kaff-favicon.svg" />
+<link rel="apple-touch-icon" href="/kaff-app-icon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   html, body {
     margin: 0; padding: 0;
-    background: #d3d8d3;
-    font-family: 'Sarabun', 'Inter', system-ui, -apple-system, sans-serif;
-    color: #0A0A0A;
+    background: #EFE9D9;
+    font-family: 'Manrope', 'Sarabun', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+    color: #0E1A14;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
@@ -25,28 +27,28 @@
     display: flex; align-items: center; justify-content: center;
     padding: 32px 24px;
     background:
-      radial-gradient(900px 500px at 80% 10%, #cdd6cd 0%, #d3d8d3 50%, #c5cdc5 100%);
+      radial-gradient(900px 500px at 80% 10%, #EFE9D9 0%, #E6DFCF 60%, #DCD3BC 100%);
   }
 
   ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-thumb { background: rgba(13,59,46,0.18); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb { background: rgba(42,96,65,0.20); border-radius: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
 
   .topbar {
     position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
     z-index: 100; display: flex; gap: 8px; align-items: center;
-    background: rgba(13,59,46,0.95); color: #fff;
+    background: rgba(42,96,65,0.96); color: #fff;
     padding: 8px 14px; border-radius: 999px;
-    font-family: 'Inter', system-ui; font-size: 12px; font-weight: 600;
-    box-shadow: 0 6px 22px rgba(0,0,0,0.18);
+    font-family: 'Manrope', system-ui; font-size: 12px; font-weight: 600;
+    box-shadow: 0 6px 22px rgba(14,26,20,0.18);
   }
   .topbar a {
-    color: #C9A94A; text-decoration: none;
+    color: #D4AF37; text-decoration: none;
     padding: 5px 12px; border-radius: 999px;
     background: rgba(255,255,255,0.06);
     transition: background .15s;
   }
-  .topbar a:hover { background: rgba(201,169,74,0.18); }
+  .topbar a:hover { background: rgba(212,175,55,0.18); }
   .topbar .sep { opacity: 0.4; }
 </style>
 </head>

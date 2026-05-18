@@ -6,6 +6,7 @@ import { AdminApp } from './AdminApp';
 import { DataProvider } from '../lib/data-context';
 import { ClerkTokenBridge } from '../lib/clerk-token-bridge';
 import { AZ } from './AdminUI';
+import { KaffGlyph } from '../lib/brand';
 
 const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
 
@@ -21,8 +22,7 @@ function SignInGate() {
           width: 44, height: 44, borderRadius: 12,
           background: AZ.gold, color: AZ.forest,
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'Sarabun', fontWeight: 800, fontSize: 22,
-        }}>ك</div>
+        }}><KaffGlyph size={30} /></div>
         <div style={{ fontSize: 16, fontWeight: 700, color: AZ.ink }}>Kaff Admin · Back Office</div>
         <div style={{ fontSize: 12.5, color: AZ.muted, textAlign: 'center', maxWidth: 320 }}>
           กรุณาเข้าสู่ระบบเพื่อจัดการแคมเปญและองค์กร

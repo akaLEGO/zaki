@@ -1,19 +1,20 @@
 import type { CSSProperties, ReactNode } from 'react';
 
+// Brand tokens — kept aligned with the consumer's Z palette + Kaff brand handoff.
 export const AZ = {
-  forest: '#0D3B2E',
-  forestDeep: '#082A21',
+  forest: '#2A6041',
+  forestDeep: '#0E1A14',
   sage: '#2EC27E',
-  sageSoft: '#DCF0E5',
-  gold: '#C9A94A',
-  goldSoft: '#F5EDD3',
-  surface: '#F6F8F6',
+  sageSoft: '#E6EDE8',
+  gold: '#D4AF37',
+  goldSoft: '#F4E4B7',
+  surface: '#F5F1E8',
   paper: '#FFFFFF',
-  ink: '#0A0A0A',
-  muted: '#6B7280',
+  ink: '#0E1A14',
+  muted: '#6B6B6B',
   mutedLite: '#9CA3AF',
-  line: '#E6ECE7',
-  rowHover: '#F1F5F1',
+  line: '#E6DFCF',
+  rowHover: '#EFE9D9',
   danger: '#C0392B',
   warn: '#D7A03B',
 };
