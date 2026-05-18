@@ -1,4 +1,4 @@
--- Zaki schema. Run once via Neon SQL editor (or psql) against your DATABASE_URL.
+-- Kaff schema. Run once via Neon SQL editor (or psql) against your DATABASE_URL.
 -- Idempotent: safe to re-run.
 
 CREATE TABLE IF NOT EXISTS orgs (

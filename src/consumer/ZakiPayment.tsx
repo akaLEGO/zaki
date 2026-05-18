@@ -161,8 +161,8 @@ export function QRPayment({ amount, onBack, onConfirm }: { amount: number; onBac
           </div>
           <FakeQR size={200} style={{ marginTop: 14 }} />
           <div style={{ marginTop: 14, fontSize: 12, color: Z.muted, textAlign: 'center' }}>
-            ผู้รับ: <b style={{ color: Z.ink }}>Zaki Trust Account</b><br />
-            อ้างอิง: <span style={{ fontVariantNumeric: 'tabular-nums', color: Z.ink }}>ZK-{Math.floor(Math.random() * 9000 + 1000)}-58</span>
+            ผู้รับ: <b style={{ color: Z.ink }}>Kaff Trust Account</b><br />
+            อ้างอิง: <span style={{ fontVariantNumeric: 'tabular-nums', color: Z.ink }}>KF-{Math.floor(Math.random() * 9000 + 1000)}-58</span>
           </div>
         </div>
 
@@ -241,7 +241,7 @@ function FakeQR({ size = 200, style = {} }: { size?: number; style?: CSSProperti
         <rect x={size/2 - 18} y={size/2 - 18} width={36} height={36} fill="#fff" rx="6" />
         <rect x={size/2 - 14} y={size/2 - 14} width={28} height={28} fill={Z.forest} rx="5" />
         <text x={size/2} y={size/2 + 5} textAnchor="middle" fill={Z.gold}
-              fontSize="18" fontWeight="800" fontFamily="Sarabun, system-ui">ز</text>
+              fontSize="18" fontWeight="800" fontFamily="Sarabun, system-ui">ك</text>
       </svg>
     </div>
   );
@@ -256,7 +256,7 @@ export function BankTransfer({ amount, onBack, onConfirm }: { amount: number; on
   };
   const fields: { key: string; label: string; value: string; big?: boolean }[] = [
     { key: 'bank', label: 'ธนาคาร', value: 'SCB · ไทยพาณิชย์' },
-    { key: 'name', label: 'ชื่อบัญชี', value: 'มูลนิธิ Zaki Foundation' },
+    { key: 'name', label: 'ชื่อบัญชี', value: 'มูลนิธิ Kaff Foundation' },
     { key: 'no', label: 'เลขที่บัญชี', value: '407-298-8472' },
     { key: 'amt', label: 'จำนวนเงิน', value: '฿' + amount.toLocaleString(), big: true },
   ];
@@ -317,7 +317,7 @@ export function SuccessScreen({ summary, onHome }: { summary: Summary; onHome: (
     return () => clearTimeout(t);
   }, []);
 
-  const refNo = useMemo(() => 'ZK-' + Math.floor(Math.random() * 900000 + 100000), []);
+  const refNo = useMemo(() => 'KF-' + Math.floor(Math.random() * 900000 + 100000), []);
   const dateStr = useMemo(() => {
     const d = new Date();
     return `${d.getDate()} พ.ค. 2569 · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
@@ -368,6 +368,7 @@ export function SuccessScreen({ summary, onHome }: { summary: Summary; onHome: (
           </svg>
         </div>
         <div style={{ marginTop: 20, fontSize: 22, fontWeight: 800, letterSpacing: '-0.01em' }}>บริจาคสำเร็จแล้ว</div>
+        <div style={{ marginTop: 6, fontSize: 13.5, color: Z.gold, fontWeight: 600 }}>คุณคือมือบน · You are the Upper Hand</div>
         <div style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{impact}</div>
       </div>
 
@@ -412,7 +413,7 @@ export function SuccessScreen({ summary, onHome }: { summary: Summary; onHome: (
               <div style={{ fontWeight: 500, marginTop: 4 }}>{summary.impactText}</div>
             )}
           </div>
-          <div style={{ marginTop: 12, fontSize: 11, fontWeight: 600, opacity: 0.65 }}>via Zaki — Give Pure · ให้บริสุทธิ์</div>
+          <div style={{ marginTop: 12, fontSize: 11, fontWeight: 600, opacity: 0.65 }}>via Kaff — Be the Upper Hand</div>
           <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
             <button style={{
               flex: 1, padding: '11px 14px', borderRadius: 12,

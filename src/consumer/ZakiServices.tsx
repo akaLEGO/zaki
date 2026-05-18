@@ -47,7 +47,7 @@ export function RibaEntry({ amount, setAmount, onBack, onNext }: {
             <div style={{ color: Z.forest }}><Icon name="info" size={20} /></div>
             <div style={{ flex: 1, fontSize: 13, lineHeight: 1.55, color: Z.ink }}>
               <b style={{ color: Z.forest }}>ทำไมดอกเบี้ยเป็นสิ่งต้องห้าม?</b><br />
-              <span style={{ color: Z.muted }}>ดอกเบี้ยตามหลักศาสนานั้นไม่สามารถใช้ส่วนตัวได้ แต่การปล่อยทิ้งไว้ในระบบธนาคารก็ไม่ใช่ทางออก Zaki ช่วยคุณเคลียร์เงินส่วนนี้ไปสร้างประโยชน์สาธารณะเพื่อความบริสุทธิ์ใจ (ไม่นับเป็นแต้มบุญทาน)</span>
+              <span style={{ color: Z.muted }}>ดอกเบี้ยตามหลักศาสนานั้นไม่สามารถใช้ส่วนตัวได้ แต่การปล่อยทิ้งไว้ในระบบธนาคารก็ไม่ใช่ทางออก Kaff ช่วยคุณเคลียร์เงินส่วนนี้ไปสร้างประโยชน์สาธารณะเพื่อความบริสุทธิ์ใจ (ไม่นับเป็นแต้มบุญทาน)</span>
             </div>
           </div>
         </div>
@@ -469,7 +469,7 @@ function FitrahPanel({ count, setCount }: { count: number; setCount: (n: number)
       </div>
 
       <div style={{ marginTop: 14, padding: '12px 14px', fontSize: 12, color: Z.muted, lineHeight: 1.55 }}>
-        Fitrah ต้องจ่ายก่อนละหมาดอีดิลฟิตริ — Zaki ส่งต่อให้ผู้ขัดสนภายใน 24 ชั่วโมง
+        Fitrah ต้องจ่ายก่อนละหมาดอีดิลฟิตริ — Kaff ส่งต่อให้ผู้ขัดสนภายใน 24 ชั่วโมง
       </div>
     </div>
   );
@@ -559,7 +559,7 @@ function KaffarahPanel({ type, setType, types: KAFFARAH_TYPES }: {
         fontSize: 12, color: Z.muted, lineHeight: 1.55,
         textAlign: 'center', fontStyle: 'italic',
       }}>
-        "ทุกคนมีเรื่องที่อยากเคลียร์ — Zaki ช่วยให้คุณทำสิ่งที่ถูกต้องโดยไม่ต้องอธิบายใคร"
+        "ทุกคนมีเรื่องที่อยากเคลียร์ — Kaff ช่วยให้คุณทำสิ่งที่ถูกต้องโดยไม่ต้องอธิบายใคร"
       </div>
     </div>
   );
@@ -768,7 +768,7 @@ export function SadaqahCampaigns({ campaign, setCampaign, iftarMeals, setIftarMe
       <ForestHeader
         onBack={onBack}
         title="บริจาคตามศรัทธา ให้ถูกที่ถูกเวลา"
-        sub="แคมเปญที่ทีม Zaki คัดมาแล้ว"
+        sub="แคมเปญที่ทีม Kaff คัดมาแล้ว"
         right={<div style={{ padding: '6px 10px', background: 'rgba(201,169,74,0.16)', color: Z.gold, borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: '0.06em' }}>SADAQAH</div>}
       />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 0 24px' }}>

@@ -7,10 +7,11 @@ interface FaqGroup { id: string; title: string; icon: ZIconName; color: string; 
 
 export const FAQ_GROUPS: FaqGroup[] = [
   {
-    id: 'about', title: 'เกี่ยวกับ Zaki', icon: 'sparkle', color: '#0D3B2E',
+    id: 'about', title: 'เกี่ยวกับ Kaff', icon: 'sparkle', color: '#0D3B2E',
     qs: [
-      { q: 'Zaki คืออะไร?', a: 'แอป Islamic Finance OS สำหรับมุสลิมไทย — รวมการชำระดอกเบี้ย ซะกาต ฟิฏร ฟิดยะห์ กัฟฟารอฮ์ กุรบ่าน และศ่อดะเกาะฮ์ไว้ในที่เดียว ใช้ง่ายไม่เกิน 3 ปุ่ม' },
-      { q: 'เก็บค่าธรรมเนียมยังไง?', a: 'ไม่เก็บค่าธรรมเนียมจากคุณ — Zaki เก็บค่าใช้จ่าย 5% จากองค์กรปลายทาง เพื่อให้บริการยั่งยืน คุณบริจาคเท่าไรก็ถึงปลายทางเท่านั้น' },
+      { q: 'ทำไมต้องชื่อ Kaff?', a: 'Kaff (كفّ) เป็นภาษาอาหรับ แปลว่า "มือ / ฝ่ามือ" — มาจากฮะดีษของท่านนบีมุฮัมมัด ﷺ ว่า "มือบน ดีกว่ามือล่าง" (อัลบุคอรียฺ 1429, มุสลิม 1033) หมายความว่า มือผู้ให้นั้นประเสริฐกว่ามือผู้รับ Kaff คือเครื่องเตือนใจว่าทุกครั้งที่คุณบริจาค คุณกำลังยกระดับตัวเองและผู้อื่นไปพร้อมกัน' },
+      { q: 'Kaff คืออะไร?', a: 'แอป Islamic Finance OS สำหรับมุสลิมไทย — รวมการชำระดอกเบี้ย ซะกาต ฟิฏร ฟิดยะห์ กัฟฟารอฮ์ กุรบ่าน และศ่อดะเกาะฮ์ไว้ในที่เดียว ใช้ง่ายไม่เกิน 3 ปุ่ม' },
+      { q: 'เก็บค่าธรรมเนียมยังไง?', a: 'ไม่เก็บค่าธรรมเนียมจากคุณ — Kaff เก็บค่าใช้จ่าย 5% จากองค์กรปลายทาง เพื่อให้บริการยั่งยืน คุณบริจาคเท่าไรก็ถึงปลายทางเท่านั้น' },
       { q: 'ใครรับรองความถูกต้อง?', a: 'คณะกรรมการชะรีอะฮ์อิสระ ร่วมกับองค์กรพันธมิตรในประเทศไทยและต่างประเทศ ทุกสูตรคำนวณและทุกประเภทการบริจาคได้รับการตรวจสอบ' },
       { q: 'ฉันต้องลงทะเบียนไหม?', a: 'ลงทะเบียนเพื่อเก็บประวัติและออกใบเสร็จลดหย่อนภาษีได้ แต่บริจาคแบบไม่ระบุชื่อก็ทำได้ในทุกฟีเจอร์' },
     ],
@@ -18,7 +19,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
   {
     id: 'riba', title: 'Riba · ดอกเบี้ย', icon: 'riba', color: '#0D3B2E',
     qs: [
-      { q: 'ทำไมต้องเคลียร์ดอกเบี้ย?', a: 'ดอกเบี้ยจากบัญชีธนาคารไม่ใช่เงินที่นำมาใช้เองได้ในอิสลาม — แต่ทิ้งไปก็ไม่ใช่ทาง Zaki ช่วยส่งต่อเพื่อสาธารณประโยชน์ โดยไม่นับเป็นบุญส่วนตัว' },
+      { q: 'ทำไมต้องเคลียร์ดอกเบี้ย?', a: 'ดอกเบี้ยจากบัญชีธนาคารไม่ใช่เงินที่นำมาใช้เองได้ในอิสลาม — แต่ทิ้งไปก็ไม่ใช่ทาง Kaff ช่วยส่งต่อเพื่อสาธารณประโยชน์ โดยไม่นับเป็นบุญส่วนตัว' },
       { q: 'ส่งต่อให้ใครได้บ้าง?', a: 'องค์กรสาธารณประโยชน์เท่านั้น — โรงพยาบาล / ถนน / ห้องน้ำสาธารณะ / กองทุนชุมชน ไม่ใช่มัสยิด ไม่ใช่กิจกรรมศาสนา (เพราะดอกเบี้ยไม่นับเป็นบุญ)' },
       { q: 'จะนับเป็นบุญหรือซะกาตได้ไหม?', a: 'ไม่ได้ — การเคลียร์ดอกเบี้ยเป็นเพียงการทำให้เงินสะอาด ไม่ใช่ทาน ไม่ใช่ซะกาต ตามคำชี้ขาดของนักวิชาการชะรีอะฮ์' },
     ],
@@ -53,7 +54,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
     id: 'sadaqah', title: 'Sadaqah · ศ่อดะเกาะฮ์', icon: 'sadaqah', color: '#4A8B6A',
     qs: [
       { q: 'ต่างจาก Zakat ยังไง?', a: 'ซะกาตคือภาคบังคับ (2.5% ของทรัพย์ครบเกณฑ์) · ศ่อดะเกาะฮ์คือการให้ตามศรัทธา เป็นการสมัครใจ ไม่มีกฎเกณฑ์ตายตัว' },
-      { q: 'แคมเปญตรวจสอบยังไง?', a: 'ทีม Zaki ลงพื้นที่ตรวจสอบทุกแคมเปญก่อนเปิดให้บริจาค และทำงานเฉพาะกับองค์กรพันธมิตรที่ผ่านการรับรอง' },
+      { q: 'แคมเปญตรวจสอบยังไง?', a: 'ทีม Kaff ลงพื้นที่ตรวจสอบทุกแคมเปญก่อนเปิดให้บริจาค และทำงานเฉพาะกับองค์กรพันธมิตรที่ผ่านการรับรอง' },
     ],
   },
   {
@@ -83,7 +84,7 @@ export function FAQScreen({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void })
 
   return (
     <div style={{ width: '100%', height: '100%', background: Z.surface, overflowY: 'auto', position: 'relative' }}>
-      <ForestHeader title="คำถามที่พบบ่อย" sub="ทุกฟีเจอร์ของ Zaki · อธิบายให้เข้าใจง่าย" compact />
+      <ForestHeader title="คำถามที่พบบ่อย" sub="ทุกฟีเจอร์ของ Kaff · อธิบายให้เข้าใจง่าย" compact />
 
       <div style={{ padding: '18px 16px 120px' }}>
         <div style={{
@@ -111,7 +112,7 @@ export function FAQScreen({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void })
         {groups.length === 0 && (
           <div style={{ padding: '40px 20px', textAlign: 'center', color: Z.muted, fontSize: 14 }}>
             ไม่พบคำถามที่ตรงกับ "{query}"<br />
-            <span style={{ fontSize: 12 }}>ลองใช้คำอื่น หรือถามทีม Zaki โดยตรง</span>
+            <span style={{ fontSize: 12 }}>ลองใช้คำอื่น หรือถามทีม Kaff โดยตรง</span>
           </div>
         )}
 
@@ -186,7 +187,7 @@ export function FAQScreen({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void })
             border: '1px solid rgba(201,169,74,0.18)',
           }} />
           <div style={{ fontSize: 11, color: Z.gold, fontWeight: 700, letterSpacing: '0.12em' }}>ไม่เจอคำตอบ?</div>
-          <div style={{ marginTop: 6, fontSize: 17, fontWeight: 700, lineHeight: 1.35 }}>ถามทีม Zaki โดยตรง</div>
+          <div style={{ marginTop: 6, fontSize: 17, fontWeight: 700, lineHeight: 1.35 }}>ถามทีม Kaff โดยตรง</div>
           <div style={{ marginTop: 4, fontSize: 12.5, color: 'rgba(255,255,255,0.65)' }}>ตอบใน 1 ชั่วโมงระหว่างเวลาทำการ</div>
           <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
             <button style={{
@@ -194,7 +195,7 @@ export function FAQScreen({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void })
               background: '#06C755', color: '#fff', fontWeight: 700, fontSize: 13.5,
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             }}>
-              <Icon name="line" size={16} color="#fff" /> LINE @zaki
+              <Icon name="line" size={16} color="#fff" /> LINE @kaff
             </button>
             <button style={{
               flex: 1, padding: '11px 14px', borderRadius: 12,

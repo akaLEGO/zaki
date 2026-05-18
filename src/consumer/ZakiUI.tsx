@@ -386,6 +386,6 @@ export function ZakiMark({ size = 30, light = false }: { size?: number; light?: 
       fontWeight: 800, fontSize: size * 0.5,
       fontFamily: 'Sarabun, system-ui',
       letterSpacing: '-0.04em',
-    }}>ز</div>
+    }}>ك</div>
   );
 }

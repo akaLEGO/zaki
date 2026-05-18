@@ -1,4 +1,4 @@
--- Seed Zaki data from src/shared/data.ts. Run after schema.sql.
+-- Seed Kaff data from src/shared/data.ts. Run after schema.sql.
 -- ON CONFLICT keeps re-runs idempotent (preserves any admin edits).
 
 INSERT INTO orgs (id, icon, name, goal, raised, target, pitch, hot) VALUES

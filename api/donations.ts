@@ -12,7 +12,7 @@ const METHODS = ['qr','bank','usdc'] as const;
 const STATUSES = ['pending','completed','failed'] as const;
 
 function newRef() {
-  return 'ZK-' + Math.floor(Math.random() * 900000 + 100000);
+  return 'KF-' + Math.floor(Math.random() * 900000 + 100000);
 }
 
 export default withErrors(async function handler(req: VercelRequest, res: VercelResponse) {

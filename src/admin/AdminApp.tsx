@@ -47,9 +47,9 @@ function Sidebar({ screen, setScreen }: { screen: ScreenId; setScreen: (s: Scree
           background: AZ.gold, color: AZ.forest,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontWeight: 800, fontSize: 18, fontFamily: 'Sarabun',
-        }}>ز</div>
+        }}>ك</div>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.01em' }}>Zaki Admin</div>
+          <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.01em' }}>Kaff Admin</div>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', fontWeight: 600, marginTop: 1 }}>BACK OFFICE</div>
         </div>
       </div>
@@ -181,7 +181,7 @@ export function AdminApp() {
       <ChromeWindow
         width={1280} height={820}
         tabs={[
-          { title: 'Zaki Admin · Back Office' },
+          { title: 'Kaff Admin · Back Office' },
           { title: 'Shariah Committee' },
           { title: 'BoT Reports' },
         ]}

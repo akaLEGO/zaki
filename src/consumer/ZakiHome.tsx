@@ -137,8 +137,8 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <ZakiMark size={28} />
           <div>
-            <div style={{ fontWeight: 700, fontSize: 17, color: Z.forest, letterSpacing: '-0.01em', lineHeight: 1 }}>Zaki</div>
-            <div style={{ fontSize: 10, color: Z.muted, letterSpacing: '0.04em', marginTop: 3, fontWeight: 500 }}>เปลี่ยนทุกการให้ ให้บริสุทธิ์</div>
+            <div style={{ fontWeight: 700, fontSize: 17, color: Z.forest, letterSpacing: '-0.01em', lineHeight: 1 }}>Kaff</div>
+            <div style={{ fontSize: 10, color: Z.muted, letterSpacing: '0.04em', marginTop: 3, fontWeight: 500 }}>มือที่ให้ คือมือที่สูงกว่า</div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
@@ -426,7 +426,7 @@ export function ProfileScreen({ tab, onTab, onHistory }: { tab: Tab; onTab: (t: 
           }}>{initial}</div>
           <div>
             <div style={{ fontSize: 20, fontWeight: 700 }}>{name}</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>สมาชิก Zaki{memberSince ? ` · ตั้งแต่ ${memberSince}` : ''}</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>สมาชิก Kaff{memberSince ? ` · ตั้งแต่ ${memberSince}` : ''}</div>
           </div>
         </div>
       </ForestHeader>

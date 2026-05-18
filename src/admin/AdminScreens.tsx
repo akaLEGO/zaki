@@ -82,9 +82,9 @@ export function AdminDashboard({ onNav }: { onNav: (s: ScreenId) => void }) {
   ];
 
   const slipsPending = [
-    { ref: 'ZK-748231', amount: 1500, time: '09:34', method: 'Bank Transfer' },
-    { ref: 'ZK-748229', amount: 350, time: '09:18', method: 'Bank Transfer' },
-    { ref: 'ZK-748212', amount: 12000, time: '08:51', method: 'USDC' },
+    { ref: 'KF-748231', amount: 1500, time: '09:34', method: 'Bank Transfer' },
+    { ref: 'KF-748229', amount: 350, time: '09:18', method: 'Bank Transfer' },
+    { ref: 'KF-748212', amount: 12000, time: '08:51', method: 'USDC' },
   ];
 
   const lowCampaigns = CAMPAIGNS
@@ -102,7 +102,7 @@ export function AdminDashboard({ onNav }: { onNav: (s: ScreenId) => void }) {
         <div>
           <div style={{ fontSize: 11, color: AZ.muted, letterSpacing: '0.08em', fontWeight: 600 }}>DASHBOARD · {today}</div>
           <div style={{ fontSize: 24, fontWeight: 800, color: AZ.ink, letterSpacing: '-0.02em', marginTop: 2 }}>
-            สลาม Zaki — วันนี้ระบบทำงานราบรื่น
+            สลาม Kaff — วันนี้ระบบทำงานราบรื่น
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>

@@ -22,8 +22,8 @@ function SignInGate() {
           background: AZ.gold, color: AZ.forest,
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
           fontFamily: 'Sarabun', fontWeight: 800, fontSize: 22,
-        }}>ز</div>
-        <div style={{ fontSize: 16, fontWeight: 700, color: AZ.ink }}>Zaki Admin · Back Office</div>
+        }}>ك</div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: AZ.ink }}>Kaff Admin · Back Office</div>
         <div style={{ fontSize: 12.5, color: AZ.muted, textAlign: 'center', maxWidth: 320 }}>
           กรุณาเข้าสู่ระบบเพื่อจัดการแคมเปญและองค์กร
         </div>

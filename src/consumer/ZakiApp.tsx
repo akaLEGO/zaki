@@ -360,11 +360,11 @@ export function App() {
       <div className="wrap">
         <div className="credits">
           <span className="logo">
-            <span className="dot">ز</span>
-            Zaki
+            <span className="dot">ك</span>
+            Kaff
           </span>
           <h1>Islamic Finance OS for Thai Muslims</h1>
-          <p className="tag">"Give Pure" · ให้อย่างบริสุทธิ์ — เคลียร์ดอกเบี้ย ซะกาต ฟิฏร กุรบ่าน ศ่อดะเกาะฮ์ ในที่เดียว</p>
+          <p className="tag">"Be the Upper Hand" · มือที่ให้ คือมือที่สูงกว่า — เคลียร์ดอกเบี้ย ซะกาต ฟิฏร กุรบ่าน ศ่อดะเกาะฮ์ ในที่เดียว</p>
 
           <div className="swatchrow">
             <div className="s" style={{ background: '#0D3B2E' }} title="Forest"></div>
