@@ -138,7 +138,7 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
           <ZakiMark size={28} />
           <div>
             <div style={{ fontWeight: 700, fontSize: 17, color: Z.forest, letterSpacing: '-0.01em', lineHeight: 1 }}>Kaff</div>
-            <div style={{ fontSize: 10, color: Z.muted, letterSpacing: '0.04em', marginTop: 3, fontWeight: 500 }}>มือที่ให้ คือมือที่สูงกว่า</div>
+            <div style={{ fontSize: 10, color: Z.muted, letterSpacing: '0.04em', marginTop: 3, fontWeight: 500 }}>มือที่พร้อมให้ ในหนทางที่ถูกต้อง</div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
