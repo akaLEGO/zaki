@@ -6,6 +6,37 @@ import {
 import type { ZIconName } from './KaffUI';
 import { amilFee, AMIL_FEE_RATE } from '../lib/fee';
 
+// Safety guard for beta/testing. VITE_KAFF_TESTING_MODE must be explicitly set
+// to "false" on Vercel to enable real payment flows. Anything else (including
+// missing env) keeps the app in testing mode — UI shows a big "DO NOT PAY"
+// banner on the QR + bank screens so beta testers don't accidentally send
+// money to the placeholder PromptPay number (which is not ours).
+const IS_TESTING_MODE =
+  (import.meta.env.VITE_KAFF_TESTING_MODE as string | undefined) !== 'false';
+
+function TestingBanner() {
+  if (!IS_TESTING_MODE) return null;
+  return (
+    <div style={{
+      background: '#C0392B', color: '#fff',
+      padding: '10px 14px',
+      borderRadius: 12, margin: '8px 16px 0',
+      display: 'flex', gap: 10, alignItems: 'flex-start',
+      boxShadow: '0 4px 14px rgba(192,57,43,0.25)',
+    }}>
+      <div style={{ fontSize: 18 }}>⚠️</div>
+      <div style={{ flex: 1, lineHeight: 1.45 }}>
+        <div style={{ fontWeight: 800, fontSize: 13, letterSpacing: '0.02em' }}>
+          ระบบกำลังทดสอบ · DO NOT PAY
+        </div>
+        <div style={{ fontSize: 12, marginTop: 2, opacity: 0.95 }}>
+          อย่าโอนเงินจริง — QR/บัญชีที่แสดงเป็นข้อมูลทดสอบ คุณสามารถ "กดยืนยัน" เพื่อเทสต์ flow ได้โดยไม่ต้องโอน
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export type PayMethod = 'qr' | 'bank' | 'usdc';
 
 export interface Summary {
@@ -261,6 +292,7 @@ export function QRPayment({ amount, onBack, onConfirm }: { amount: number; onBac
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
       <ForestHeader onBack={onBack} title="สแกนเพื่อชำระ" sub="Thai QR · PromptPay · รองรับทุกธนาคาร" compact />
+      <TestingBanner />
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
         <div style={{
@@ -391,6 +423,7 @@ export function BankTransfer({ amount, onBack, onConfirm }: { amount: number; on
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
       <ForestHeader onBack={onBack} title="โอนผ่านธนาคาร" sub="คัดลอกแล้วเปิดแอปธนาคารของคุณ" compact />
+      <TestingBanner />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 24px' }}>
         <div style={{ background: '#fff', borderRadius: 20, border: `1.5px solid ${Z.line}`, overflow: 'hidden' }}>
           {fields.map((f, i) => (
@@ -438,7 +471,7 @@ export function BankTransfer({ amount, onBack, onConfirm }: { amount: number; on
   );
 }
 
-export function SuccessScreen({ summary, onHome }: { summary: Summary; onHome: () => void }) {
+export function SuccessScreen({ summary, donor, onHome }: { summary: Summary; donor?: Donor; onHome: () => void }) {
   const [animated, setAnimated] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setAnimated(true), 100);
@@ -450,6 +483,49 @@ export function SuccessScreen({ summary, onHome }: { summary: Summary; onHome: (
     const d = new Date();
     return `${d.getDate()} พ.ค. 2569 · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   }, []);
+
+  const donorDisplay = donor?.firstName?.trim()
+    ? `คุณ${donor.firstName.trim()}`
+    : 'ผู้บริจาค';
+
+  const shareText = [
+    `${donorDisplay} ${summary.shortImpact || 'บริจาค'} ${fmtTHB(summary.amount)}`,
+    summary.dest && summary.dest !== '—' ? `ส่งต่อให้ ${summary.dest}` : '',
+    summary.impactText || '',
+    '',
+    'via Kaff — Be the Upper Hand',
+    'https://kaff.me',
+  ].filter(Boolean).join('\n');
+
+  const shareToLine = () => {
+    const url = `https://line.me/R/msg/text/?${encodeURIComponent(shareText)}`;
+    if (typeof window !== 'undefined') window.open(url, '_blank', 'noopener');
+  };
+
+  const shareGeneric = async () => {
+    // Web Share API on mobile (opens native share sheet). Falls back to clipboard copy.
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Kaff — Be the Upper Hand',
+          text: shareText,
+          url: 'https://kaff.me',
+        });
+        return;
+      } catch {
+        // user cancelled — fall through
+        return;
+      }
+    }
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        alert('คัดลอกข้อความแล้ว — paste ที่ไหนก็ได้');
+      } catch {
+        alert('แชร์ไม่ได้บนเบราว์เซอร์นี้');
+      }
+    }
+  };
 
   const impactLines: Record<string, string> = {
     'Riba · ดอกเบี้ย': 'ส่งต่อสาธารณประโยชน์',
@@ -536,26 +612,26 @@ export function SuccessScreen({ summary, onHome }: { summary: Summary; onHome: (
             marginTop: 8, fontSize: 17, fontWeight: 700, lineHeight: 1.45,
             whiteSpace: 'pre-line',
           }}>
-            <span>คุณกัสมา {summary.shortImpact || 'เคลียร์ดอกเบี้ย'} {fmtTHB(summary.amount)}</span>
+            <span>{donorDisplay} {summary.shortImpact || 'เคลียร์ดอกเบี้ย'} {fmtTHB(summary.amount)}</span>
             {summary.impactText && (
               <div style={{ fontWeight: 500, marginTop: 4 }}>{summary.impactText}</div>
             )}
           </div>
           <div style={{ marginTop: 12, fontSize: 11, fontWeight: 600, opacity: 0.65 }}>via Kaff — Be the Upper Hand</div>
           <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
-            <button style={{
+            <button onClick={shareToLine} style={{
               flex: 1, padding: '11px 14px', borderRadius: 12,
               background: '#06C755', color: '#fff', fontWeight: 700, fontSize: 13.5,
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             }}>
               <Icon name="line" size={16} color="#fff" /> Share to LINE
             </button>
-            <button style={{
+            <button onClick={shareGeneric} title="แชร์ / คัดลอก" style={{
               padding: '11px 14px', borderRadius: 12,
               background: Z.forest, color: '#fff', fontWeight: 700, fontSize: 13,
               display: 'inline-flex', alignItems: 'center', gap: 6,
             }}>
-              <Icon name="download" size={16} color="#fff" />
+              <Icon name="share" size={16} color="#fff" />
             </button>
           </div>
         </div>

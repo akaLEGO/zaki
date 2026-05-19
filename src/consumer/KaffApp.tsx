@@ -386,7 +386,7 @@ export function App() {
       view = <BankTransfer amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={() => { void recordDonation(); setScreen('success'); }} />;
       break;
     case 'success':
-      view = <SuccessScreen summary={{ ...summary, payMethod }} onHome={goHome} />;
+      view = <SuccessScreen summary={{ ...summary, payMethod }} donor={donor} onHome={goHome} />;
       break;
     default:
       view = <HomeScreen onService={openService} tab={tab} onTab={handleTab} />;
