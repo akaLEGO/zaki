@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <title>Kaff — Be the Upper Hand</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#0D3B2E" />
 <meta name="description" content="Kaff — Be the Upper Hand. Islamic Finance OS for Thai Muslims." />
 <meta property="og:title" content="Kaff — Be the Upper Hand" />
 <meta property="og:description" content="Give with dignity. Riba · Zakat · Wajib · Qurban · Sadaqah — in one app." />
@@ -99,6 +102,25 @@
   @media (max-width: 900px) {
     .credits { display: none; }
     .stage { padding: 20px 0; }
+  }
+
+  /* Full-screen production mode — no iPhone frame, no design panel */
+  .app-fullscreen {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: #0D3B2E;
+    display: flex;
+    justify-content: center;
+  }
+  .app-fullscreen > .app-canvas {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: #F5F1E8;
+    position: relative;
+    overflow-x: hidden;
   }
 </style>
 </head>

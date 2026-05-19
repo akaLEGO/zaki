@@ -365,6 +365,16 @@ export function App() {
   const showPreviewPanel = typeof window !== 'undefined' &&
     new URLSearchParams(window.location.search).has('preview');
 
+  if (!showPreviewPanel) {
+    return (
+      <div className="app-fullscreen">
+        <div className="app-canvas" key={screen} style={{ animation: 'zakiFade .25s ease-out' }}>
+          {view}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="stage">
       <div className="wrap">
