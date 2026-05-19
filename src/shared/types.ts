@@ -46,6 +46,7 @@ export interface Campaign {
 }
 
 export interface QurbanOption {
+  id: number;
   country: string;
   flag: string;
   price: number;
@@ -68,4 +69,38 @@ export interface KaffarahType {
   label: string;
   amount: number;
   sub: string;
+}
+
+export type DonationFlow =
+  | 'riba' | 'zakat' | 'fitrah' | 'fidyah' | 'kaffarah' | 'qurban' | 'sadaqah';
+
+export type DonationStatus =
+  | 'pending'
+  | 'paid'
+  | 'awaiting_partner'
+  | 'partner_confirmed'
+  | 'completed'
+  | 'partner_rejected'
+  | 'refunded'
+  | 'failed';
+
+export interface Partner {
+  id: string;
+  name: string;
+  contactEmail: string | null;
+  contactLine: string | null;
+  webhookUrl: string | null;
+  flows: DonationFlow[];
+  active: boolean;
+  notes: string | null;
+  createdAt: string;
+}
+
+export interface DonationEvent {
+  id: number;
+  fromStatus: DonationStatus | null;
+  toStatus: DonationStatus;
+  actor: string;
+  note: string | null;
+  createdAt: string;
 }

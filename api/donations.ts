@@ -26,6 +26,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
       SELECT id, ref, user_id AS "userId", flow, amount,
              fee_amount AS "feeAmount", destination,
              pay_method AS "payMethod", status, niyyah,
+             partner_id AS "partnerId", partner_ref AS "partnerRef",
              to_char(created_at, 'DD Mon YYYY HH24:MI') AS "createdAt"
       FROM donations
       ORDER BY created_at DESC

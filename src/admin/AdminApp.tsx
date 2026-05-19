@@ -1,11 +1,17 @@
 import { useState } from 'react';
-import { AZ, AIcon, ABtn } from './AdminUI';
+import { AZ, AIcon } from './AdminUI';
 import type { IconName } from './AdminUI';
 import { ChromeWindow } from './BrowserWindow';
-import { AdminDashboard, AdminCampaigns, AdminOrgs } from './AdminScreens';
+import {
+  AdminDashboard, AdminCampaigns, AdminOrgs,
+  AdminTransactions, AdminShariah, AdminRates, AdminAudit,
+  AdminPartners,
+} from './AdminScreens';
 import { KaffGlyph } from '../lib/brand';
 
-type ScreenId = 'dashboard' | 'campaigns' | 'orgs' | 'rates' | 'transactions' | 'shariah' | 'settings';
+type ScreenId =
+  | 'dashboard' | 'campaigns' | 'orgs' | 'rates'
+  | 'partners' | 'transactions' | 'shariah' | 'settings';
 
 interface NavItem {
   id: ScreenId;
@@ -24,14 +30,15 @@ function Sidebar({ screen, setScreen }: { screen: ScreenId; setScreen: (s: Scree
     { label: 'CATALOG', items: [
       { id: 'campaigns', icon: 'campaign', label: 'Campaigns', badge: '12' },
       { id: 'orgs',      icon: 'orgs',     label: 'Orgs & Recipients' },
-      { id: 'rates',     icon: 'rates',    label: 'Rates & Prices', soon: true },
+      { id: 'rates',     icon: 'rates',    label: 'Rates & Prices' },
     ]},
     { label: 'OPERATIONS', items: [
-      { id: 'transactions', icon: 'transactions', label: 'Transactions', soon: true },
-      { id: 'shariah',      icon: 'shariah',      label: 'Shariah Board', soon: true, badge: '3' },
+      { id: 'partners',     icon: 'community',    label: 'Partners' },
+      { id: 'transactions', icon: 'transactions', label: 'Transactions' },
+      { id: 'shariah',      icon: 'shariah',      label: 'Shariah Board' },
     ]},
     { label: 'SETTINGS', items: [
-      { id: 'settings', icon: 'settings', label: 'Roles & Audit', soon: true },
+      { id: 'settings', icon: 'settings', label: 'Roles & Audit' },
     ]},
   ];
 
@@ -149,31 +156,14 @@ export function AdminApp() {
 
   let view;
   switch (screen) {
-    case 'dashboard':
-      view = <AdminDashboard onNav={setScreen} />;
-      break;
-    case 'campaigns':
-      view = <AdminCampaigns />;
-      break;
-    case 'orgs':
-      view = <AdminOrgs />;
-      break;
-    default:
-      view = (
-        <div style={{ padding: 60, textAlign: 'center' }}>
-          <div style={{
-            display: 'inline-flex', flexDirection: 'column', alignItems: 'center',
-            gap: 12,
-          }}>
-            <AIcon name="settings" size={36} color={AZ.mutedLite} />
-            <div style={{ fontSize: 18, fontWeight: 700, color: AZ.ink }}>เร็วๆ นี้</div>
-            <div style={{ fontSize: 13, color: AZ.muted, maxWidth: 400 }}>
-              หน้า {screen} ยังเป็น mock — เริ่มใช้งานจริงพร้อมกับ Rates, Transactions, Shariah Board และ Roles+Audit Log ในเฟส 2
-            </div>
-            <ABtn kind="ghost" onClick={() => setScreen('dashboard')}>กลับ Dashboard</ABtn>
-          </div>
-        </div>
-      );
+    case 'dashboard':    view = <AdminDashboard onNav={setScreen} />; break;
+    case 'campaigns':    view = <AdminCampaigns />; break;
+    case 'orgs':         view = <AdminOrgs />; break;
+    case 'rates':        view = <AdminRates />; break;
+    case 'partners':     view = <AdminPartners />; break;
+    case 'transactions': view = <AdminTransactions />; break;
+    case 'shariah':      view = <AdminShariah />; break;
+    case 'settings':     view = <AdminAudit />; break;
   }
 
   return (

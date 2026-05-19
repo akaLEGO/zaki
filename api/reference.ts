@@ -13,7 +13,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
   const [asnaf, recipients, qurbanOptions, qurbanLocations, kaffarahTypes] = await Promise.all([
     sql`SELECT id, label, sub FROM asnaf ORDER BY display_order ASC`,
     sql`SELECT id, asnaf, name, received, area, fair FROM recipients ORDER BY id ASC`,
-    sql`SELECT country, flag, price, currency, sub, animal, popular, special FROM qurban_options ORDER BY id ASC`,
+    sql`SELECT id, country, flag, price, currency, sub, animal, popular, special FROM qurban_options ORDER BY id ASC`,
     sql`SELECT id, flag, name, impact FROM qurban_locations ORDER BY id ASC`,
     sql`SELECT id, label, amount, sub FROM kaffarah_types`,
   ]);

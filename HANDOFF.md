@@ -94,6 +94,7 @@ Run these in order in the Neon SQL Editor. Idempotent — safe to re-run.
    ```
 
 5. `db/003_amil_fee.sql` — adds the `fee_amount` column
+6. `db/004_partners.sql` — partners table, donation_events table, expanded donations.status state machine
 
 ## 8 · Project layout
 
@@ -156,11 +157,31 @@ Run these in order in the Neon SQL Editor. Idempotent — safe to re-run.
 │   │   └── [id].ts         ← PATCH / DELETE
 │   ├── donations/
 │   │   └── mine.ts         ← GET donations for the signed-in user
+│   ├── kaffarah-types/
+│   │   └── [id].ts         ← PATCH (admin only)
 │   ├── orgs/
 │   │   ├── index.ts
 │   │   └── [id].ts
+│   ├── partners/
+│   │   ├── index.ts        ← GET list / POST create (admin only)
+│   │   └── [id].ts         ← PATCH / DELETE (admin only)
 │   ├── promptpay/
 │   │   └── qr.ts           ← GET ?amount=N → SVG QR
+│   ├── qurban-locations/
+│   │   ├── index.ts        ← POST (admin only)
+│   │   └── [id].ts         ← PATCH / DELETE (admin only)
+│   ├── qurban-options/
+│   │   ├── index.ts        ← POST (admin only)
+│   │   └── [id].ts         ← PATCH / DELETE (admin only)
+│   ├── recipients/
+│   │   ├── index.ts        ← GET list / POST (admin only)
+│   │   └── [id].ts         ← PATCH / DELETE (admin only)
+│   ├── donations/
+│   │   ├── [id].ts         ← GET donation + events (admin only)
+│   │   ├── [id]/transition.ts ← POST state transition (admin only)
+│   │   └── mine.ts         ← GET donations for the signed-in user
+│   ├── admin-users.ts      ← GET (admin only)
+│   ├── audit-log.ts        ← GET (admin only) ?limit=N
 │   ├── donations.ts        ← GET (admin only) / POST (anon ok)
 │   ├── health.ts           ← diagnostic
 │   └── reference.ts        ← bundled asnaf / recipients / qurban-* / kaffarah-types
@@ -186,7 +207,10 @@ Run these in order in the Neon SQL Editor. Idempotent — safe to re-run.
 - **Rotate secrets** that ended up in chat transcripts: Clerk secret key (`sk_test_…`), all GitHub PATs.
 - **Finish kaff.me DNS** at GoDaddy → wait → Clerk allowed-origins update.
 - **Phase 2c:** Slip2Go (or alternative) auto-verification of bank slips.
-- **Phase 3:** LINE share deeplink · EN/TH toggle · wire the four "Soon" admin screens (Rates, Transactions, Shariah Board, Roles & Audit).
+- **Phase 3 — admin screens:** DONE. All four wired (Rates, Transactions, Shariah Board, Roles & Audit). New endpoints: `/api/audit-log`, `/api/admin-users`, `/api/kaffarah-types/[id]` (PATCH).
+- **Phase 4 — partner fulfillment:** DONE (UI/API). State machine `pending → paid → awaiting_partner → partner_confirmed → completed` (or `partner_rejected → refunded`). Admin Transactions row → drawer with workflow buttons + timeline. Partners managed at OPERATIONS → Partners. **Run `db/004_partners.sql` on Neon before deploying.**
+- **Phase 4 — remaining:** auto-notify partners (email/LINE), payment refund integration (today refund is manual + recorded), consumer-side state transitions on payment confirmation.
+- **Phase 3 — remaining:** LINE share deeplink · EN/TH toggle.
 - **Update bank-transfer screen** with your real Foundation account once you have one.
 
 ---
