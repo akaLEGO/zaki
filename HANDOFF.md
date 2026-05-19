@@ -38,6 +38,11 @@ DATABASE_URL=postgresql://…
 # PromptPay receiver. Optional locally — defaults to 0812345678 placeholder
 # if unset. Set on Vercel for real money.
 PROMPTPAY_ID=
+
+# Testing mode banner — set to "false" ONLY when ready to accept real
+# payments (real PROMPTPAY_ID + real bank account number in BankTransfer
+# screen). Anything else keeps the red "DO NOT PAY" banner visible.
+VITE_KAFF_TESTING_MODE=true
 ```
 
 `.env.local` is in `.gitignore` so it never reaches the repo. The same three variables also need to be set on Vercel (already done — Settings → Environment Variables).
@@ -206,6 +211,13 @@ Run these in order in the Neon SQL Editor. Idempotent — safe to re-run.
 
 - **Rotate secrets** that ended up in chat transcripts: Clerk secret key (`sk_test_…`), all GitHub PATs.
 - **Finish kaff.me DNS** at GoDaddy → wait → Clerk allowed-origins update.
+- **Before accepting real money — switch off testing mode:**
+  1. Decide where the money goes (foundation partner, registered Kaff Foundation, or Social Enterprise — see compliance memo)
+  2. Set Vercel env: `PROMPTPAY_ID=<real phone/tax-id>` of the receiving account
+  3. Update bank account constants in `src/consumer/KaffPayment.tsx` (BankTransfer fields `bank`, `name`, `no`)
+  4. Set Vercel env: `VITE_KAFF_TESTING_MODE=false`
+  5. Redeploy → red "DO NOT PAY" banner disappears
+- **AML/CTF compliance (Phase A–D):** transaction caps, IP logging, Thai ID + occupation on Tier 2 donations, ID-photo upload + source-of-funds on Tier 3, AMLO reporting. Required before scaling beyond closed beta. Consult Thai AML lawyer first (~฿15-30k retainer).
 - **Phase 2c:** Slip2Go (or alternative) auto-verification of bank slips.
 - **Phase 3 — admin screens:** DONE. All four wired (Rates, Transactions, Shariah Board, Roles & Audit). New endpoints: `/api/audit-log`, `/api/admin-users`, `/api/kaffarah-types/[id]` (PATCH).
 - **Phase 4 — partner fulfillment:** DONE (UI/API). State machine `pending → paid → awaiting_partner → partner_confirmed → completed` (or `partner_rejected → refunded`). Admin Transactions row → drawer with workflow buttons + timeline. Partners managed at OPERATIONS → Partners. **Run `db/004_partners.sql` on Neon before deploying.**
