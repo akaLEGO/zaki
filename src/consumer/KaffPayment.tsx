@@ -81,7 +81,7 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
   const methods: { id: PayMethod; label: string; sub: string; icon: ZIconName }[] = [
     { id: 'qr', label: 'Thai QR (PromptPay)', sub: 'สแกนผ่านแอปธนาคาร', icon: 'qr' },
     { id: 'bank', label: 'โอนผ่านธนาคาร', sub: 'คัดลอกเลขบัญชี · แนบสลิป', icon: 'bank' },
-    { id: 'usdc', label: 'USDC (Crypto)', sub: 'Polygon · Solana', icon: 'coin' },
+    { id: 'usdc', label: 'USDC บน Base', sub: 'low gas · ~1 นาที', icon: 'coin' },
   ];
 
   return (
@@ -499,6 +499,134 @@ export function BankTransfer({ amount, onBack, onConfirm }: { amount: number; on
   );
 }
 
+// ─── Base USDC ──────────────────────────────────────────────────────────────
+
+interface RateResponse {
+  rate: number;        // 1 USDC = N THB
+  source: 'coingecko' | 'fallback';
+  updatedAt: string;
+  error?: string;
+}
+
+export function BaseUSDCPayment({ amount, onBack, onConfirm }: { amount: number; onBack: () => void; onConfirm: () => void }) {
+  const [rateInfo, setRateInfo] = useState<RateResponse | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/base/rate')
+      .then(r => r.json())
+      .then((d: RateResponse) => setRateInfo(d))
+      .catch(() => setRateInfo({ rate: 35, source: 'fallback', updatedAt: new Date().toISOString() }));
+  }, []);
+
+  const rate = rateInfo?.rate ?? 35;
+  const usdcAmount = amount / rate;
+  const usdcDisplay = usdcAmount.toFixed(2);
+
+  // Wallet shown to the user — purely informational; the QR encodes the real
+  // recipient via the EIP-681 URI. If the server has no wallet configured
+  // (placeholder mode), this stays as the dashed placeholder so testers can't
+  // copy a bogus address either.
+  const placeholderWallet = '0x0000…000000  (ระบบทดสอบ)';
+
+  const copyAddress = async () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(placeholderWallet);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      } catch { /* ignore */ }
+    }
+  };
+
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+      <ForestHeader onBack={onBack} title="USDC บน Base" sub="โอน USDC บน Base mainnet · low gas · ~1 นาที" compact />
+      <TestingBanner />
+      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+
+        <div style={{
+          padding: '10px 22px', background: Z.forest, color: '#fff',
+          borderRadius: 999, fontWeight: 800, fontSize: 22, letterSpacing: '-0.01em',
+          fontVariantNumeric: 'tabular-nums',
+          display: 'inline-flex', alignItems: 'center', gap: 10,
+        }}>
+          <span>{usdcDisplay}</span>
+          <span style={{ fontSize: 13, opacity: 0.75, fontWeight: 600 }}>USDC</span>
+        </div>
+        <div style={{ marginTop: 6, fontSize: 12.5, color: Z.muted }}>
+          ≈ {fmtTHB(amount)} · 1 USDC = ฿{rate.toFixed(2)}
+          {rateInfo?.source === 'fallback' && <span style={{ color: '#c0392b', marginLeft: 6 }}>(ใช้อัตราสำรอง)</span>}
+        </div>
+
+        <div style={{
+          marginTop: 20, padding: 18, background: '#fff', borderRadius: 24,
+          border: `1.5px solid ${Z.line}`,
+          width: '100%',
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+        }}>
+          <div style={{
+            background: '#0052FF', color: '#fff', padding: '6px 14px',
+            borderRadius: 8, fontSize: 10, fontWeight: 800, letterSpacing: '0.1em',
+            display: 'inline-flex', gap: 6, alignItems: 'center',
+          }}>
+            <span>◆ BASE NETWORK · USDC</span>
+          </div>
+          <img
+            src={`/api/base/qr?amount=${encodeURIComponent(usdcDisplay)}`}
+            alt={`Base USDC QR ${usdcDisplay}`}
+            width={220} height={220}
+            style={{ marginTop: 14, borderRadius: 6 }}
+          />
+          <div style={{ marginTop: 14, width: '100%', textAlign: 'center' }}>
+            <div style={{ fontSize: 12, color: Z.muted, marginBottom: 4 }}>โอนไปที่ wallet</div>
+            <button onClick={copyAddress} style={{
+              fontFamily: 'Geist Mono, ui-monospace, monospace',
+              fontSize: 13, color: Z.ink, fontWeight: 600,
+              padding: '8px 12px', borderRadius: 10,
+              background: Z.surface, border: `1px solid ${Z.line}`,
+              width: '100%', textAlign: 'center',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            }}>
+              {placeholderWallet}
+              <Icon name="copy" size={14} />
+            </button>
+            {copied && <div style={{ marginTop: 6, fontSize: 11.5, color: Z.sage, fontWeight: 600 }}>คัดลอกแล้ว</div>}
+          </div>
+        </div>
+
+        <div style={{
+          marginTop: 14, padding: 12, borderRadius: 12,
+          background: '#fff', border: `1.5px solid ${Z.line}`,
+          width: '100%', display: 'flex', gap: 10, alignItems: 'flex-start',
+        }}>
+          <div style={{ fontSize: 20 }}>📱</div>
+          <div style={{ flex: 1, fontSize: 12.5, color: Z.muted, lineHeight: 1.5 }}>
+            <b style={{ color: Z.ink }}>วิธีโอน</b><br />
+            สแกน QR ด้วย Coinbase Wallet / MetaMask Mobile / Rainbow → app จะ pre-fill จำนวน + wallet ปลายทาง → ยืนยัน
+          </div>
+        </div>
+
+        <div style={{
+          marginTop: 12, padding: '8px 14px', borderRadius: 999,
+          background: 'rgba(0,82,255,0.1)', color: '#0052FF',
+          fontSize: 12, fontWeight: 600,
+        }}>
+          ⛽ Gas บน Base ~$0.01 · เร็วกว่า Ethereum mainnet ~10 เท่า
+        </div>
+      </div>
+
+      <StickyBottom>
+        <GoldButton onClick={onConfirm}>
+          {IS_TESTING_MODE
+            ? <>ดูใบเสร็จทดสอบ <Icon name="arrowRight" size={20} /></>
+            : <>โอนแล้ว ยืนยัน <Icon name="check" size={20} /></>}
+        </GoldButton>
+      </StickyBottom>
+    </div>
+  );
+}
+
 export function SuccessScreen({ summary, donor, onHome }: { summary: Summary; donor?: Donor; onHome: () => void }) {
   const [animated, setAnimated] = useState(false);
   const [policy, setPolicy] = useState<PolicyKind | null>(null);
@@ -635,7 +763,7 @@ export function SuccessScreen({ summary, donor, onHome }: { summary: Summary; do
             <Row label="จำนวน" value={fmtTHB(summary.amount)} />
             <Row label="ปลายทาง" value={summary.dest} />
             <Row label="ประเภท" value={summary.type} />
-            <Row label="วิธีชำระ" value={summary.payMethod === 'qr' ? 'Thai QR' : summary.payMethod === 'bank' ? 'โอนผ่านธนาคาร' : 'USDC'} />
+            <Row label="วิธีชำระ" value={summary.payMethod === 'qr' ? 'Thai QR' : summary.payMethod === 'bank' ? 'โอนผ่านธนาคาร' : 'USDC บน Base'} />
           </div>
         </div>
 

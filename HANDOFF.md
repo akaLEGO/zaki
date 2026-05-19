@@ -39,6 +39,10 @@ DATABASE_URL=postgresql://…
 # if unset. Set on Vercel for real money.
 PROMPTPAY_ID=
 
+# Base (Ethereum L2) wallet for USDC payments. Optional locally — defaults
+# to a non-scannable placeholder if unset. Must be a 0x… 40-hex address.
+KAFF_BASE_WALLET=
+
 # Testing mode banner — set to "false" ONLY when ready to accept real
 # payments (real PROMPTPAY_ID + real bank account number in BankTransfer
 # screen). Anything else keeps the red "DO NOT PAY" banner visible.

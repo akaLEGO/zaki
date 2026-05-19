@@ -15,7 +15,7 @@ import {
 } from './KaffServices';
 import type { ZakatValues, CompulsorySub, KaffType, QurbanAnimal } from './KaffServices';
 import {
-  CheckoutScreen, QRPayment, BankTransfer, SuccessScreen,
+  CheckoutScreen, QRPayment, BankTransfer, BaseUSDCPayment, SuccessScreen,
 } from './KaffPayment';
 import type { PayMethod, Summary, Donor } from './KaffPayment';
 import type { AsnafId } from '../shared/types';
@@ -31,7 +31,7 @@ type Screen =
   | 'compulsory'
   | 'qurban-1'
   | 'sadaqah'
-  | 'checkout' | 'pay-qr' | 'pay-bank' | 'success';
+  | 'checkout' | 'pay-qr' | 'pay-bank' | 'pay-usdc' | 'success';
 
 type ActiveFlow =
   | null | 'riba' | 'zakat'
@@ -249,7 +249,11 @@ export function App() {
 
   const goHome = () => { setScreen('home'); setTab('home'); setNiyyahConfirmed(false); setActiveFlow(null); };
   const goCheckout = (flow: ActiveFlow) => { setActiveFlow(flow); setNiyyahConfirmed(false); setScreen('checkout'); };
-  const goPay = () => setScreen(payMethod === 'bank' ? 'pay-bank' : 'pay-qr');
+  const goPay = () => setScreen(
+    payMethod === 'bank' ? 'pay-bank' :
+    payMethod === 'usdc' ? 'pay-usdc' :
+    'pay-qr'
+  );
 
   const recordDonation = async () => {
     if (!activeFlow) return;
@@ -392,6 +396,9 @@ export function App() {
       break;
     case 'pay-bank':
       view = <BankTransfer amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={() => { void recordDonation(); setScreen('success'); }} />;
+      break;
+    case 'pay-usdc':
+      view = <BaseUSDCPayment amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={() => { void recordDonation(); setScreen('success'); }} />;
       break;
     case 'success':
       view = <SuccessScreen summary={{ ...summary, payMethod }} donor={donor} onHome={goHome} />;
