@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql } from '../_lib/db.js';
-import { withErrors } from '../_lib/handler.js';
-import { requireAdmin } from '../_lib/auth.js';
-import { cors } from '../_lib/cors.js';
-import { rateLimit } from '../_lib/ratelimit.js';
+import { sql } from '../../_lib/db.js';
+import { withErrors } from '../../_lib/handler.js';
+import { requireAdmin } from '../../_lib/auth.js';
+import { cors } from '../../_lib/cors.js';
+import { rateLimit } from '../../_lib/ratelimit.js';
 
 export default withErrors(async function handler(req: VercelRequest, res: VercelResponse) {
   if (!cors(req, res)) return;
