@@ -91,6 +91,7 @@ export function App() {
 
   const [qurbanCountry, setQurbanCountry] = useState<string | null>('บังกลาเทศ');
   const [qurbanAnimal, setQurbanAnimal] = useState<QurbanAnimal>('goat');
+  const [qurbanCowShares, setQurbanCowShares] = useState<number>(1);
 
   const [campaign, setCampaign] = useState<string | null>('iftar');
   const [iftarMeals, setIftarMeals] = useState(5);
@@ -202,20 +203,26 @@ export function App() {
       }
       case 'qurban': {
         const q = QURBAN_OPTIONS.find(x => x.country === qurbanCountry);
+        const shares = qurbanAnimal === 'cow' ? qurbanCowShares : 1;
+        const animalLabel = qurbanAnimal === 'goat'
+          ? 'แพะ 1 ตัว'
+          : shares === 7 ? 'วัวเต็มตัว' : `วัว ${shares}/7 ส่วน`;
         const countryImpact: Record<string, string> = {
-          'ไทย':        'แจกจ่ายเนื้อให้ชาวไทยชายแดนใต้กว่า 30 ครอบครัว',
-          'บังกลาเทศ': 'แจกจ่ายเนื้อให้ชาวบังกลาเทศกว่า 35 ครอบครัว',
-          'มาเลเซีย':  'แจกจ่ายเนื้อให้ชุมชนมาเลเซียกว่า 30 ครอบครัว',
-          'กาซา':      'แจกจ่ายเนื้อให้ชาวปาเลสไตน์กว่า 45 ครอบครัว',
+          'ไทย':        'แจกจ่ายเนื้อให้ชาวไทยชายแดนใต้',
+          'บังกลาเทศ': 'แจกจ่ายเนื้อให้ชาวบังกลาเทศ',
+          'มาเลเซีย':  'แจกจ่ายเนื้อให้ชุมชนมาเลเซีย',
+          'กาซา':      'แจกจ่ายเนื้อให้ชาวปาเลสไตน์',
         };
         return {
           flow: activeFlow || "",
-          amount: q ? q.price : 0,
+          amount: q ? q.price * shares : 0,
           type: 'Qurban · กุรบ่าน',
-          dest: q ? q.country : '—',
+          dest: q ? `${q.country} · ${animalLabel}` : '—',
           niyyah: 'ฉันตั้งใจทำกุรบ่านนี้เพื่ออัลลอฮ์ — ตามแบบอย่างของนบีอิบรอฮีม',
           shortImpact: 'ทำกุรบ่าน',
-          impactText: (q && countryImpact[q.country]) || 'แจกจ่ายเนื้อสดในวันอีดอัฎฮา',
+          impactText: q
+            ? `${countryImpact[q.country] || 'แจกจ่ายเนื้อสด'} · ${animalLabel}`
+            : 'แจกจ่ายเนื้อสดในวันอีดอัฎฮา',
         };
       }
       case 'sadaqah': {
@@ -238,7 +245,7 @@ export function App() {
       default:
         return { flow: '', amount: 0, type: '—', dest: '—', niyyah: '', shortImpact: '' };
     }
-  }, [activeFlow, ribaAmount, selectedOrg, zakatValues, asnaf, zakatRecipient, fitrahCount, fidyahDays, kaffType, qurbanCountry, campaign, iftarMeals]);
+  }, [activeFlow, ribaAmount, selectedOrg, zakatValues, asnaf, zakatRecipient, fitrahCount, fidyahDays, kaffType, qurbanCountry, qurbanAnimal, qurbanCowShares, campaign, iftarMeals]);
 
   const goHome = () => { setScreen('home'); setTab('home'); setNiyyahConfirmed(false); setActiveFlow(null); };
   const goCheckout = (flow: ActiveFlow) => { setActiveFlow(flow); setNiyyahConfirmed(false); setScreen('checkout'); };
@@ -350,6 +357,7 @@ export function App() {
       view = <QurbanPrices
         selected={qurbanCountry} setSelected={setQurbanCountry}
         animal={qurbanAnimal} setAnimal={setQurbanAnimal}
+        cowShares={qurbanCowShares} setCowShares={setQurbanCowShares}
         onBack={goHome}
         onNext={() => goCheckout('qurban')}
       />;

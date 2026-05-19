@@ -567,16 +567,21 @@ function KaffarahPanel({ type, setType, types: KAFFARAH_TYPES }: {
 
 export type QurbanAnimal = 'goat' | 'cow';
 
-export function QurbanPrices({ selected, setSelected, animal, setAnimal, onBack, onNext }: {
+export function QurbanPrices({ selected, setSelected, animal, setAnimal, cowShares, setCowShares, onBack, onNext }: {
   selected: string | null; setSelected: (s: string) => void;
   animal: QurbanAnimal; setAnimal: (a: QurbanAnimal) => void;
+  cowShares: number; setCowShares: (n: number) => void;
   onBack: () => void; onNext: () => void;
 }) {
   const { qurbanOptions: QURBAN_OPTIONS } = useData();
   const animals: { id: QurbanAnimal; label: string; sub: string }[] = [
     { id: 'goat', label: 'แพะ 1 ตัว', sub: '1 ครอบครัว' },
-    { id: 'cow', label: 'วัว 1/7 ส่วน', sub: 'ร่วม 7 คน' },
+    { id: 'cow', label: 'วัว · เลือกจำนวนส่วน', sub: '1–7 ส่วน' },
   ];
+  const selectedOption = QURBAN_OPTIONS.find(q => q.country === selected);
+  const totalAmount = selectedOption
+    ? selectedOption.price * (animal === 'cow' ? cowShares : 1)
+    : 0;
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
       <ForestHeader
@@ -642,36 +647,59 @@ export function QurbanPrices({ selected, setSelected, animal, setAnimal, onBack,
           })}
         </div>
 
-        {animal === 'cow' && (
+        {animal === 'cow' && selectedOption && (
           <div style={{
-            marginTop: 16, padding: 16, borderRadius: 18,
+            marginTop: 16, padding: 18, borderRadius: 18,
             background: `linear-gradient(135deg, ${Z.forest} 0%, ${Z.forestDeep} 100%)`,
-            color: '#fff', display: 'flex', alignItems: 'center', gap: 12,
+            color: '#fff',
           }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, color: Z.gold, fontWeight: 700, letterSpacing: '0.06em', marginBottom: 2 }}>GROUP QURBAN</div>
-              <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.35 }}>ร่วมกัน 7 คน วัวเดียว<br />หาเพื่อนร่วมได้เลย</div>
-              <div style={{ marginTop: 10, display: 'flex' }}>
-                {[1,2,3,4].map(i => (
-                  <div key={i} style={{
-                    width: 26, height: 26, borderRadius: 999,
-                    background: ['#E8C871','#7BD3A8','#D87C7C','#A07CD8'][i-1],
-                    marginLeft: i === 1 ? 0 : -8,
-                    border: '2px solid #0D3B2E',
-                  }} />
-                ))}
-                <div style={{
-                  marginLeft: -8, height: 26, padding: '0 9px', borderRadius: 999,
-                  background: 'rgba(255,255,255,0.16)', border: '2px solid #0D3B2E',
-                  color: '#fff', fontSize: 11, fontWeight: 700,
-                  display: 'flex', alignItems: 'center',
-                }}>+3 ที่เหลือ</div>
-              </div>
+            <div style={{ fontSize: 11, color: Z.gold, fontWeight: 700, letterSpacing: '0.08em' }}>เลือกจำนวนส่วน</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 2, lineHeight: 1.45 }}>
+              วัว 1 ตัว = 7 ส่วน · เลือก {cowShares} ส่วนได้เลย ระบบจะจับคู่ผู้ร่วมส่วนที่เหลือให้
             </div>
-            <button style={{
-              padding: '10px 14px', borderRadius: 12, background: Z.gold, color: '#3d2c08',
-              fontWeight: 700, fontSize: 13,
-            }}>เข้าร่วม</button>
+            <div style={{
+              marginTop: 14, display: 'flex', alignItems: 'center', gap: 14,
+              background: 'rgba(0,0,0,0.25)', padding: '10px 14px', borderRadius: 14,
+            }}>
+              <button
+                onClick={() => setCowShares(Math.max(1, cowShares - 1))}
+                disabled={cowShares <= 1}
+                style={{
+                  width: 40, height: 40, borderRadius: 999,
+                  background: cowShares <= 1 ? 'rgba(255,255,255,0.06)' : Z.gold,
+                  color: cowShares <= 1 ? 'rgba(255,255,255,0.3)' : '#3d2c08',
+                  fontSize: 24, fontWeight: 800, lineHeight: 1,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: cowShares <= 1 ? 'not-allowed' : 'pointer',
+                }}
+              >−</button>
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{cowShares}<span style={{ fontSize: 16, opacity: 0.55 }}>/7</span></div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 4 }}>
+                  {cowShares === 7 ? 'วัวเต็มตัว · ทำคนเดียว' : `ร่วม ${cowShares} ส่วน · ${7 - cowShares} ส่วนที่ระบบจัดสรร`}
+                </div>
+              </div>
+              <button
+                onClick={() => setCowShares(Math.min(7, cowShares + 1))}
+                disabled={cowShares >= 7}
+                style={{
+                  width: 40, height: 40, borderRadius: 999,
+                  background: cowShares >= 7 ? 'rgba(255,255,255,0.06)' : Z.gold,
+                  color: cowShares >= 7 ? 'rgba(255,255,255,0.3)' : '#3d2c08',
+                  fontSize: 24, fontWeight: 800, lineHeight: 1,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: cowShares >= 7 ? 'not-allowed' : 'pointer',
+                }}
+              >+</button>
+            </div>
+            <div style={{
+              marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+            }}>
+              <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.7)' }}>รวม</span>
+              <span style={{ fontSize: 22, fontWeight: 800, color: Z.gold, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em' }}>
+                {selectedOption.currency}{totalAmount.toLocaleString()}
+              </span>
+            </div>
           </div>
         )}
 
@@ -693,7 +721,7 @@ export function QurbanPrices({ selected, setSelected, animal, setAnimal, onBack,
 
       <StickyBottom>
         <GoldButton disabled={!selected} onClick={onNext}>
-          เลือกพื้นที่แจกจ่าย <Icon name="arrowRight" size={20} />
+          ดำเนินการต่อ <Icon name="arrowRight" size={20} />
         </GoldButton>
       </StickyBottom>
     </div>
