@@ -501,6 +501,7 @@ export function BankTransfer({ amount, onBack, onConfirm }: { amount: number; on
 
 export function SuccessScreen({ summary, donor, onHome }: { summary: Summary; donor?: Donor; onHome: () => void }) {
   const [animated, setAnimated] = useState(false);
+  const [policy, setPolicy] = useState<PolicyKind | null>(null);
   useEffect(() => {
     const t = setTimeout(() => setAnimated(true), 100);
     return () => clearTimeout(t);
@@ -683,11 +684,21 @@ export function SuccessScreen({ summary, donor, onHome }: { summary: Summary; do
         }}>
           "الحمد لله — ขอบคุณอัลลอฮ์ที่ให้โอกาส"
         </div>
+
+        <div style={{
+          marginTop: 8, textAlign: 'center', fontSize: 11.5, color: Z.muted,
+        }}>
+          <button onClick={() => setPolicy('privacy')} style={{ color: Z.muted, textDecoration: 'underline' }}>นโยบายความเป็นส่วนตัว</button>
+          {' · '}
+          <button onClick={() => setPolicy('terms')} style={{ color: Z.muted, textDecoration: 'underline' }}>ข้อกำหนด</button>
+        </div>
       </div>
 
       <StickyBottom>
         <GoldButton onClick={onHome}>กลับหน้าหลัก <Icon name="home" size={20} /></GoldButton>
       </StickyBottom>
+
+      <PolicySheet kind={policy} onClose={() => setPolicy(null)} />
     </div>
   );
 }
