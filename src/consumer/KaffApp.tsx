@@ -362,9 +362,13 @@ export function App() {
       view = <HomeScreen onService={openService} tab={tab} onTab={handleTab} />;
   }
 
+  const showPreviewPanel = typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).has('preview');
+
   return (
     <div className="stage">
       <div className="wrap">
+        {showPreviewPanel && (
         <div className="credits">
           <span className="logo">
             <span className="dot">ك</span>
@@ -422,6 +426,7 @@ export function App() {
             <span style={{ opacity: 0.6 }}>→</span>
           </a>
         </div>
+        )}
 
         <IOSDevice width={390} height={844}>
           <div key={screen} style={{
