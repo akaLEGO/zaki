@@ -116,8 +116,8 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
           <div style={{ fontSize: 13, color: Z.muted, fontWeight: 600, marginBottom: 8, padding: '0 4px' }}>ข้อมูลผู้บริจาค</div>
           <div style={{ background: '#fff', borderRadius: 18, border: `1.5px solid ${Z.line}`, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <DonorField label="ชื่อ" value={donor.firstName} onChange={v => update('firstName', v)} placeholder="กัสมา" required />
-              <DonorField label="นามสกุล" value={donor.lastName} onChange={v => update('lastName', v)} placeholder="วันแอ" required />
+              <DonorField label="ชื่อ" value={donor.firstName} onChange={v => update('firstName', v)} placeholder="ชื่อจริง" required />
+              <DonorField label="นามสกุล" value={donor.lastName} onChange={v => update('lastName', v)} placeholder="นามสกุล" required />
             </div>
             <DonorField
               label="อีเมล"
@@ -493,9 +493,10 @@ export function SuccessScreen({ summary, donor, onHome }: { summary: Summary; do
     return `${d.getDate()} พ.ค. 2569 · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   }, []);
 
-  const donorDisplay = donor?.firstName?.trim()
-    ? `คุณ${donor.firstName.trim()}`
-    : 'ผู้บริจาค';
+  const donorFullName = [donor?.firstName?.trim(), donor?.lastName?.trim()]
+    .filter(Boolean)
+    .join(' ');
+  const donorDisplay = donorFullName ? `คุณ${donorFullName}` : 'ผู้บริจาค';
 
   const shareText = [
     `${donorDisplay} ${summary.shortImpact || 'บริจาค'} ${fmtTHB(summary.amount)}`,
