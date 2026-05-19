@@ -19,18 +19,19 @@ function TestingBanner() {
   return (
     <div style={{
       background: '#C0392B', color: '#fff',
-      padding: '10px 14px',
+      padding: '12px 14px',
       borderRadius: 12, margin: '8px 16px 0',
       display: 'flex', gap: 10, alignItems: 'flex-start',
       boxShadow: '0 4px 14px rgba(192,57,43,0.25)',
     }}>
-      <div style={{ fontSize: 18 }}>⚠️</div>
-      <div style={{ flex: 1, lineHeight: 1.45 }}>
-        <div style={{ fontWeight: 800, fontSize: 13, letterSpacing: '0.02em' }}>
-          ระบบกำลังทดสอบ · DO NOT PAY
+      <div style={{ fontSize: 20 }}>⚠️</div>
+      <div style={{ flex: 1, lineHeight: 1.5 }}>
+        <div style={{ fontWeight: 800, fontSize: 13.5, letterSpacing: '0.02em' }}>
+          ระบบทดสอบ · ห้ามโอนเงินจริง
         </div>
-        <div style={{ fontSize: 12, marginTop: 2, opacity: 0.95 }}>
-          อย่าโอนเงินจริง — QR/บัญชีที่แสดงเป็นข้อมูลทดสอบ คุณสามารถ "กดยืนยัน" เพื่อเทสต์ flow ได้โดยไม่ต้องโอน
+        <div style={{ fontSize: 12, marginTop: 4, opacity: 0.95 }}>
+          QR และเลขบัญชีที่เห็นเป็นแค่ตัวอย่าง — บัญชีของ Kaff ยังไม่เปิด<br />
+          กดปุ่ม <strong style={{ background: 'rgba(255,255,255,0.2)', padding: '1px 6px', borderRadius: 4 }}>ดูใบเสร็จทดสอบ →</strong> ด้านล่างได้เลย เพื่อดู flow ต่อ
         </div>
       </div>
     </div>
@@ -353,7 +354,11 @@ export function QRPayment({ amount, onBack, onConfirm }: { amount: number; onBac
       </div>
 
       <StickyBottom>
-        <GoldButton onClick={onConfirm}>โอนแล้ว ยืนยัน <Icon name="check" size={20} /></GoldButton>
+        <GoldButton onClick={onConfirm}>
+          {IS_TESTING_MODE
+            ? <>ดูใบเสร็จทดสอบ <Icon name="arrowRight" size={20} /></>
+            : <>โอนแล้ว ยืนยัน <Icon name="check" size={20} /></>}
+        </GoldButton>
       </StickyBottom>
     </div>
   );
@@ -465,7 +470,11 @@ export function BankTransfer({ amount, onBack, onConfirm }: { amount: number; on
       </div>
 
       <StickyBottom>
-        <GoldButton onClick={onConfirm}>โอนแล้ว ยืนยัน <Icon name="check" size={20} /></GoldButton>
+        <GoldButton onClick={onConfirm}>
+          {IS_TESTING_MODE
+            ? <>ดูใบเสร็จทดสอบ <Icon name="arrowRight" size={20} /></>
+            : <>โอนแล้ว ยืนยัน <Icon name="check" size={20} /></>}
+        </GoldButton>
       </StickyBottom>
     </div>
   );
@@ -571,9 +580,21 @@ export function SuccessScreen({ summary, donor, onHome }: { summary: Summary; do
             />
           </svg>
         </div>
-        <div style={{ marginTop: 20, fontSize: 22, fontWeight: 800, letterSpacing: '-0.01em' }}>บริจาคสำเร็จแล้ว</div>
-        <div style={{ marginTop: 6, fontSize: 13.5, color: Z.gold, fontWeight: 600 }}>คุณคือมือบน · You are the Upper Hand</div>
+        <div style={{ marginTop: 20, fontSize: 22, fontWeight: 800, letterSpacing: '-0.01em' }}>
+          {IS_TESTING_MODE ? 'ใบเสร็จทดสอบ' : 'บริจาคสำเร็จแล้ว'}
+        </div>
+        <div style={{ marginTop: 6, fontSize: 13.5, color: Z.gold, fontWeight: 600 }}>
+          {IS_TESTING_MODE ? 'ระบบทดสอบ · ไม่มีเงินถูกหัก' : 'คุณคือมือบน · You are the Upper Hand'}
+        </div>
         <div style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{impact}</div>
+        {IS_TESTING_MODE && (
+          <div style={{
+            marginTop: 14, padding: '6px 12px',
+            display: 'inline-block', borderRadius: 999,
+            background: 'rgba(192,57,43,0.85)', color: '#fff',
+            fontSize: 11, fontWeight: 800, letterSpacing: '0.1em',
+          }}>TEST RUN</div>
+        )}
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 24px' }}>
