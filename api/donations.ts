@@ -51,16 +51,39 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
     const flow = b.flow as string;
     const amount = b.amount as number;
     const fee = amilFee(flow, amount);
+
+    // If an active partner handles this flow, assign it and start the donation
+    // in 'paid' (not 'completed') so the admin workflow can route it through
+    // partner confirmation. Flows with no partner stay in 'completed'.
+    const partnerRows = await sql`
+      SELECT id FROM partners
+      WHERE active = TRUE AND ${flow} = ANY(flows)
+      ORDER BY name ASC
+      LIMIT 1
+    `;
+    const partnerId = partnerRows[0]?.id as string | undefined;
+    const initialStatus = (b.status as string) || (partnerId ? 'paid' : 'completed');
+
     const [row] = await sql`
-      INSERT INTO donations (ref, user_id, flow, amount, fee_amount, destination, pay_method, status, niyyah)
+      INSERT INTO donations (ref, user_id, flow, amount, fee_amount, destination, pay_method, status, niyyah, partner_id)
       VALUES (${newRef()}, ${auth?.userId || null}, ${flow}, ${amount}, ${fee},
               ${(b.destination as string) ?? null}, ${(b.payMethod as string) ?? null},
-              ${(b.status as string) || 'completed'}, ${(b.niyyah as string) ?? null})
+              ${initialStatus}, ${(b.niyyah as string) ?? null},
+              ${partnerId ?? null})
       RETURNING id, ref, flow, amount, fee_amount AS "feeAmount", destination,
                 pay_method AS "payMethod", status, niyyah,
+                partner_id AS "partnerId",
                 to_char(created_at, 'DD Mon YYYY HH24:MI') AS "createdAt"
     `;
-    await audit(req, 'donations.create', String((row as { ref: string }).ref), auth?.userId ?? null, b);
+    // Seed donation_events with the initial state so the admin timeline starts
+    // from "system created this in <status>" with the partner already linked.
+    await sql`
+      INSERT INTO donation_events (donation_id, from_status, to_status, actor, note)
+      VALUES (${(row as { id: number }).id}, NULL, ${initialStatus},
+              ${'system'},
+              ${partnerId ? `auto-assigned to partner ${partnerId}` : null})
+    `;
+    await audit(req, 'donations.create', String((row as { ref: string }).ref), auth?.userId ?? null, { ...b, partnerId, initialStatus });
     return res.status(201).json(row);
   }
   res.setHeader('Allow', 'GET, POST');

@@ -9,7 +9,7 @@ import {
   RibaEntry, RibaOrgSelect,
   ZakatCalc, ZakatAsnaf,
   CompulsoryScreen,
-  QurbanPrices, QurbanLocation,
+  QurbanPrices,
   SadaqahCampaigns,
 } from './KaffServices';
 import type { ZakatValues, CompulsorySub, KaffType, QurbanAnimal } from './KaffServices';
@@ -28,7 +28,7 @@ type Screen =
   | 'riba-1' | 'riba-2'
   | 'zakat-1' | 'zakat-2'
   | 'compulsory'
-  | 'qurban-1' | 'qurban-2'
+  | 'qurban-1'
   | 'sadaqah'
   | 'checkout' | 'pay-qr' | 'pay-bank' | 'success';
 
@@ -48,7 +48,6 @@ const SCREEN_GROUPS: { key: Screen; label: string }[] = [
   { key: 'zakat-2', label: 'Zakat — 8 Asnaf' },
   { key: 'compulsory', label: 'Fitrah/Fidyah/Kaffarah' },
   { key: 'qurban-1', label: 'Qurban — Prices' },
-  { key: 'qurban-2', label: 'Qurban — Location' },
   { key: 'sadaqah', label: 'Sadaqah — Campaigns' },
   { key: 'checkout', label: 'Checkout · Niyyah' },
   { key: 'pay-qr', label: 'Payment — Thai QR' },
@@ -66,7 +65,7 @@ export function App() {
   const {
     orgs: ORG_LIST, campaigns: CAMPAIGNS,
     asnaf: ASNAF, recipients: ASNAF_RECIPIENTS,
-    qurbanOptions: QURBAN_OPTIONS, qurbanLocations: QURBAN_LOCATIONS,
+    qurbanOptions: QURBAN_OPTIONS,
     kaffarahTypes: KAFFARAH_TYPES,
   } = data;
   const [tweaks, setTweak] = useTweaks<Tweaks>({
@@ -91,7 +90,6 @@ export function App() {
 
   const [qurbanCountry, setQurbanCountry] = useState<string | null>('บังกลาเทศ');
   const [qurbanAnimal, setQurbanAnimal] = useState<QurbanAnimal>('goat');
-  const [qurbanLocation, setQurbanLocation] = useState<string | null>(null);
 
   const [campaign, setCampaign] = useState<string | null>('iftar');
   const [iftarMeals, setIftarMeals] = useState(5);
@@ -170,22 +168,20 @@ export function App() {
       }
       case 'qurban': {
         const q = QURBAN_OPTIONS.find(x => x.country === qurbanCountry);
-        const loc = QURBAN_LOCATIONS.find(l => l.id === qurbanLocation);
-        const qurbanImpact: Record<string, string> = {
-          thailand:    'แจกจ่ายเนื้อให้ชาวไทยชายแดนใต้กว่า 30 ครอบครัว',
-          bangladesh:  'แจกจ่ายเนื้อให้ชาวบังกลาเทศกว่า 35 ครอบครัว',
-          africa:      'แจกจ่ายเนื้อให้ชาวแอฟริกาตะวันออกกว่า 40 ครอบครัว',
-          gaza:        'แจกจ่ายเนื้อให้ชาวปาเลสไตน์กว่า 45 ครอบครัว',
-          rohingya:    'แจกจ่ายเนื้อให้ผู้ลี้ภัยโรฮิงยากว่า 35 ครอบครัว',
+        const countryImpact: Record<string, string> = {
+          'ไทย':        'แจกจ่ายเนื้อให้ชาวไทยชายแดนใต้กว่า 30 ครอบครัว',
+          'บังกลาเทศ': 'แจกจ่ายเนื้อให้ชาวบังกลาเทศกว่า 35 ครอบครัว',
+          'มาเลเซีย':  'แจกจ่ายเนื้อให้ชุมชนมาเลเซียกว่า 30 ครอบครัว',
+          'กาซา':      'แจกจ่ายเนื้อให้ชาวปาเลสไตน์กว่า 45 ครอบครัว',
         };
         return {
           flow: activeFlow || "",
           amount: q ? q.price : 0,
           type: 'Qurban · กุรบ่าน',
-          dest: loc ? loc.name : (q ? q.country : '—'),
+          dest: q ? q.country : '—',
           niyyah: 'ฉันตั้งใจทำกุรบ่านนี้เพื่ออัลลอฮ์ — ตามแบบอย่างของนบีอิบรอฮีม',
           shortImpact: 'ทำกุรบ่าน',
-          impactText: (qurbanLocation && qurbanImpact[qurbanLocation]) || (loc ? `แจกจ่ายเนื้อให้\n${loc.name}` : 'แจกจ่ายเนื้อสดในวันอีดอัฎฮา'),
+          impactText: (q && countryImpact[q.country]) || 'แจกจ่ายเนื้อสดในวันอีดอัฎฮา',
         };
       }
       case 'sadaqah': {
@@ -208,7 +204,7 @@ export function App() {
       default:
         return { flow: '', amount: 0, type: '—', dest: '—', niyyah: '', shortImpact: '' };
     }
-  }, [activeFlow, ribaAmount, selectedOrg, zakatValues, asnaf, zakatRecipient, fitrahCount, fidyahDays, kaffType, qurbanCountry, qurbanLocation, campaign, iftarMeals]);
+  }, [activeFlow, ribaAmount, selectedOrg, zakatValues, asnaf, zakatRecipient, fitrahCount, fidyahDays, kaffType, qurbanCountry, campaign, iftarMeals]);
 
   const goHome = () => { setScreen('home'); setTab('home'); setNiyyahConfirmed(false); setActiveFlow(null); };
   const goCheckout = (flow: ActiveFlow) => { setActiveFlow(flow); setNiyyahConfirmed(false); setScreen('checkout'); };
@@ -224,8 +220,9 @@ export function App() {
           amount: summary.amount,
           destination: summary.dest,
           payMethod,
-          status: 'completed',
           niyyah: summary.niyyah,
+          // Server picks initial status: 'paid' if a partner handles this flow
+          // (Qurban → Ummatee), 'completed' otherwise.
         }),
       });
       void data.refresh();
@@ -315,13 +312,6 @@ export function App() {
         selected={qurbanCountry} setSelected={setQurbanCountry}
         animal={qurbanAnimal} setAnimal={setQurbanAnimal}
         onBack={goHome}
-        onNext={() => setScreen('qurban-2')}
-      />;
-      break;
-    case 'qurban-2':
-      view = <QurbanLocation
-        location={qurbanLocation} setLocation={setQurbanLocation}
-        onBack={() => setScreen('qurban-1')}
         onNext={() => goCheckout('qurban')}
       />;
       break;
@@ -342,7 +332,7 @@ export function App() {
           const map: Record<string, Screen> = {
             riba: 'riba-2', zakat: 'zakat-2',
             fitrah: 'compulsory', fidyah: 'compulsory', kaffarah: 'compulsory',
-            qurban: 'qurban-2', sadaqah: 'sadaqah',
+            qurban: 'qurban-1', sadaqah: 'sadaqah',
           };
           setScreen((activeFlow && map[activeFlow]) || 'home');
         }}
