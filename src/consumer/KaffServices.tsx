@@ -36,7 +36,7 @@ export function RibaEntry({ amount, setAmount, onBack, onNext }: {
         </div>
 
         <div style={{ marginTop: 22 }}>
-          <TrustBadge>ไม่มีค่าธรรมเนียมจากคุณ — 5% เก็บจากองค์กรปลายทาง</TrustBadge>
+          <TrustBadge>ไม่มีค่าธรรมเนียมจากคุณ — องค์กรปลายทางชำระค่าธรรมเนียม 5% จากยอด Riba</TrustBadge>
         </div>
 
         <div style={{

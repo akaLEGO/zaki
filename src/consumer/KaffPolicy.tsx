@@ -167,7 +167,7 @@ function TermsContent() {
 
       <H>3. ค่าธรรมเนียม Amil</H>
       <L>
-        <li><b>Riba</b>: ไม่มีค่าธรรมเนียมจากผู้บริจาค (องค์กรปลายทางรับ 5%)</li>
+        <li><b>Riba</b>: ไม่มีค่าธรรมเนียมจากผู้บริจาค (องค์กรปลายทางชำระค่าธรรมเนียม 5% จากยอด Riba)</li>
         <li><b>Zakat / Fitrah / Fidyah / Kaffarah / Qurban / Sadaqah</b>: Kaff รับ 5%
           เป็นค่า Amil ตามหลักศาสนา (Amilin คือ 1 ใน 8 Asnaf ของ Zakat)</li>
         <li>ส่วนที่เหลือ 95% ส่งต่อให้ปลายทางที่คุณเลือก</li>

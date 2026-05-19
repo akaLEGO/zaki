@@ -271,7 +271,7 @@ function Row({ label, value, sub, valueColor }: { label: string; value: ReactNod
 function FeeRows({ flow, amount }: { flow: string; amount: number }) {
   const rate = AMIL_FEE_RATE[flow] ?? 0;
   if (rate === 0) {
-    return <Row label="ค่าธรรมเนียม" value="฿0" sub="(เก็บจากองค์กรปลายทาง 5%)" valueColor={Z.sage} />;
+    return <Row label="ค่าธรรมเนียม" value="฿0" sub="(องค์กรปลายทางชำระค่าธรรมเนียม 5% จากยอด Riba)" valueColor={Z.sage} />;
   }
   const fee = amilFee(flow, amount);
   const net = amount - fee;
