@@ -1109,7 +1109,22 @@ function QurbanTable() {
               <Field label="ราคา"><TextInput type="number" value={optDraft.price} onChange={v => setOptDraft({ ...optDraft, price: Number(v) })} /></Field>
               <Field label="หน่วยเงิน"><TextInput value={optDraft.currency} onChange={v => setOptDraft({ ...optDraft, currency: String(v) })} placeholder="฿" /></Field>
             </div>
-            <Field label="ประเภทสัตว์"><TextInput value={optDraft.animal} onChange={v => setOptDraft({ ...optDraft, animal: String(v) })} placeholder="แพะ 1 ตัว" /></Field>
+            <Field label="ประเภทสัตว์" hint="ใช้แยก list ฝั่ง consumer ตอน toggle แพะ/วัว">
+              <div style={{ display: 'flex', gap: 6 }}>
+                {(['แพะ 1 ตัว', 'วัว 1 ส่วน'] as const).map(a => {
+                  const on = optDraft.animal === a;
+                  return (
+                    <button key={a} onClick={() => setOptDraft({ ...optDraft, animal: a })} style={{
+                      flex: 1, padding: '10px 14px', borderRadius: 10,
+                      background: on ? AZ.forest : '#fff',
+                      color: on ? '#fff' : AZ.forest,
+                      border: `1.5px solid ${on ? AZ.forest : AZ.line}`,
+                      fontSize: 13, fontWeight: 600,
+                    }}>{a}</button>
+                  );
+                })}
+              </div>
+            </Field>
             <Field label="คำอธิบายสั้น"><TextInput value={optDraft.sub} onChange={v => setOptDraft({ ...optDraft, sub: String(v) })} placeholder="ราคาประหยัด" /></Field>
             <div style={{ display: 'flex', gap: 16, padding: 12, background: AZ.surface, borderRadius: 10 }}>
               <Toggle value={optDraft.popular} onChange={v => setOptDraft({ ...optDraft, popular: v })} label="⭐ Popular" />

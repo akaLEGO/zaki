@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Z, Icon, GoldButton, ForestHeader, StickyBottom,
   Card, ProgressBar, MoneyField, Stepper, Chip, TrustBadge, fmtTHB, fmtPct,
@@ -578,7 +578,20 @@ export function QurbanPrices({ selected, setSelected, animal, setAnimal, cowShar
     { id: 'goat', label: 'แพะ 1 ตัว', sub: '1 ครอบครัว' },
     { id: 'cow', label: 'วัว · เลือกจำนวนส่วน', sub: '1–7 ส่วน' },
   ];
-  const selectedOption = QURBAN_OPTIONS.find(q => q.country === selected);
+  const animalLabel = animal === 'goat' ? 'แพะ 1 ตัว' : 'วัว 1 ส่วน';
+  const filteredOptions = QURBAN_OPTIONS.filter(q => q.animal === animalLabel);
+
+  // If toggling animal strands the current country selection, clear it so the
+  // user explicitly picks from the new list (and the bottom CTA stays disabled
+  // until they do).
+  useEffect(() => {
+    if (selected && !filteredOptions.some(q => q.country === selected)) {
+      setSelected('');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animal]);
+
+  const selectedOption = filteredOptions.find(q => q.country === selected);
   const totalAmount = selectedOption
     ? selectedOption.price * (animal === 'cow' ? cowShares : 1)
     : 0;
@@ -612,40 +625,55 @@ export function QurbanPrices({ selected, setSelected, animal, setAnimal, cowShar
           ))}
         </div>
 
-        <div style={{ fontSize: 12, color: Z.muted, fontWeight: 600, padding: '0 4px 8px' }}>เปรียบเทียบราคาตามประเทศ</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {QURBAN_OPTIONS.map((q, i) => {
-            const isSel = selected === q.country;
-            return (
-              <Card key={i}
-                onClick={() => setSelected(q.country)}
-                selected={isSel}
-                padding={14}
-                style={{ position: 'relative' }}
-              >
-                {q.popular && (
-                  <div style={{
-                    position: 'absolute', top: -6, right: 14,
-                    padding: '3px 10px', background: Z.gold,
-                    color: '#3d2c08', borderRadius: 999,
-                    fontSize: 10, fontWeight: 700, letterSpacing: '0.06em',
-                  }}>POPULAR</div>
-                )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div style={{ fontSize: 32 }}>{q.flag}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: Z.ink }}>{q.country}</div>
-                    <div style={{ fontSize: 12, color: Z.muted, marginTop: 1 }}>{q.sub}</div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 11, color: Z.muted, fontWeight: 600 }}>ตั้งแต่</div>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: Z.forest, letterSpacing: '-0.01em' }}>{q.currency}{q.price.toLocaleString()}</div>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
+        <div style={{ fontSize: 12, color: Z.muted, fontWeight: 600, padding: '0 4px 8px' }}>
+          เปรียบเทียบราคา {animal === 'goat' ? 'แพะ' : 'วัว · ต่อ 1 ส่วน'}
         </div>
+        {filteredOptions.length === 0 ? (
+          <div style={{
+            padding: '24px 16px', textAlign: 'center',
+            background: '#fff', borderRadius: 14, border: `1.5px dashed ${Z.line}`,
+            color: Z.muted, fontSize: 13.5, lineHeight: 1.5,
+          }}>
+            ยังไม่มีตัวเลือก {animal === 'goat' ? 'แพะ' : 'วัว'} ในระบบ<br />
+            <span style={{ fontSize: 12, color: '#9aa39e' }}>admin กำลังเปิดเพิ่ม — ลองเลือกประเภทอื่นก่อนได้</span>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {filteredOptions.map((q, i) => {
+              const isSel = selected === q.country;
+              return (
+                <Card key={i}
+                  onClick={() => setSelected(q.country)}
+                  selected={isSel}
+                  padding={14}
+                  style={{ position: 'relative' }}
+                >
+                  {q.popular && (
+                    <div style={{
+                      position: 'absolute', top: -6, right: 14,
+                      padding: '3px 10px', background: Z.gold,
+                      color: '#3d2c08', borderRadius: 999,
+                      fontSize: 10, fontWeight: 700, letterSpacing: '0.06em',
+                    }}>POPULAR</div>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ fontSize: 32 }}>{q.flag}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: Z.ink }}>{q.country}</div>
+                      <div style={{ fontSize: 12, color: Z.muted, marginTop: 1 }}>{q.sub}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 11, color: Z.muted, fontWeight: 600 }}>
+                        {animal === 'cow' ? 'ต่อ 1 ส่วน' : 'ตั้งแต่'}
+                      </div>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: Z.forest, letterSpacing: '-0.01em' }}>{q.currency}{q.price.toLocaleString()}</div>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         {animal === 'cow' && selectedOption && (
           <div style={{
