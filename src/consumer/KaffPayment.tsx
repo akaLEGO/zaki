@@ -19,11 +19,30 @@ export interface Summary {
   payMethod?: PayMethod;
 }
 
-export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirmed, setNiyyahConfirmed, onBack, onNext }: {
+export interface Donor {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  lineId: string;
+}
+
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+function donorComplete(d: Donor) {
+  return d.firstName.trim() !== '' &&
+         d.lastName.trim() !== '' &&
+         EMAIL_RE.test(d.email.trim()) &&
+         d.phone.trim().length >= 6;
+}
+
+export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirmed, setNiyyahConfirmed, donor, setDonor, onBack, onNext }: {
   summary: Summary; payMethod: PayMethod; setPayMethod: (m: PayMethod) => void;
   niyyahConfirmed: boolean; setNiyyahConfirmed: (b: boolean) => void;
+  donor: Donor; setDonor: (d: Donor) => void;
   onBack: () => void; onNext: () => void;
 }) {
+  const isDonorComplete = donorComplete(donor);
+  const update = (k: keyof Donor, v: string) => setDonor({ ...donor, [k]: v });
   const methods: { id: PayMethod; label: string; sub: string; icon: ZIconName }[] = [
     { id: 'qr', label: 'Thai QR (PromptPay)', sub: 'สแกนผ่านแอปธนาคาร', icon: 'qr' },
     { id: 'bank', label: 'โอนผ่านธนาคาร', sub: 'คัดลอกเลขบัญชี · แนบสลิป', icon: 'bank' },
@@ -59,6 +78,42 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
             confirmed={niyyahConfirmed}
             onConfirm={() => setNiyyahConfirmed(!niyyahConfirmed)}
           />
+        </div>
+
+        <div style={{ marginTop: 18 }}>
+          <div style={{ fontSize: 13, color: Z.muted, fontWeight: 600, marginBottom: 8, padding: '0 4px' }}>ข้อมูลผู้บริจาค</div>
+          <div style={{ background: '#fff', borderRadius: 18, border: `1.5px solid ${Z.line}`, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <DonorField label="ชื่อ" value={donor.firstName} onChange={v => update('firstName', v)} placeholder="กัสมา" required />
+              <DonorField label="นามสกุล" value={donor.lastName} onChange={v => update('lastName', v)} placeholder="วันแอ" required />
+            </div>
+            <DonorField
+              label="อีเมล"
+              value={donor.email}
+              onChange={v => update('email', v)}
+              placeholder="you@example.com"
+              type="email"
+              required
+              error={donor.email.trim() !== '' && !EMAIL_RE.test(donor.email.trim()) ? 'รูปแบบอีเมลไม่ถูกต้อง' : undefined}
+            />
+            <DonorField
+              label="เบอร์โทรศัพท์"
+              value={donor.phone}
+              onChange={v => update('phone', v)}
+              placeholder="081-234-5678"
+              type="tel"
+              required
+            />
+            <DonorField
+              label="LINE ID (option)"
+              value={donor.lineId}
+              onChange={v => update('lineId', v)}
+              placeholder="@kaff หรือ kaff_team"
+            />
+            <div style={{ fontSize: 11, color: Z.muted, lineHeight: 1.5, marginTop: 2 }}>
+              🔒 ข้อมูลนี้ใช้สำหรับติดตามการบริจาคและส่งใบเสร็จ · เก็บปลอดภัยตาม PDPA
+            </div>
+          </div>
         </div>
 
         <div style={{ marginTop: 18 }}>
@@ -106,13 +161,50 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
 
       <StickyBottom>
         <GoldButton
-          disabled={!niyyahConfirmed}
+          disabled={!niyyahConfirmed || !isDonorComplete}
           onClick={onNext}
         >
-          {!niyyahConfirmed ? 'กรุณายืนยัน Niyyah ก่อน' : <>ดำเนินการชำระเงิน <Icon name="arrowRight" size={20} /></>}
+          {!niyyahConfirmed
+            ? 'กรุณายืนยัน Niyyah ก่อน'
+            : !isDonorComplete
+              ? 'กรุณากรอกข้อมูลผู้บริจาคให้ครบ'
+              : <>ดำเนินการชำระเงิน <Icon name="arrowRight" size={20} /></>}
         </GoldButton>
       </StickyBottom>
     </div>
+  );
+}
+
+function DonorField({ label, value, onChange, placeholder, type = 'text', required, error }: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  type?: 'text' | 'email' | 'tel';
+  required?: boolean;
+  error?: string;
+}) {
+  return (
+    <label style={{ display: 'block' }}>
+      <div style={{ fontSize: 11.5, color: Z.muted, fontWeight: 600, marginBottom: 4, display: 'flex', justifyContent: 'space-between' }}>
+        <span>{label}{required && <span style={{ color: Z.danger, marginLeft: 4 }}>*</span>}</span>
+        {error && <span style={{ color: Z.danger, fontWeight: 500 }}>{error}</span>}
+      </div>
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={e => onChange(e.target.value)}
+        style={{
+          width: '100%', height: 40, padding: '0 12px',
+          background: '#fff', border: `1.5px solid ${error ? Z.danger : Z.line}`,
+          borderRadius: 10, fontSize: 14, color: Z.ink, outline: 'none',
+          fontFamily: 'inherit',
+        }}
+        onFocus={e => { if (!error) e.target.style.borderColor = Z.forest; }}
+        onBlur={e => { if (!error) e.target.style.borderColor = Z.line; }}
+      />
+    </label>
   );
 }
 

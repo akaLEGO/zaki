@@ -27,6 +27,11 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
              fee_amount AS "feeAmount", destination,
              pay_method AS "payMethod", status, niyyah,
              partner_id AS "partnerId", partner_ref AS "partnerRef",
+             donor_first_name AS "donorFirstName",
+             donor_last_name  AS "donorLastName",
+             donor_email      AS "donorEmail",
+             donor_phone      AS "donorPhone",
+             donor_line_id    AS "donorLineId",
              to_char(created_at, 'DD Mon YYYY HH24:MI') AS "createdAt"
       FROM donations
       ORDER BY created_at DESC
@@ -39,12 +44,17 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
     if (!(await rateLimit(req, res, { scope: 'donate', max: 10, windowSeconds: 60 }))) return;
     const auth = await optionalAuth(req);
     const v = validate(req.body, {
-      flow:        { type: 'string', required: true, oneOf: FLOWS },
-      amount:      { type: 'int', required: true, min: 1, max: 10_000_000 },
-      destination: { type: 'string', max: 300 },
-      payMethod:   { type: 'string', oneOf: METHODS },
-      status:      { type: 'string', oneOf: STATUSES },
-      niyyah:      { type: 'string', max: 500 },
+      flow:           { type: 'string', required: true, oneOf: FLOWS },
+      amount:         { type: 'int', required: true, min: 1, max: 10_000_000 },
+      destination:    { type: 'string', max: 300 },
+      payMethod:      { type: 'string', oneOf: METHODS },
+      status:         { type: 'string', oneOf: STATUSES },
+      niyyah:         { type: 'string', max: 500 },
+      donorFirstName: { type: 'string', required: true, max: 100 },
+      donorLastName:  { type: 'string', required: true, max: 100 },
+      donorEmail:     { type: 'string', required: true, max: 200, pattern: /^[^@\s]+@[^@\s]+\.[^@\s]+$/ },
+      donorPhone:     { type: 'string', required: true, min: 6, max: 30 },
+      donorLineId:    { type: 'string', max: 100 },
     });
     if (!v.ok) return res.status(400).json({ error: v.error });
     const b = v.value as Record<string, unknown>;
@@ -65,14 +75,28 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
     const initialStatus = (b.status as string) || (partnerId ? 'paid' : 'completed');
 
     const [row] = await sql`
-      INSERT INTO donations (ref, user_id, flow, amount, fee_amount, destination, pay_method, status, niyyah, partner_id)
-      VALUES (${newRef()}, ${auth?.userId || null}, ${flow}, ${amount}, ${fee},
-              ${(b.destination as string) ?? null}, ${(b.payMethod as string) ?? null},
-              ${initialStatus}, ${(b.niyyah as string) ?? null},
-              ${partnerId ?? null})
+      INSERT INTO donations (
+        ref, user_id, flow, amount, fee_amount, destination, pay_method,
+        status, niyyah, partner_id,
+        donor_first_name, donor_last_name, donor_email, donor_phone, donor_line_id
+      )
+      VALUES (
+        ${newRef()}, ${auth?.userId || null}, ${flow}, ${amount}, ${fee},
+        ${(b.destination as string) ?? null}, ${(b.payMethod as string) ?? null},
+        ${initialStatus}, ${(b.niyyah as string) ?? null},
+        ${partnerId ?? null},
+        ${b.donorFirstName as string}, ${b.donorLastName as string},
+        ${b.donorEmail as string}, ${b.donorPhone as string},
+        ${(b.donorLineId as string) ?? null}
+      )
       RETURNING id, ref, flow, amount, fee_amount AS "feeAmount", destination,
                 pay_method AS "payMethod", status, niyyah,
                 partner_id AS "partnerId",
+                donor_first_name AS "donorFirstName",
+                donor_last_name  AS "donorLastName",
+                donor_email      AS "donorEmail",
+                donor_phone      AS "donorPhone",
+                donor_line_id    AS "donorLineId",
                 to_char(created_at, 'DD Mon YYYY HH24:MI') AS "createdAt"
     `;
     // Seed donation_events with the initial state so the admin timeline starts

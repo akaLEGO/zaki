@@ -1139,6 +1139,11 @@ interface DonationRow {
   niyyah: string | null;
   partnerId: string | null;
   partnerRef: string | null;
+  donorFirstName: string | null;
+  donorLastName: string | null;
+  donorEmail: string | null;
+  donorPhone: string | null;
+  donorLineId: string | null;
   createdAt: string;
 }
 
@@ -1424,6 +1429,35 @@ function TransactionDrawer({ id, partners, onClose, onChange }: {
               )}
             </div>
           </ACard>
+
+          {(donation.donorFirstName || donation.donorEmail || donation.donorPhone) && (
+            <ACard title="ข้อมูลผู้บริจาค" padding={14}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 12.5 }}>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <span style={{ color: AZ.muted }}>ชื่อ: </span>
+                  <strong>{donation.donorFirstName || '—'} {donation.donorLastName || ''}</strong>
+                </div>
+                {donation.donorEmail && (
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <span style={{ color: AZ.muted }}>Email: </span>
+                    <a href={`mailto:${donation.donorEmail}`} style={{ color: AZ.forest, textDecoration: 'underline' }}>{donation.donorEmail}</a>
+                  </div>
+                )}
+                {donation.donorPhone && (
+                  <div>
+                    <span style={{ color: AZ.muted }}>โทร: </span>
+                    <a href={`tel:${donation.donorPhone}`} style={{ color: AZ.forest, textDecoration: 'underline', fontVariantNumeric: 'tabular-nums' }}>{donation.donorPhone}</a>
+                  </div>
+                )}
+                {donation.donorLineId && (
+                  <div>
+                    <span style={{ color: AZ.muted }}>LINE: </span>
+                    <span style={{ fontFamily: 'Geist Mono, monospace' }}>{donation.donorLineId}</span>
+                  </div>
+                )}
+              </div>
+            </ACard>
+          )}
 
           <div>
             <div style={{ fontSize: 11, color: AZ.muted, fontWeight: 700, letterSpacing: '0.08em', marginBottom: 8 }}>WORKFLOW</div>

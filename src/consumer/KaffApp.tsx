@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import { IOSDevice } from './IosFrame';
 import {
   HomeScreen, HistoryScreen, ProfileScreen,
@@ -16,7 +17,7 @@ import type { ZakatValues, CompulsorySub, KaffType, QurbanAnimal } from './KaffS
 import {
   CheckoutScreen, QRPayment, BankTransfer, SuccessScreen,
 } from './KaffPayment';
-import type { PayMethod, Summary } from './KaffPayment';
+import type { PayMethod, Summary, Donor } from './KaffPayment';
 import type { AsnafId } from '../shared/types';
 import type { Tab } from './KaffUI';
 import { TweaksPanel, TweakSection, TweakRadio, useTweaks } from './TweaksPanel';
@@ -96,6 +97,39 @@ export function App() {
 
   const [payMethod, setPayMethod] = useState<PayMethod>('qr');
   const [niyyahConfirmed, setNiyyahConfirmed] = useState(false);
+
+  const { user, isSignedIn } = useUser();
+  const [donor, setDonor] = useState<Donor>(() => {
+    if (typeof window === 'undefined') {
+      return { firstName: '', lastName: '', email: '', phone: '', lineId: '' };
+    }
+    try {
+      const cached = window.localStorage.getItem('kaff:donor');
+      if (cached) return JSON.parse(cached) as Donor;
+    } catch { /* ignore parse errors */ }
+    return { firstName: '', lastName: '', email: '', phone: '', lineId: '' };
+  });
+
+  // When user signs in, prefer Clerk's identity over localStorage for the
+  // base fields (donor can still edit them). Phone + LINE ID stay from
+  // whatever they entered last time.
+  useEffect(() => {
+    if (!isSignedIn || !user) return;
+    setDonor(prev => ({
+      ...prev,
+      firstName: prev.firstName || user.firstName || '',
+      lastName:  prev.lastName  || user.lastName  || '',
+      email:     prev.email     || user.primaryEmailAddress?.emailAddress || '',
+      phone:     prev.phone     || user.primaryPhoneNumber?.phoneNumber  || '',
+    }));
+  }, [isSignedIn, user]);
+
+  // Persist donor to localStorage so next-visit pre-fills work.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try { window.localStorage.setItem('kaff:donor', JSON.stringify(donor)); }
+    catch { /* quota / private-mode etc — ignore */ }
+  }, [donor]);
 
   const [activeFlow, setActiveFlow] = useState<ActiveFlow>(null);
 
@@ -221,6 +255,11 @@ export function App() {
           destination: summary.dest,
           payMethod,
           niyyah: summary.niyyah,
+          donorFirstName: donor.firstName.trim(),
+          donorLastName:  donor.lastName.trim(),
+          donorEmail:     donor.email.trim(),
+          donorPhone:     donor.phone.trim(),
+          donorLineId:    donor.lineId.trim() || undefined,
           // Server picks initial status: 'paid' if a partner handles this flow
           // (Qurban → Ummatee), 'completed' otherwise.
         }),
@@ -328,6 +367,7 @@ export function App() {
         summary={summary}
         payMethod={payMethod} setPayMethod={setPayMethod}
         niyyahConfirmed={niyyahConfirmed} setNiyyahConfirmed={setNiyyahConfirmed}
+        donor={donor} setDonor={setDonor}
         onBack={() => {
           const map: Record<string, Screen> = {
             riba: 'riba-2', zakat: 'zakat-2',

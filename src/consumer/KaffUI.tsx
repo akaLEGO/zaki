@@ -13,6 +13,7 @@ export const Z = {
   ink: '#0E1A14',
   muted: '#6B6B6B',
   line: '#E6DFCF',         // hair — paper-toned borders
+  danger: '#C0392B',       // error red — matches admin AZ.danger
 };
 
 export type ZIconName =
