@@ -5,6 +5,8 @@ import {
 } from './KaffUI';
 import type { ZIconName } from './KaffUI';
 import { amilFee, AMIL_FEE_RATE } from '../lib/fee';
+import { PolicySheet } from './KaffPolicy';
+import type { PolicyKind } from './KaffPolicy';
 
 // Safety guard for beta/testing. VITE_KAFF_TESTING_MODE must be explicitly set
 // to "false" on Vercel to enable real payment flows. Anything else (including
@@ -75,6 +77,7 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
 }) {
   const isDonorComplete = donorComplete(donor);
   const update = (k: keyof Donor, v: string) => setDonor({ ...donor, [k]: v });
+  const [policy, setPolicy] = useState<PolicyKind | null>(null);
   const methods: { id: PayMethod; label: string; sub: string; icon: ZIconName }[] = [
     { id: 'qr', label: 'Thai QR (PromptPay)', sub: 'สแกนผ่านแอปธนาคาร', icon: 'qr' },
     { id: 'bank', label: 'โอนผ่านธนาคาร', sub: 'คัดลอกเลขบัญชี · แนบสลิป', icon: 'bank' },
@@ -143,7 +146,10 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
               placeholder="@kaff หรือ kaff_team"
             />
             <div style={{ fontSize: 11, color: Z.muted, lineHeight: 1.5, marginTop: 2 }}>
-              🔒 ข้อมูลนี้ใช้สำหรับติดตามการบริจาคและส่งใบเสร็จ · เก็บปลอดภัยตาม PDPA
+              🔒 ข้อมูลนี้ใช้สำหรับติดตามการบริจาคและส่งใบเสร็จ · เก็บปลอดภัยตาม{' '}
+              <button onClick={() => setPolicy('privacy')} style={{ color: Z.forest, textDecoration: 'underline', fontWeight: 600 }}>
+                PDPA
+              </button>
             </div>
           </div>
         </div>
@@ -186,8 +192,12 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
           </div>
         </div>
 
-        <div style={{ marginTop: 14, fontSize: 11, color: Z.muted, textAlign: 'center', lineHeight: 1.5 }}>
-          🔒 ปลอดภัย · ตรวจสอบโดยที่ปรึกษาชะรีอะฮ์<br />ใบเสร็จออนไลน์ลดหย่อนภาษีได้
+        <div style={{ marginTop: 14, fontSize: 11, color: Z.muted, textAlign: 'center', lineHeight: 1.55 }}>
+          🔒 ปลอดภัย · ตรวจสอบโดยที่ปรึกษาชะรีอะฮ์ · ใบเสร็จออนไลน์<br />
+          การดำเนินการชำระเงินถือว่าคุณยอมรับ{' '}
+          <button onClick={() => setPolicy('terms')} style={{ color: Z.forest, textDecoration: 'underline', fontWeight: 600 }}>ข้อกำหนด</button>
+          {' '}และ{' '}
+          <button onClick={() => setPolicy('privacy')} style={{ color: Z.forest, textDecoration: 'underline', fontWeight: 600 }}>นโยบายความเป็นส่วนตัว</button>
         </div>
       </div>
 
@@ -203,6 +213,8 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
               : <>ดำเนินการชำระเงิน <Icon name="arrowRight" size={20} /></>}
         </GoldButton>
       </StickyBottom>
+
+      <PolicySheet kind={policy} onClose={() => setPolicy(null)} />
     </div>
   );
 }
@@ -419,12 +431,19 @@ export function BankTransfer({ amount, onBack, onConfirm }: { amount: number; on
     setCopied(key);
     setTimeout(() => setCopied(null), 1500);
   };
-  const fields: { key: string; label: string; value: string; big?: boolean }[] = [
-    { key: 'bank', label: 'ธนาคาร', value: 'SCB · ไทยพาณิชย์' },
-    { key: 'name', label: 'ชื่อบัญชี', value: 'มูลนิธิ Kaff Foundation' },
-    { key: 'no', label: 'เลขที่บัญชี', value: '407-298-8472' },
-    { key: 'amt', label: 'จำนวนเงิน', value: '฿' + amount.toLocaleString(), big: true },
-  ];
+  const fields: { key: string; label: string; value: string; big?: boolean }[] = IS_TESTING_MODE
+    ? [
+        { key: 'bank', label: 'ธนาคาร',     value: '—' },
+        { key: 'name', label: 'ชื่อบัญชี',   value: 'ระบบทดสอบ — ห้ามโอน' },
+        { key: 'no',   label: 'เลขที่บัญชี', value: 'XXX-XXX-XXXX (ทดสอบ)' },
+        { key: 'amt',  label: 'จำนวนเงิน',   value: '฿' + amount.toLocaleString(), big: true },
+      ]
+    : [
+        { key: 'bank', label: 'ธนาคาร',     value: 'SCB · ไทยพาณิชย์' },
+        { key: 'name', label: 'ชื่อบัญชี',   value: 'มูลนิธิ Kaff Foundation' },
+        { key: 'no',   label: 'เลขที่บัญชี', value: '407-298-8472' },
+        { key: 'amt',  label: 'จำนวนเงิน',   value: '฿' + amount.toLocaleString(), big: true },
+      ];
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
       <ForestHeader onBack={onBack} title="โอนผ่านธนาคาร" sub="คัดลอกแล้วเปิดแอปธนาคารของคุณ" compact />
