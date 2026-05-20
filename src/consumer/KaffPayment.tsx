@@ -192,7 +192,15 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
           </div>
         </div>
 
-        <div style={{ marginTop: 14, fontSize: 11, color: Z.muted, textAlign: 'center', lineHeight: 1.55 }}>
+        <div style={{
+          marginTop: 14, padding: '12px 14px',
+          background: '#FBF6E4', border: `1px solid ${Z.goldSoft}`,
+          borderRadius: 12, fontSize: 11.5, color: '#5a4400', lineHeight: 1.55,
+        }}>
+          ⚖️ <b>การปฏิบัติตามกฎหมาย</b> — Kaff ปฏิบัติตามพระราชบัญญัติป้องกันและปราบปรามการฟอกเงิน (AMLA) ข้อมูลที่ท่านกรอกอาจถูกตรวจสอบหรือส่งต่อหน่วยงานราชการ (ปปง./สรรพากร) ตามกฎหมายกำหนด · ระหว่าง beta จำกัด ฿5,000/รายการ และ ฿20,000/30วัน/ผู้บริจาค
+        </div>
+
+        <div style={{ marginTop: 10, fontSize: 11, color: Z.muted, textAlign: 'center', lineHeight: 1.55 }}>
           🔒 ปลอดภัย · ตรวจสอบโดยที่ปรึกษาชะรีอะฮ์ · ใบเสร็จออนไลน์<br />
           การดำเนินการชำระเงินถือว่าคุณยอมรับ{' '}
           <button onClick={() => setPolicy('terms')} style={{ color: Z.forest, textDecoration: 'underline', fontWeight: 600 }}>ข้อกำหนด</button>

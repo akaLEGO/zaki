@@ -109,6 +109,9 @@ Run these in order in the Neon SQL Editor. Idempotent — safe to re-run.
 
 5. `db/003_amil_fee.sql` — adds the `fee_amount` column
 6. `db/004_partners.sql` — partners table, donation_events table, expanded donations.status state machine
+7. `db/005_donor_info.sql` — donor contact columns
+8. `db/006_is_test_flag.sql` — `is_test` column + backfill existing rows as test
+9. `db/007_aml_phase_a.sql` — `donor_ip`, `donor_ua`, `risk_tier` columns + backfill tier by amount
 
 ## 8 · Project layout
 
@@ -226,7 +229,7 @@ Run these in order in the Neon SQL Editor. Idempotent — safe to re-run.
   3. Update bank account constants in `src/consumer/KaffPayment.tsx` (BankTransfer fields `bank`, `name`, `no`)
   4. Set Vercel env: `VITE_KAFF_TESTING_MODE=false`
   5. Redeploy → red "DO NOT PAY" banner disappears
-- **AML/CTF compliance (Phase A–D):** transaction caps, IP logging, Thai ID + occupation on Tier 2 donations, ID-photo upload + source-of-funds on Tier 3, AMLO reporting. Required before scaling beyond closed beta. Consult Thai AML lawyer first (~฿15-30k retainer).
+- **AML Phase A — DONE.** /api/donations enforces ฿5,000/donation + ฿20,000/30days/donor caps on real donations (test rows exempt so beta flow still works). Logs donor_ip + donor_ua + auto-tags risk_tier (low/medium/high/enhanced) by amount. Checkout shows an AML disclaimer card with the cap thresholds. **Run `db/007_aml_phase_a.sql` on Neon before deploying.** Phase B-D (Thai ID + occupation + ID-photo upload + source-of-funds + AMLO reporting) still pending — consult Thai AML lawyer first (~฿15-30k retainer).
 - **Phase 2c:** Slip2Go (or alternative) auto-verification of bank slips.
 - **Phase 3 — admin screens:** DONE. All four wired (Rates, Transactions, Shariah Board, Roles & Audit). New endpoints: `/api/audit-log`, `/api/admin-users`, `/api/kaffarah-types/[id]` (PATCH).
 - **Phase 4 — partner fulfillment:** DONE (UI/API). State machine `pending → paid → awaiting_partner → partner_confirmed → completed` (or `partner_rejected → refunded`). Admin Transactions row → drawer with workflow buttons + timeline. Partners managed at OPERATIONS → Partners. **Run `db/004_partners.sql` on Neon before deploying.**
