@@ -7,6 +7,7 @@ import { validate } from './_lib/validate.js';
 import { cors } from './_lib/cors.js';
 import { rateLimit } from './_lib/ratelimit.js';
 import { amilFee } from './_lib/fee.js';
+import { sendDonationReceipt } from './_lib/email.js';
 
 const FLOWS = ['riba','zakat','fitrah','fidyah','kaffarah','qurban','sadaqah'] as const;
 const METHODS = ['qr','bank','usdc'] as const;
@@ -113,6 +114,27 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
               ${partnerId ? `auto-assigned to partner ${partnerId}` : null})
     `;
     await audit(req, 'donations.create', String((row as { ref: string }).ref), auth?.userId ?? null, { ...b, partnerId, initialStatus });
+
+    // Fire-and-forget the receipt email. Errors here MUST NOT bubble up — the
+    // donation is already committed, the donor's flow shouldn't fail just
+    // because Resend hiccuped or env vars are missing.
+    const r = row as Record<string, unknown>;
+    void sendDonationReceipt({
+      ref: String(r.ref),
+      amount: Number(r.amount),
+      flow: String(r.flow),
+      destination: (r.destination as string | null) ?? null,
+      niyyah: (r.niyyah as string | null) ?? null,
+      donorFirstName: String(r.donorFirstName ?? ''),
+      donorLastName:  String(r.donorLastName ?? ''),
+      donorEmail:     String(r.donorEmail ?? ''),
+      payMethod:      (r.payMethod as string | null) ?? null,
+      isTest:         Boolean(r.isTest),
+      createdAt:      String(r.createdAt ?? ''),
+    }).then(result => {
+      if (!result.sent) console.warn('receipt email skipped:', result.reason);
+    }).catch(e => console.error('receipt email failed:', e));
+
     return res.status(201).json(row);
   }
   res.setHeader('Allow', 'GET, POST');

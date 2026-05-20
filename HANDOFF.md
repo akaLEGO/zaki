@@ -43,6 +43,11 @@ PROMPTPAY_ID=
 # to a non-scannable placeholder if unset. Must be a 0x… 40-hex address.
 KAFF_BASE_WALLET=
 
+# Resend — sends a branded receipt email after every donation. Both must be
+# set or no email goes out. From-address domain must be verified at resend.com.
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=Kaff <hello@kaff.me>
+
 # Testing mode banner — set to "false" ONLY when ready to accept real
 # payments (real PROMPTPAY_ID + real bank account number in BankTransfer
 # screen). Anything else keeps the red "DO NOT PAY" banner visible.
