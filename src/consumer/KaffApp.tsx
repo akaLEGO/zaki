@@ -16,6 +16,7 @@ import {
 import type { ZakatValues, CompulsorySub, KaffType, QurbanAnimal } from './KaffServices';
 import {
   CheckoutScreen, QRPayment, BankTransfer, BaseUSDCPayment, SuccessScreen,
+  IS_TESTING_MODE,
 } from './KaffPayment';
 import type { PayMethod, Summary, Donor } from './KaffPayment';
 import type { AsnafId } from '../shared/types';
@@ -271,6 +272,9 @@ export function App() {
           donorEmail:     donor.email.trim(),
           donorPhone:     donor.phone.trim(),
           donorLineId:    donor.lineId.trim() || undefined,
+          // Tag this row as test so admin can filter/purge before going live.
+          // Flips off when VITE_KAFF_TESTING_MODE=false is set on Vercel.
+          isTest: IS_TESTING_MODE,
           // Server picks initial status: 'paid' if a partner handles this flow
           // (Qurban → Ummatee), 'completed' otherwise.
         }),

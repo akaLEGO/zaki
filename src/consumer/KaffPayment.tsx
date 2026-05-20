@@ -13,7 +13,7 @@ import type { PolicyKind } from './KaffPolicy';
 // missing env) keeps the app in testing mode — UI shows a big "DO NOT PAY"
 // banner on the QR + bank screens so beta testers don't accidentally send
 // money to the placeholder PromptPay number (which is not ours).
-const IS_TESTING_MODE =
+export const IS_TESTING_MODE =
   (import.meta.env.VITE_KAFF_TESTING_MODE as string | undefined) !== 'false';
 
 function TestingBanner() {

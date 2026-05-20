@@ -32,6 +32,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
              donor_email      AS "donorEmail",
              donor_phone      AS "donorPhone",
              donor_line_id    AS "donorLineId",
+             is_test AS "isTest",
              to_char(created_at, 'DD Mon YYYY HH24:MI') AS "createdAt"
       FROM donations
       ORDER BY created_at DESC
@@ -55,6 +56,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
       donorEmail:     { type: 'string', required: true, max: 200, pattern: /^[^@\s]+@[^@\s]+\.[^@\s]+$/ },
       donorPhone:     { type: 'string', required: true, min: 6, max: 30 },
       donorLineId:    { type: 'string', max: 100 },
+      isTest:         { type: 'bool' },
     });
     if (!v.ok) return res.status(400).json({ error: v.error });
     const b = v.value as Record<string, unknown>;
@@ -78,7 +80,8 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
       INSERT INTO donations (
         ref, user_id, flow, amount, fee_amount, destination, pay_method,
         status, niyyah, partner_id,
-        donor_first_name, donor_last_name, donor_email, donor_phone, donor_line_id
+        donor_first_name, donor_last_name, donor_email, donor_phone, donor_line_id,
+        is_test
       )
       VALUES (
         ${newRef()}, ${auth?.userId || null}, ${flow}, ${amount}, ${fee},
@@ -87,7 +90,8 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
         ${partnerId ?? null},
         ${b.donorFirstName as string}, ${b.donorLastName as string},
         ${b.donorEmail as string}, ${b.donorPhone as string},
-        ${(b.donorLineId as string) ?? null}
+        ${(b.donorLineId as string) ?? null},
+        ${!!b.isTest}
       )
       RETURNING id, ref, flow, amount, fee_amount AS "feeAmount", destination,
                 pay_method AS "payMethod", status, niyyah,
@@ -97,6 +101,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
                 donor_email      AS "donorEmail",
                 donor_phone      AS "donorPhone",
                 donor_line_id    AS "donorLineId",
+                is_test AS "isTest",
                 to_char(created_at, 'DD Mon YYYY HH24:MI') AS "createdAt"
     `;
     // Seed donation_events with the initial state so the admin timeline starts

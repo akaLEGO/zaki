@@ -29,6 +29,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
            donor_email      AS "donorEmail",
            donor_phone      AS "donorPhone",
            donor_line_id    AS "donorLineId",
+           is_test AS "isTest",
            to_char(partner_notified_at,   'DD Mon YYYY HH24:MI') AS "partnerNotifiedAt",
            to_char(partner_confirmed_at,  'DD Mon YYYY HH24:MI') AS "partnerConfirmedAt",
            to_char(customer_confirmed_at, 'DD Mon YYYY HH24:MI') AS "customerConfirmedAt",

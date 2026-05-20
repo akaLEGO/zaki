@@ -1159,6 +1159,7 @@ interface DonationRow {
   donorEmail: string | null;
   donorPhone: string | null;
   donorLineId: string | null;
+  isTest: boolean;
   createdAt: string;
 }
 
@@ -1201,6 +1202,7 @@ export function AdminTransactions() {
   const [q, setQ] = useState('');
   const [flow, setFlow] = useState<'all' | DonationFlow>('all');
   const [status, setStatus] = useState<'all' | DonationStatus>('all');
+  const [mode, setMode] = useState<'real' | 'test' | 'all'>('real');
   const [openId, setOpenId] = useState<number | null>(null);
 
   const load = async () => {
@@ -1217,12 +1219,17 @@ export function AdminTransactions() {
   useEffect(() => { void load(); }, []);
 
   const filtered = useMemo(() => (rows || []).filter(r => {
+    if (mode === 'real' && r.isTest) return false;
+    if (mode === 'test' && !r.isTest) return false;
     if (flow !== 'all' && r.flow !== flow) return false;
     if (status !== 'all' && r.status !== status) return false;
     if (q && !r.ref.toLowerCase().includes(q.toLowerCase()) &&
         !(r.destination || '').toLowerCase().includes(q.toLowerCase())) return false;
     return true;
-  }), [rows, flow, status, q]);
+  }), [rows, mode, flow, status, q]);
+
+  const testCount = (rows || []).filter(r => r.isTest).length;
+  const realCount = (rows || []).filter(r => !r.isTest).length;
 
   const totalAmount = filtered.reduce((s, r) => s + r.amount, 0);
   const totalFee = filtered.reduce((s, r) => s + r.feeAmount, 0);
@@ -1267,6 +1274,29 @@ export function AdminTransactions() {
             style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', height: 36, fontSize: 13.5, color: AZ.ink }}
           />
         </div>
+        <div style={{ display: 'flex', gap: 4, background: AZ.surface, padding: 4, borderRadius: 8 }}>
+          {([
+            { id: 'real' as const, label: 'จริง', count: realCount },
+            { id: 'test' as const, label: 'ทดสอบ', count: testCount },
+            { id: 'all'  as const, label: 'ทั้งหมด', count: rows?.length ?? 0 },
+          ]).map(m => {
+            const on = mode === m.id;
+            return (
+              <button key={m.id} onClick={() => setMode(m.id)} style={{
+                padding: '6px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+                color: on ? '#fff' : AZ.muted,
+                background: on ? (m.id === 'test' ? AZ.danger : AZ.forest) : 'transparent',
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+              }}>
+                {m.label}
+                <span style={{
+                  fontSize: 10, padding: '1px 5px', borderRadius: 999,
+                  background: on ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.06)',
+                }}>{m.count}</span>
+              </button>
+            );
+          })}
+        </div>
         <div style={{ display: 'flex', gap: 4, background: AZ.surface, padding: 4, borderRadius: 8, flexWrap: 'wrap' }}>
           {(['all','riba','zakat','fitrah','fidyah','kaffarah','qurban','sadaqah'] as const).map(f => (
             <button key={f} onClick={() => setFlow(f)} style={{
@@ -1306,7 +1336,16 @@ export function AdminTransactions() {
                   onMouseLeave={e => { (e.currentTarget as HTMLTableRowElement).style.background = 'transparent'; }}
                 >
                   <Td>
-                    <div style={{ fontSize: 12.5, fontWeight: 700, fontVariantNumeric: 'tabular-nums', fontFamily: 'Geist Mono, monospace' }}>{r.ref}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ fontSize: 12.5, fontWeight: 700, fontVariantNumeric: 'tabular-nums', fontFamily: 'Geist Mono, monospace' }}>{r.ref}</div>
+                      {r.isTest && (
+                        <span style={{
+                          fontSize: 9, padding: '1px 5px', borderRadius: 3,
+                          background: AZ.danger, color: '#fff',
+                          fontWeight: 800, letterSpacing: '0.05em',
+                        }}>TEST</span>
+                      )}
+                    </div>
                     {r.userId && <div style={{ fontSize: 10.5, color: AZ.mutedLite }}>{r.userId.slice(0, 14)}…</div>}
                   </Td>
                   <Td>
