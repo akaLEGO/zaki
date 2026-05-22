@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import {
   ClerkProvider, SignedIn, SignedOut, SignIn,
 } from '@clerk/clerk-react';
+import { Analytics } from '@vercel/analytics/react';
 import { AdminApp } from './AdminApp';
 import { DataProvider } from '../lib/data-context';
 import { ClerkTokenBridge } from '../lib/clerk-token-bridge';
@@ -52,6 +53,7 @@ if (root) {
             <AdminApp />
           </DataProvider>
         </SignedIn>
+        <Analytics />
       </ClerkProvider>,
     );
   }

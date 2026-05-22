@@ -112,6 +112,7 @@ Run these in order in the Neon SQL Editor. Idempotent — safe to re-run.
 7. `db/005_donor_info.sql` — donor contact columns
 8. `db/006_is_test_flag.sql` — `is_test` column + backfill existing rows as test
 9. `db/007_aml_phase_a.sql` — `donor_ip`, `donor_ua`, `risk_tier` columns + backfill tier by amount
+10. `db/008_funnel_events.sql` — `donations.phase` column + new `funnel_events` table for visitor-level analytics
 
 ## 8 · Project layout
 

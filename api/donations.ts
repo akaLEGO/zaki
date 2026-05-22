@@ -133,13 +133,14 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
     const ip = clientIp(req);
     const ua = (req.headers['user-agent'] as string | undefined) ?? null;
     const tier = riskTier(amount);
+    const phase = process.env.KAFF_PHASE || 'closed_beta';
 
     const [row] = await sql`
       INSERT INTO donations (
         ref, user_id, flow, amount, fee_amount, destination, pay_method,
         status, niyyah, partner_id,
         donor_first_name, donor_last_name, donor_email, donor_phone, donor_line_id,
-        is_test, donor_ip, donor_ua, risk_tier
+        is_test, donor_ip, donor_ua, risk_tier, phase
       )
       VALUES (
         ${newRef()}, ${auth?.userId || null}, ${flow}, ${amount}, ${fee},
@@ -149,7 +150,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
         ${b.donorFirstName as string}, ${b.donorLastName as string},
         ${b.donorEmail as string}, ${b.donorPhone as string},
         ${(b.donorLineId as string) ?? null},
-        ${isTest}, ${ip}, ${ua}, ${tier}
+        ${isTest}, ${ip}, ${ua}, ${tier}, ${phase}
       )
       RETURNING id, ref, flow, amount, fee_amount AS "feeAmount", destination,
                 pay_method AS "payMethod", status, niyyah,

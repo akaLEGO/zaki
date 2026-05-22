@@ -24,6 +24,7 @@ import type { Tab } from './KaffUI';
 import { TweaksPanel, TweakSection, TweakRadio, useTweaks } from './TweaksPanel';
 import { useData } from '../lib/data-context';
 import { apiFetch } from '../lib/api';
+import { track } from '../lib/funnel';
 
 type Screen =
   | 'home' | 'history' | 'profile' | 'faq'
@@ -76,6 +77,14 @@ export function App() {
   });
 
   const [screen, setScreen] = useState<Screen>('home');
+
+  // Funnel tracking — every screen change is a page_view with flow context.
+  // Fire-and-forget; the funnel module debounces a batch to /api/events.
+  useEffect(() => {
+    track('page_view', { step: screen, flow: activeFlow ?? undefined });
+    if (screen === 'checkout') track('checkout_viewed', { flow: activeFlow ?? undefined });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen]);
   const [tab, setTab] = useState<Tab>('home');
 
   const [ribaAmount, setRibaAmount] = useState(350);
@@ -250,14 +259,25 @@ export function App() {
 
   const goHome = () => { setScreen('home'); setTab('home'); setNiyyahConfirmed(false); setActiveFlow(null); };
   const goCheckout = (flow: ActiveFlow) => { setActiveFlow(flow); setNiyyahConfirmed(false); setScreen('checkout'); };
-  const goPay = () => setScreen(
-    payMethod === 'bank' ? 'pay-bank' :
-    payMethod === 'usdc' ? 'pay-usdc' :
-    'pay-qr'
-  );
+  const goPay = () => {
+    track('donation_started', {
+      flow: activeFlow ?? undefined,
+      meta: { payMethod, amount: summary.amount },
+    });
+    track('payment_method_chosen', { meta: { payMethod } });
+    setScreen(
+      payMethod === 'bank' ? 'pay-bank' :
+      payMethod === 'usdc' ? 'pay-usdc' :
+      'pay-qr'
+    );
+  };
 
   const recordDonation = async () => {
     if (!activeFlow) return;
+    track('donation_completed', {
+      flow: activeFlow,
+      meta: { payMethod, amount: summary.amount, isTest: IS_TESTING_MODE },
+    });
     try {
       await apiFetch('/api/donations', {
         method: 'POST',
@@ -293,6 +313,7 @@ export function App() {
   };
 
   const openService = (s: ServiceId) => {
+    track('service_picked', { flow: s, step: 'home' });
     if (s === 'riba') setScreen('riba-1');
     else if (s === 'zakat') setScreen('zakat-1');
     else if (s === 'compulsory') setScreen('compulsory');
