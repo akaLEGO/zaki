@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Z, Icon, ForestHeader, BottomNav } from './KaffUI';
 import type { Tab, ZIconName } from './KaffUI';
+import { DISPLAY_VERSION } from '../lib/version';
 
 interface FaqItem { q: string; a: string }
 interface FaqGroup { id: string; title: string; icon: ZIconName; color: string; qs: FaqItem[] }
@@ -206,6 +207,13 @@ export function FAQScreen({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void })
               ถามชะรีอะฮ์
             </button>
           </div>
+        </div>
+
+        <div style={{
+          marginTop: 20, marginBottom: 80, textAlign: 'center',
+          fontSize: 11, color: Z.muted, letterSpacing: '0.04em',
+        }}>
+          Kaff · {DISPLAY_VERSION}
         </div>
       </div>
 

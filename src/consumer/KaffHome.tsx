@@ -5,6 +5,7 @@ import {
 } from './KaffUI';
 import type { Tab, ZIconName } from './KaffUI';
 import { apiFetch } from '../lib/api';
+import { DISPLAY_VERSION } from '../lib/version';
 
 export type ServiceId = 'riba' | 'zakat' | 'compulsory' | 'qurban' | 'sadaqah';
 
@@ -495,6 +496,13 @@ export function ProfileScreen({ tab, onTab, onHistory }: { tab: Tab; onTab: (t: 
               <div style={{ color: Z.muted, transform: 'rotate(-90deg)' }}><Icon name="chevDown" size={16} /></div>
             </button>
           ))}
+        </div>
+
+        <div style={{
+          marginTop: 20, marginBottom: 80, textAlign: 'center',
+          fontSize: 11, color: Z.muted, letterSpacing: '0.04em',
+        }}>
+          Kaff · {DISPLAY_VERSION}
         </div>
       </div>
 

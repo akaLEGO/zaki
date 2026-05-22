@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AZ, AIcon } from './AdminUI';
 import type { IconName } from './AdminUI';
 import { ChromeWindow } from './BrowserWindow';
+import { DISPLAY_VERSION } from '../lib/version';
 import {
   AdminDashboard, AdminCampaigns, AdminOrgs,
   AdminTransactions, AdminShariah, AdminRates, AdminAudit,
@@ -146,6 +147,13 @@ function Sidebar({ screen, setScreen }: { screen: ScreenId; setScreen: (s: Scree
           color: 'rgba(255,255,255,0.5)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}><AIcon name="chev" size={14} color="rgba(255,255,255,0.5)" /></button>
+      </div>
+      <div style={{
+        padding: '8px 14px 12px',
+        fontSize: 10, color: 'rgba(255,255,255,0.35)',
+        letterSpacing: '0.06em', textAlign: 'center',
+      }}>
+        Kaff Admin · {DISPLAY_VERSION}
       </div>
     </div>
   );
