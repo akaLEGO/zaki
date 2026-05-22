@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         index: resolve(__dirname, 'index.html'),
         admin: resolve(__dirname, 'admin.html'),
+        liff:  resolve(__dirname, 'liff.html'),
       },
     },
   },

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<title>Kaff — บริจาคใน LINE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0D3B2E" />
+<meta name="description" content="Kaff — Be the Upper Hand. Islamic Finance OS for Thai Muslims." />
+<link rel="icon" type="image/svg+xml" href="/kaff-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    background: #F5F1E8;
+    font-family: 'Manrope', 'Sarabun', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+    color: #0E1A14;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  * { box-sizing: border-box; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; padding: 0; color: inherit; }
+  input { font-family: inherit; }
+
+  /* LIFF runs inside the LINE app, so we always want full-screen — no
+     "design preview" mode, no iPhone frame. The .app-canvas is bounded to
+     480px so it still looks ok if someone opens the LIFF URL on desktop. */
+  .liff-stage {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: #F5F1E8;
+    display: flex;
+    justify-content: center;
+  }
+  .liff-stage > .app-canvas {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: #F5F1E8;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Loading splash while LIFF SDK initializes. */
+  .liff-splash {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px;
+    background: #0D3B2E; color: #fff;
+    font-family: 'Manrope', system-ui, sans-serif;
+  }
+  .liff-splash .glyph {
+    width: 60px; height: 60px; border-radius: 16px;
+    background: #D4AF37; color: #0D3B2E;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 38px; font-weight: 600;
+  }
+  .liff-splash .label { font-size: 13px; color: rgba(255,255,255,0.7); letter-spacing: 0.06em; }
+</style>
+</head>
+<body>
+  <div id="root">
+    <div class="liff-splash">
+      <div class="glyph">ك</div>
+      <div class="label">กำลังเชื่อมต่อ LINE…</div>
+    </div>
+  </div>
+  <script type="module" src="/src/liff/main.tsx"></script>
+</body>
+</html>
