@@ -13,7 +13,11 @@ type EventName =
   | 'donation_started'
   | 'donation_completed'
   | 'policy_viewed'
-  | 'sign_in_started';
+  | 'sign_in_started'
+  | 'tip_shown'
+  | 'tip_selected'
+  | 'tip_skipped'
+  | 'tip_completed';
 
 interface FunnelEvent {
   sessionId: string;

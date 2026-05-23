@@ -4,9 +4,12 @@ import {
   Z, Icon, GoldButton, ForestHeader, StickyBottom, NiyyahBox, KaffMark, fmtTHB,
 } from './KaffUI';
 import type { ZIconName } from './KaffUI';
-import { amilFee, AMIL_FEE_RATE } from '../lib/fee';
+// Fee imports kept commented for future re-introduction if policy changes.
+// Tipping model = 100% to recipient, no Kaff fee.
 import { PolicySheet } from './KaffPolicy';
 import type { PolicyKind } from './KaffPolicy';
+import { apiFetch } from '../lib/api';
+import { track } from '../lib/funnel';
 
 // Safety guard for beta/testing. VITE_KAFF_TESTING_MODE must be explicitly set
 // to "false" on Vercel to enable real payment flows. Anything else (including
@@ -272,32 +275,16 @@ function Row({ label, value, sub, valueColor }: { label: string; value: ReactNod
   );
 }
 
-// Flow-aware fee breakdown.
-// Riba: org absorbs the 5%; donor pays gross, no Kaff cut.
-// Zakat / Fitrah / Fidyah / Kaffarah / Qurban / Sadaqah: Kaff takes 5% as Amil
-// (one of the 8 Asnaf), recipient gets 95%.
-function FeeRows({ flow, amount }: { flow: string; amount: number }) {
-  const rate = AMIL_FEE_RATE[flow] ?? 0;
-  if (rate === 0) {
-    return <Row label="ค่าธรรมเนียม" value="฿0" sub="(องค์กรปลายทางชำระค่าธรรมเนียม 5% จากยอด Riba)" valueColor={Z.sage} />;
-  }
-  const fee = amilFee(flow, amount);
-  const net = amount - fee;
+// Tipping-model fee breakdown: 100% always goes to the recipient. Kaff
+// takes nothing; it's sustained by voluntary tips on the success screen.
+function FeeRows({ flow: _flow, amount }: { flow: string; amount: number }) {
   return (
-    <>
-      <Row
-        label="ผู้รับ"
-        value={fmtTHB(net)}
-        sub={`95% ของยอดบริจาค`}
-        valueColor={Z.ink}
-      />
-      <Row
-        label="ค่าใช้จ่ายอามิล"
-        value={fmtTHB(fee)}
-        sub="5% · ทีม Kaff ในฐานะ Amil (1 ใน 8 อัศนาฟ)"
-        valueColor={Z.gold}
-      />
-    </>
+    <Row
+      label="ผู้รับ"
+      value={fmtTHB(amount)}
+      sub="100% ของยอดบริจาค"
+      valueColor={Z.sage}
+    />
   );
 }
 
@@ -814,6 +801,8 @@ export function SuccessScreen({ summary, donor, onHome }: { summary: Summary; do
           </div>
         </div>
 
+        <TipSection donor={donor} isTest={IS_TESTING_MODE} parentFlow={summary.flow} />
+
         <div style={{
           marginTop: 16, padding: 14, textAlign: 'center',
           fontSize: 13, color: Z.muted, fontStyle: 'italic', lineHeight: 1.55,
@@ -835,6 +824,217 @@ export function SuccessScreen({ summary, donor, onHome }: { summary: Summary; do
       </StickyBottom>
 
       <PolicySheet kind={policy} onClose={() => setPolicy(null)} />
+    </div>
+  );
+}
+
+// ─── TipSection (voluntary support for Kaff) ────────────────────────────────
+// Shown on the success screen, AFTER the share buttons, BEFORE the home CTA.
+// 100% of the donation already went to the NGO/partner; this is the donor's
+// optional way to keep Kaff running. Hard rules from product spec:
+//   - no "tip" in the copy (use "สนับสนุน Kaff" / "ขอบคุณ Kaff")
+//   - no default selection
+//   - no forced popup
+//   - skip ("ครั้งหน้า") always visible
+//
+// Stages:
+//   pick → user chooses amount or skips
+//   pay  → inline QR scanned by donor in their bank app
+//   done → thank-you state (replaces the section)
+
+const TIP_PRESETS = [20, 50, 100] as const;
+
+function TipSection({ donor, isTest, parentFlow }: {
+  donor?: Donor;
+  isTest: boolean;
+  parentFlow: string;
+}) {
+  const [stage, setStage] = useState<'pick' | 'pay' | 'done'>('pick');
+  const [amount, setAmount] = useState<number | null>(null);
+  const [custom, setCustom] = useState('');
+  const [showCustom, setShowCustom] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  // Fire tip_shown once when the section mounts.
+  useEffect(() => {
+    track('tip_shown', { flow: parentFlow });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const pickAmount = (a: number) => {
+    setAmount(a);
+    setShowCustom(false);
+    setStage('pay');
+    track('tip_selected', { flow: parentFlow, meta: { amount: a, source: 'preset' } });
+  };
+
+  const confirmCustom = () => {
+    const n = Math.round(Number(custom));
+    if (!Number.isFinite(n) || n < 1 || n > 100_000) return;
+    setAmount(n);
+    setShowCustom(false);
+    setStage('pay');
+    track('tip_selected', { flow: parentFlow, meta: { amount: n, source: 'custom' } });
+  };
+
+  const skip = () => {
+    track('tip_skipped', { flow: parentFlow });
+    setStage('done');
+  };
+
+  const recordTip = async () => {
+    if (!amount) return;
+    setBusy(true);
+    try {
+      await apiFetch('/api/donations', {
+        method: 'POST',
+        body: JSON.stringify({
+          flow: 'tip',
+          amount,
+          destination: 'Kaff Foundation (สนับสนุนระบบ)',
+          payMethod: 'qr',
+          niyyah: 'สนับสนุนการดำเนินงานของ Kaff',
+          donorFirstName: donor?.firstName?.trim() || '',
+          donorLastName:  donor?.lastName?.trim()  || '',
+          donorEmail:     donor?.email?.trim()     || '',
+          donorPhone:     donor?.phone?.trim()     || '',
+          donorLineId:    donor?.lineId?.trim()    || undefined,
+          isTest,
+        }),
+      });
+      track('tip_completed', { flow: parentFlow, meta: { amount } });
+      setStage('done');
+    } catch (e) {
+      console.error('tip save failed', e);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (stage === 'done') {
+    return (
+      <div style={{
+        marginTop: 16, padding: '20px 16px',
+        background: '#FBF6E4', border: `1.5px solid ${Z.goldSoft}`,
+        borderRadius: 16, textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 22 }}>🙏</div>
+        <div style={{ marginTop: 6, fontSize: 14, fontWeight: 700, color: '#3d2c08' }}>
+          ขอบคุณที่สนับสนุน Kaff
+        </div>
+        <div style={{ marginTop: 4, fontSize: 12, color: '#5a4400' }}>
+          ความเมตตาของคุณช่วยให้ Kaff ฟรี 100% สำหรับทุกคน
+        </div>
+      </div>
+    );
+  }
+
+  if (stage === 'pay' && amount !== null) {
+    return (
+      <div style={{
+        marginTop: 16, padding: 18,
+        background: '#fff', border: `1.5px solid ${Z.line}`,
+        borderRadius: 18,
+      }}>
+        <div style={{ fontSize: 13, color: Z.muted, fontWeight: 600 }}>สนับสนุน Kaff</div>
+        <div style={{ fontSize: 28, fontWeight: 800, color: Z.forest, letterSpacing: '-0.01em', marginTop: 2 }}>
+          {fmtTHB(amount)}
+        </div>
+        <div style={{ marginTop: 6, fontSize: 12, color: Z.muted, lineHeight: 1.5 }}>
+          สแกน QR ด้วยแอปธนาคารใดก็ได้ — เงินไปบัญชี Kaff Foundation โดยตรง (แยกจากบัญชี NGO ปลายทาง)
+        </div>
+        <div style={{ marginTop: 14, display: 'flex', justifyContent: 'center' }}>
+          <img
+            src={`/api/promptpay/qr?to=kaff&amount=${encodeURIComponent(amount)}`}
+            alt={`Tip ${amount} QR`}
+            width={180} height={180}
+            style={{ borderRadius: 6 }}
+          />
+        </div>
+        <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
+          <button onClick={() => { setStage('pick'); setAmount(null); }} style={{
+            flex: 1, padding: '11px 14px', borderRadius: 12,
+            background: 'transparent', color: Z.muted, fontWeight: 600, fontSize: 13,
+            border: `1px solid ${Z.line}`,
+          }}>ยกเลิก</button>
+          <button onClick={recordTip} disabled={busy} style={{
+            flex: 2, padding: '11px 14px', borderRadius: 12,
+            background: busy ? '#9aa39e' : Z.forest, color: '#fff',
+            fontWeight: 700, fontSize: 13.5,
+          }}>
+            {busy ? 'กำลังบันทึก…' : isTest ? 'ทดสอบ flow' : 'ฉันสนับสนุนแล้ว'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // stage === 'pick'
+  return (
+    <div style={{
+      marginTop: 16, padding: '18px 16px',
+      background: '#fff', border: `1.5px solid ${Z.line}`,
+      borderRadius: 16,
+    }}>
+      <div style={{ textAlign: 'center', fontSize: 15, fontWeight: 700, color: Z.ink }}>
+        ขอบคุณที่ใช้ Kaff ❤️
+      </div>
+      <div style={{ marginTop: 6, textAlign: 'center', fontSize: 12.5, color: Z.muted, lineHeight: 1.55 }}>
+        Kaff ฟรี 100% สำหรับคุณเสมอ<br />
+        ค่าใช้จ่ายของเรามาจากความเมตตาของผู้ใช้
+      </div>
+
+      <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+        {TIP_PRESETS.map(a => (
+          <button key={a} onClick={() => pickAmount(a)} style={{
+            padding: '12px 8px', borderRadius: 12,
+            background: '#fff', border: `1.5px solid ${Z.line}`,
+            color: Z.forest, fontWeight: 700, fontSize: 15,
+            fontVariantNumeric: 'tabular-nums',
+            transition: 'background .12s, border .12s',
+          }}
+            onMouseDown={e => { (e.currentTarget as HTMLButtonElement).style.background = Z.sageSoft; }}
+            onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.background = '#fff'; }}
+          >฿{a}</button>
+        ))}
+      </div>
+
+      {!showCustom ? (
+        <button onClick={() => setShowCustom(true)} style={{
+          width: '100%', marginTop: 8, padding: '10px',
+          borderRadius: 10, background: 'transparent',
+          color: Z.muted, fontSize: 13, fontWeight: 500,
+          border: `1px dashed ${Z.line}`,
+        }}>กำหนดเอง…</button>
+      ) : (
+        <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
+          <input
+            type="number"
+            autoFocus
+            value={custom}
+            onChange={e => setCustom(e.target.value)}
+            placeholder="ระบุจำนวน (บาท)"
+            style={{
+              flex: 1, height: 40, padding: '0 12px',
+              border: `1.5px solid ${Z.line}`, borderRadius: 10,
+              fontSize: 14, color: Z.ink, outline: 'none',
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          />
+          <button onClick={confirmCustom} disabled={!Number(custom)} style={{
+            padding: '0 14px', borderRadius: 10,
+            background: Number(custom) ? Z.forest : '#E0E0E0',
+            color: Number(custom) ? '#fff' : '#9aa3a0',
+            fontWeight: 700, fontSize: 13,
+          }}>ต่อไป</button>
+        </div>
+      )}
+
+      <button onClick={skip} style={{
+        width: '100%', marginTop: 12, padding: '8px',
+        background: 'transparent', color: Z.muted,
+        fontSize: 12.5, textDecoration: 'underline',
+      }}>ครั้งหน้า</button>
     </div>
   );
 }

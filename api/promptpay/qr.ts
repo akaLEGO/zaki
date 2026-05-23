@@ -5,14 +5,21 @@ import { withErrors } from '../_lib/handler.js';
 import { cors } from '../_lib/cors.js';
 import { rateLimit } from '../_lib/ratelimit.js';
 
-// GET /api/promptpay/qr?amount=120
+// GET /api/promptpay/qr?amount=120&to=ngo|kaff   (to defaults to ngo)
 // Returns an SVG QR that Thai bank apps can scan via PromptPay.
 //
-// SAFETY: PROMPTPAY_ID MUST be set in the environment. If it's missing or
-// equals the well-known sample number 0812345678 (a valid Thai phone format
-// that may be registered to an unknown account), we refuse to generate a
-// real scannable QR. Instead we return a placeholder SVG that says
-// "NOT CONFIGURED" so beta testers can't accidentally pay a stranger.
+// Tipping-model split:
+//   PROMPTPAY_NGO_ID  — recipient organisation (donations land here, 100%)
+//   PROMPTPAY_KAFF_ID — Kaff Foundation (tips land here)
+//
+// Backwards-compat: if PROMPTPAY_NGO_ID isn't set we fall back to the older
+// PROMPTPAY_ID env so existing Vercel projects keep working until env is
+// renamed.
+//
+// SAFETY: if the chosen target isn't set OR equals the well-known sample
+// 0812345678 (a valid Thai phone format that may be registered to an
+// unknown account), we refuse to encode a real PromptPay payload and
+// return a clearly-marked red placeholder SVG instead.
 
 const UNSAFE_PLACEHOLDER = '0812345678';
 
@@ -38,14 +45,22 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
     return res.status(400).json({ error: 'amount required, 1..10000000' });
   }
 
-  const target = process.env.PROMPTPAY_ID;
+  const to = String(req.query.to || 'ngo').toLowerCase();
+  let target: string | undefined;
+  if (to === 'kaff') {
+    target = process.env.PROMPTPAY_KAFF_ID;
+  } else {
+    // 'ngo' (default) — prefer the new var, fall back to the legacy single-account env.
+    target = process.env.PROMPTPAY_NGO_ID || process.env.PROMPTPAY_ID;
+  }
   const isPlaceholder = !target || target === UNSAFE_PLACEHOLDER;
 
   res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
 
   if (isPlaceholder) {
-    return res.send(placeholderSvg(amount, !target ? 'PROMPTPAY_ID unset' : 'sample number blocked'));
+    const envName = to === 'kaff' ? 'PROMPTPAY_KAFF_ID' : 'PROMPTPAY_NGO_ID';
+    return res.send(placeholderSvg(amount, !target ? `${envName} unset` : 'sample number blocked'));
   }
 
   const payload = generatePayload(target, { amount });
