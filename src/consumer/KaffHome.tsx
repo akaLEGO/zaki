@@ -190,56 +190,70 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
         </div>
       </div>
 
-      {homeLayout === 'stacked' && (
-        <div style={{
-          position: 'absolute', top: 110, left: 0, right: 0, bottom: 0,
-          padding: '0 16px',
-        }}>
-          {(() => {
-            // Featured cards get extra vertical peek so the seasonal hook
-            // is fully visible without focus, even when stacked under others.
-            const PEEK_FEATURED = 168;
-            let cursor = 0;
-            return deck.map((s, i) => {
-              const peek = s.featured ? PEEK_FEATURED : PEEK;
-              const top = cursor;
-              const isLast = i === deck.length - 1;
-              const height = isLast ? (s.featured ? FULL + 40 : FULL) : peek + 70;
-              cursor += peek;
-              const isFocused = focused === s.id;
-              return (
-                <button
-                  key={s.id}
-                  onMouseEnter={() => setFocused(s.id)}
-                  onMouseLeave={() => setFocused(null)}
-                  onClick={() => onService(s.id)}
-                  style={{
-                    position: 'absolute',
-                    left: 16, right: 16,
-                    top: top + (isFocused ? -10 : 0),
-                    height,
-                    background: s.bg, color: s.fg,
-                    borderRadius: 26,
-                    padding: '16px 22px 20px',
-                    textAlign: 'left',
-                    boxShadow: isFocused
-                      ? `0 -2px 0 rgba(255,255,255,0.04) inset, 0 22px 38px rgba(13,59,46,0.28)`
-                      : s.featured
-                        ? `0 -2px 0 rgba(255,255,255,0.04) inset, 0 18px 36px rgba(13,59,46,0.24), 0 0 0 1px ${s.accent}30`
-                        : `0 -2px 0 rgba(255,255,255,0.04) inset, 0 12px 24px rgba(13,59,46,0.16)`,
-                    transition: 'top .35s cubic-bezier(.2,.8,.2,1), box-shadow .25s',
-                    overflow: 'hidden',
-                    zIndex: i + 1,
-                    cursor: 'pointer',
-                  }}
-                >
-                  <CardInner s={s} isFocused={isFocused} showCTA={isLast || !!s.featured} />
-                </button>
-              );
-            });
-          })()}
-        </div>
-      )}
+      {homeLayout === 'stacked' && (() => {
+        // Featured cards get a modest extra peek so the seasonal hook is
+        // fully visible without focus. We keep the bump small (+20px) so
+        // the total stack still fits above the BottomNav on small phones.
+        const PEEK_FEATURED = 138;
+        const cards: {
+          s: ServiceDeckItem; top: number; height: number; isLast: boolean;
+        }[] = [];
+        let cursor = 0;
+        deck.forEach((s, i) => {
+          const isLast = i === deck.length - 1;
+          const peek = s.featured ? PEEK_FEATURED : PEEK;
+          const height = isLast ? (s.featured ? FULL + 30 : FULL) : peek + 70;
+          cards.push({ s, top: cursor, height, isLast });
+          cursor += peek;
+        });
+        // Total content height = the farthest card bottom + a small buffer.
+        // Container is scrollable so this works on phones of any height.
+        const totalHeight = Math.max(...cards.map(c => c.top + c.height)) + 16;
+
+        return (
+          <div style={{
+            position: 'absolute', top: 110, left: 0, right: 0, bottom: 78,
+            overflowY: 'auto', overflowX: 'hidden',
+            padding: '0 16px',
+            WebkitOverflowScrolling: 'touch',
+          }}>
+            <div style={{ position: 'relative', minHeight: totalHeight }}>
+              {cards.map(({ s, top, height, isLast }, i) => {
+                const isFocused = focused === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    onMouseEnter={() => setFocused(s.id)}
+                    onMouseLeave={() => setFocused(null)}
+                    onClick={() => onService(s.id)}
+                    style={{
+                      position: 'absolute',
+                      left: 0, right: 0,
+                      top: top + (isFocused ? -10 : 0),
+                      height,
+                      background: s.bg, color: s.fg,
+                      borderRadius: 26,
+                      padding: '16px 22px 20px',
+                      textAlign: 'left',
+                      boxShadow: isFocused
+                        ? `0 -2px 0 rgba(255,255,255,0.04) inset, 0 22px 38px rgba(13,59,46,0.28)`
+                        : s.featured
+                          ? `0 -2px 0 rgba(255,255,255,0.04) inset, 0 18px 36px rgba(13,59,46,0.24), 0 0 0 1px ${s.accent}30`
+                          : `0 -2px 0 rgba(255,255,255,0.04) inset, 0 12px 24px rgba(13,59,46,0.16)`,
+                      transition: 'top .35s cubic-bezier(.2,.8,.2,1), box-shadow .25s',
+                      overflow: 'hidden',
+                      zIndex: i + 1,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <CardInner s={s} isFocused={isFocused} showCTA={isLast || !!s.featured} />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {homeLayout === 'flat' && (
         <div style={{
