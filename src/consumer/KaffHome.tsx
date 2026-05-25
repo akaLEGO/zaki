@@ -149,8 +149,12 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
     </>
   );
 
-  const PEEK = 118;
-  const FULL = 170;
+  // PEEK is how much of each stacked card peeks above the next one. It
+  // must be tall enough to show the ribbon row + 2-line hook + a touch
+  // of breathing room. The scroll container below absorbs any overflow,
+  // so we can be generous here.
+  const PEEK = 142;
+  const FULL = 184;
 
   return (
     <div style={{
@@ -191,10 +195,10 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
       </div>
 
       {homeLayout === 'stacked' && (() => {
-        // Featured cards get a modest extra peek so the seasonal hook is
-        // fully visible without focus. We keep the bump small (+20px) so
-        // the total stack still fits above the BottomNav on small phones.
-        const PEEK_FEATURED = 138;
+        // Featured cards get a larger peek so the seasonal hook is fully
+        // visible without focus. Stack can exceed viewport; the scroll
+        // container below handles it.
+        const PEEK_FEATURED = 172;
         const cards: {
           s: ServiceDeckItem; top: number; height: number; isLast: boolean;
         }[] = [];
