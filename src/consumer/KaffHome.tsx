@@ -149,15 +149,12 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
     </>
   );
 
-  // PEEK is how much of each stacked card peeks above the next one. It
-  // must be just tall enough to show the ribbon row + the hook + a thin
-  // sliver of breathing room. Excess peek shows up as dead vertical
-  // space (empty card colour) between the hook of one card and the
-  // ribbon of the next. Tuned for single-line hooks (the common case);
-  // featured cards get their own larger PEEK_FEATURED to fit a 2-line
-  // hook + badge.
-  const PEEK = 88;
-  const FULL = 156;
+  // PEEK is how much of each stacked card peeks above the next one. Sized
+  // to fit ribbon row + 1-line hook + the sub line, with a few px of
+  // breathing room. Thai font rendering (vowel + tone marks) eats more
+  // vertical space than the nominal line-height implies, so be generous.
+  const PEEK = 96;
+  const FULL = 160;
 
   return (
     <div style={{
@@ -198,10 +195,11 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
       </div>
 
       {homeLayout === 'stacked' && (() => {
-        // Featured cards have a 2-line hook + the seasonal badge, so they
-        // need a bit more peek than normal. Scroll container below
-        // handles any overflow.
-        const PEEK_FEATURED = 112;
+        // Featured cards have a 2-line hook at 21px font + the seasonal
+        // badge. Thai with stacked vowels/tone marks renders taller than
+        // line-height predicts, so 132 leaves enough room for both lines
+        // to clear the next card.
+        const PEEK_FEATURED = 132;
         const cards: {
           s: ServiceDeckItem; top: number; height: number; isLast: boolean;
         }[] = [];
