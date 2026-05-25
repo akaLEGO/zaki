@@ -575,8 +575,8 @@ export function QurbanPrices({ selected, setSelected, animal, setAnimal, cowShar
 }) {
   const { qurbanOptions: QURBAN_OPTIONS } = useData();
   const animals: { id: QurbanAnimal; label: string; sub: string }[] = [
+    { id: 'cow', label: 'วัว 1 ส่วน', sub: '1–7 ส่วน' },
     { id: 'goat', label: 'แพะ 1 ตัว', sub: '1 ครอบครัว' },
-    { id: 'cow', label: 'วัว · เลือกจำนวนส่วน', sub: '1–7 ส่วน' },
   ];
   const animalLabel = animal === 'goat' ? 'แพะ 1 ตัว' : 'วัว 1 ส่วน';
   const filteredOptions = QURBAN_OPTIONS.filter(q => q.animal === animalLabel);
