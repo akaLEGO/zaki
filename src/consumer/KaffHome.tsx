@@ -14,13 +14,28 @@ interface ServiceDeckItem {
   bg: string; fg: string; accent: string;
   ribbon: string; hook: string; sub: string;
   icon: ZIconName;
+  /** Featured = bigger card + seasonal badge. One service at a time. */
+  featured?: boolean;
+  /** Optional seasonal badge text shown on featured cards. */
+  featuredBadge?: string;
 }
 
+// Order in this array = display order on Home.
+//
+// SEASONAL FEATURE: Qurban is at the top with `featured: true` during the
+// Eid al-Adha window. Swap the featured flag to another service when its
+// season comes (Ramadan → Fitrah, year-end → Zakat, etc.). Only ONE item
+// should be featured at a time.
+//
+// FUTURE — admin control: this hardcoded list is the fallback. Once
+// /api/reference returns a `services` override (display_order + featured
+// + emphasis), HomeScreen will merge it on top of these defaults so the
+// admin can re-prioritize without a code push.
 export const SERVICE_DECK: ServiceDeckItem[] = [
+  { id: 'qurban',     bg: '#7B5E2C', fg: '#fff',     accent: '#F0D88E', ribbon: 'QURBAN',     hook: 'อีดิลอัฎฮาใกล้แล้ว · เลือกพันธมิตรกุรบ่านที่เชื่อใจได้', sub: 'เปรียบเทียบ 4 ประเทศ · ร่วมกับ Ummatee', icon: 'qurban', featured: true, featuredBadge: '🔥 ใกล้อีดิลอัฎฮา' },
   { id: 'riba',       bg: '#0D3B2E', fg: '#fff',     accent: '#C9A94A', ribbon: 'RIBA',       hook: 'ไม่รู้จะทำยังไงกับดอกเบี้ยที่มี?',          sub: 'เคลียร์ให้เกิดประโยชน์',     icon: 'riba' },
   { id: 'zakat',      bg: '#C9A94A', fg: '#1f1707', accent: '#0D3B2E', ribbon: 'ZAKAT',      hook: 'รู้ได้ไงว่าซะกาตให้ได้ประโยชน์สูงสุด?',     sub: 'คำนวณ 2.5% · เลือกผู้รับ',  icon: 'zakat' },
   { id: 'compulsory', bg: '#3B5E48', fg: '#fff',     accent: '#E8D58A', ribbon: 'WAJIB',      hook: 'ฟิดยะห์ · ฟิฏร · กัฟฟารอฮ์ ครบที่นี่',    sub: 'ระบบช่วยคำนวณให้',          icon: 'compulsory' },
-  { id: 'qurban',     bg: '#7B5E2C', fg: '#fff',     accent: '#F0D88E', ribbon: 'QURBAN',     hook: 'อยากทำกุรบ่านแต่ราคาสูงไป?',                sub: 'เปรียบเทียบ 4 ประเทศ',      icon: 'qurban' },
   { id: 'sadaqah',    bg: '#4A8B6A', fg: '#fff',     accent: '#F5EDD3', ribbon: 'SADAQAH',    hook: 'บริจาคตามศรัทธา ถูกที่ถูกเวลา',             sub: 'แคมเปญที่เลือกมาให้คุณ',    icon: 'sadaqah' },
 ];
 
@@ -71,10 +86,20 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         position: 'relative',
       }}>
-        <div style={{
-          fontFamily: 'Inter, system-ui', fontSize: 10.5, fontWeight: 700,
-          letterSpacing: '0.14em', color: s.accent,
-        }}>{s.ribbon}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{
+            fontFamily: 'Inter, system-ui', fontSize: 10.5, fontWeight: 700,
+            letterSpacing: '0.14em', color: s.accent,
+          }}>{s.ribbon}</div>
+          {s.featured && s.featuredBadge && (
+            <div style={{
+              padding: '3px 9px', borderRadius: 999,
+              background: s.accent, color: s.bg,
+              fontSize: 10.5, fontWeight: 800, letterSpacing: '0.04em',
+              animation: 'kaffFeaturedPulse 2.4s ease-in-out infinite',
+            }}>{s.featuredBadge}</div>
+          )}
+        </div>
         <div style={{
           width: 34, height: 34, borderRadius: 10,
           background: 'rgba(255,255,255,0.10)',
@@ -87,7 +112,10 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
       </div>
 
       <div style={{
-        marginTop: 8, fontSize: 18, fontWeight: 700, lineHeight: 1.28,
+        marginTop: 8,
+        fontSize: s.featured ? 21 : 18,
+        fontWeight: s.featured ? 800 : 700,
+        lineHeight: 1.28,
         letterSpacing: '-0.005em',
         textWrap: 'balance',
         position: 'relative',
@@ -167,39 +195,49 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
           position: 'absolute', top: 110, left: 0, right: 0, bottom: 0,
           padding: '0 16px',
         }}>
-          {deck.map((s, i) => {
-            const top = i * PEEK;
-            const isLast = i === deck.length - 1;
-            const height = isLast ? FULL : PEEK + 70;
-            const isFocused = focused === s.id;
-            return (
-              <button
-                key={s.id}
-                onMouseEnter={() => setFocused(s.id)}
-                onMouseLeave={() => setFocused(null)}
-                onClick={() => onService(s.id)}
-                style={{
-                  position: 'absolute',
-                  left: 16, right: 16,
-                  top: top + (isFocused ? -10 : 0),
-                  height,
-                  background: s.bg, color: s.fg,
-                  borderRadius: 26,
-                  padding: '16px 22px 20px',
-                  textAlign: 'left',
-                  boxShadow: isFocused
-                    ? `0 -2px 0 rgba(255,255,255,0.04) inset, 0 22px 38px rgba(13,59,46,0.28)`
-                    : `0 -2px 0 rgba(255,255,255,0.04) inset, 0 12px 24px rgba(13,59,46,0.16)`,
-                  transition: 'top .35s cubic-bezier(.2,.8,.2,1), box-shadow .25s',
-                  overflow: 'hidden',
-                  zIndex: i + 1,
-                  cursor: 'pointer',
-                }}
-              >
-                <CardInner s={s} isFocused={isFocused} showCTA={isLast} />
-              </button>
-            );
-          })}
+          {(() => {
+            // Featured cards get extra vertical peek so the seasonal hook
+            // is fully visible without focus, even when stacked under others.
+            const PEEK_FEATURED = 168;
+            let cursor = 0;
+            return deck.map((s, i) => {
+              const peek = s.featured ? PEEK_FEATURED : PEEK;
+              const top = cursor;
+              const isLast = i === deck.length - 1;
+              const height = isLast ? (s.featured ? FULL + 40 : FULL) : peek + 70;
+              cursor += peek;
+              const isFocused = focused === s.id;
+              return (
+                <button
+                  key={s.id}
+                  onMouseEnter={() => setFocused(s.id)}
+                  onMouseLeave={() => setFocused(null)}
+                  onClick={() => onService(s.id)}
+                  style={{
+                    position: 'absolute',
+                    left: 16, right: 16,
+                    top: top + (isFocused ? -10 : 0),
+                    height,
+                    background: s.bg, color: s.fg,
+                    borderRadius: 26,
+                    padding: '16px 22px 20px',
+                    textAlign: 'left',
+                    boxShadow: isFocused
+                      ? `0 -2px 0 rgba(255,255,255,0.04) inset, 0 22px 38px rgba(13,59,46,0.28)`
+                      : s.featured
+                        ? `0 -2px 0 rgba(255,255,255,0.04) inset, 0 18px 36px rgba(13,59,46,0.24), 0 0 0 1px ${s.accent}30`
+                        : `0 -2px 0 rgba(255,255,255,0.04) inset, 0 12px 24px rgba(13,59,46,0.16)`,
+                    transition: 'top .35s cubic-bezier(.2,.8,.2,1), box-shadow .25s',
+                    overflow: 'hidden',
+                    zIndex: i + 1,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <CardInner s={s} isFocused={isFocused} showCTA={isLast || !!s.featured} />
+                </button>
+              );
+            });
+          })()}
         </div>
       )}
 
@@ -222,13 +260,15 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
                   position: 'relative',
                   background: s.bg, color: s.fg,
                   borderRadius: 22,
-                  padding: '16px 22px 18px',
+                  padding: s.featured ? '22px 24px 22px' : '16px 22px 18px',
                   textAlign: 'left',
-                  minHeight: 168,
+                  minHeight: s.featured ? 232 : 168,
                   border: 'none',
                   boxShadow: isFocused
                     ? '0 16px 28px rgba(13,59,46,0.18)'
-                    : '0 6px 14px rgba(13,59,46,0.08)',
+                    : s.featured
+                      ? `0 14px 28px rgba(13,59,46,0.18), 0 0 0 1.5px ${s.accent}40`
+                      : '0 6px 14px rgba(13,59,46,0.08)',
                   transition: 'transform .25s, box-shadow .25s',
                   transform: isFocused ? 'translateY(-3px)' : 'none',
                   overflow: 'hidden',
@@ -243,6 +283,12 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
       )}
 
       <BottomNav tab={tab} onTab={onTab} />
+      <style>{`
+        @keyframes kaffFeaturedPulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50%      { transform: scale(1.05); opacity: 0.92; }
+        }
+      `}</style>
     </div>
   );
 }
