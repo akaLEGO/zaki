@@ -32,7 +32,7 @@ interface ServiceDeckItem {
 // + emphasis), HomeScreen will merge it on top of these defaults so the
 // admin can re-prioritize without a code push.
 export const SERVICE_DECK: ServiceDeckItem[] = [
-  { id: 'qurban',     bg: '#7B5E2C', fg: '#fff',     accent: '#F0D88E', ribbon: 'QURBAN',     hook: 'อีดิลอัฎฮาใกล้แล้ว · เลือกพันธมิตรกุรบ่านที่เชื่อใจได้', sub: 'เปรียบเทียบ 4 ประเทศ · ร่วมกับ Ummatee', icon: 'qurban', featured: true, featuredBadge: '🔥 ใกล้อีดิลอัฎฮา' },
+  { id: 'qurban',     bg: '#7B5E2C', fg: '#fff',     accent: '#F0D88E', ribbon: 'QURBAN',     hook: 'ใกล้อีดิลอัฎฮา · เลือกทำกุรบ่านให้พี่น้องทั่วโลก', sub: 'เปรียบเทียบ 4 ประเทศ · ร่วมกับ Ummatee', icon: 'qurban', featured: true, featuredBadge: '🔥 ใกล้อีดิลอัฎฮา' },
   { id: 'riba',       bg: '#0D3B2E', fg: '#fff',     accent: '#C9A94A', ribbon: 'RIBA',       hook: 'ไม่รู้จะทำยังไงกับดอกเบี้ยที่มี?',          sub: 'เคลียร์ให้เกิดประโยชน์',     icon: 'riba' },
   { id: 'zakat',      bg: '#C9A94A', fg: '#1f1707', accent: '#0D3B2E', ribbon: 'ZAKAT',      hook: 'รู้ได้ไงว่าซะกาตให้ได้ประโยชน์สูงสุด?',     sub: 'คำนวณ 2.5% · เลือกผู้รับ',  icon: 'zakat' },
   { id: 'compulsory', bg: '#3B5E48', fg: '#fff',     accent: '#E8D58A', ribbon: 'WAJIB',      hook: 'ฟิดยะห์ · ฟิฏร · กัฟฟารอฮ์ ครบที่นี่',    sub: 'ระบบช่วยคำนวณให้',          icon: 'compulsory' },
