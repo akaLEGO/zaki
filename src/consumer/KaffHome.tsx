@@ -101,18 +101,18 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
           )}
         </div>
         <div style={{
-          width: 28, height: 28, borderRadius: 9,
+          width: 24, height: 24, borderRadius: 8,
           background: 'rgba(255,255,255,0.10)',
           color: s.accent,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           border: `1px solid rgba(255,255,255,0.10)`,
         }}>
-          <Icon name={s.icon} size={17} color={s.accent} strokeWidth={1.7} />
+          <Icon name={s.icon} size={15} color={s.accent} strokeWidth={1.7} />
         </div>
       </div>
 
       <div style={{
-        marginTop: 4,
+        marginTop: 2,
         fontSize: s.featured ? 21 : 18,
         fontWeight: s.featured ? 800 : 700,
         lineHeight: 1.28,
@@ -150,13 +150,14 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
   );
 
   // PEEK is how much of each stacked card peeks above the next one. It
-  // must be tall enough to show the ribbon row + the hook + a touch of
-  // breathing room — not more. Excess peek shows up as dead vertical
-  // space inside each card. Tuned for single-line hooks (the common
-  // case); featured cards get their own slightly bigger PEEK_FEATURED
-  // below to fit a 2-line hook.
-  const PEEK = 110;
-  const FULL = 168;
+  // must be just tall enough to show the ribbon row + the hook + a thin
+  // sliver of breathing room. Excess peek shows up as dead vertical
+  // space (empty card colour) between the hook of one card and the
+  // ribbon of the next. Tuned for single-line hooks (the common case);
+  // featured cards get their own larger PEEK_FEATURED to fit a 2-line
+  // hook + badge.
+  const PEEK = 88;
+  const FULL = 156;
 
   return (
     <div style={{
@@ -200,7 +201,7 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
         // Featured cards have a 2-line hook + the seasonal badge, so they
         // need a bit more peek than normal. Scroll container below
         // handles any overflow.
-        const PEEK_FEATURED = 138;
+        const PEEK_FEATURED = 112;
         const cards: {
           s: ServiceDeckItem; top: number; height: number; isLast: boolean;
         }[] = [];
@@ -239,7 +240,7 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
                       height,
                       background: s.bg, color: s.fg,
                       borderRadius: 26,
-                      padding: '10px 22px 16px',
+                      padding: '6px 22px 14px',
                       textAlign: 'left',
                       boxShadow: isFocused
                         ? `0 -2px 0 rgba(255,255,255,0.04) inset, 0 22px 38px rgba(13,59,46,0.28)`
@@ -280,9 +281,9 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
                   position: 'relative',
                   background: s.bg, color: s.fg,
                   borderRadius: 22,
-                  padding: s.featured ? '16px 24px 18px' : '12px 22px 16px',
+                  padding: s.featured ? '10px 24px 16px' : '8px 22px 14px',
                   textAlign: 'left',
-                  minHeight: s.featured ? 208 : 148,
+                  minHeight: s.featured ? 192 : 132,
                   border: 'none',
                   boxShadow: isFocused
                     ? '0 16px 28px rgba(13,59,46,0.18)'
