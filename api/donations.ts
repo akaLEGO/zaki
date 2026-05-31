@@ -56,6 +56,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
              donor_line_id    AS "donorLineId",
              is_test AS "isTest",
              risk_tier AS "riskTier",
+             (slip_image IS NOT NULL) AS "hasSlip",
              to_char(created_at, 'DD Mon YYYY HH24:MI') AS "createdAt"
       FROM donations
       ORDER BY created_at DESC
@@ -80,6 +81,9 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
       donorPhone:     { type: 'string', required: true, min: 6, max: 30 },
       donorLineId:    { type: 'string', max: 100 },
       isTest:         { type: 'bool' },
+      // Client-compressed base64 data URL of the transfer slip (~50-100KB).
+      // Cap at ~800k chars (~600KB image) as a guardrail.
+      slipImage:      { type: 'string', max: 800_000 },
     });
     if (!v.ok) return res.status(400).json({ error: v.error });
     const b = v.value as Record<string, unknown>;
@@ -128,7 +132,16 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
       LIMIT 1
     `;
     const partnerId = partnerRows[0]?.id as string | undefined;
-    const initialStatus = (b.status as string) || (partnerId ? 'paid' : 'completed');
+
+    // Payment verification: if the payer attached a transfer slip (real
+    // bank/QR payment), the donation lands in 'pending' so an admin can
+    // verify the slip before it counts. Approving later moves it to
+    // 'paid' (partner flow) or 'completed' (no partner). Tests + slipless
+    // flows (e.g. USDC, testing mode) keep the old auto-status.
+    const slipImage = (typeof b.slipImage === 'string' && (b.slipImage as string).length > 0)
+      ? (b.slipImage as string) : null;
+    const initialStatus = (b.status as string)
+      || (slipImage ? 'pending' : (partnerId ? 'paid' : 'completed'));
 
     const ip = clientIp(req);
     const ua = (req.headers['user-agent'] as string | undefined) ?? null;
@@ -140,7 +153,8 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
         ref, user_id, flow, amount, fee_amount, destination, pay_method,
         status, niyyah, partner_id,
         donor_first_name, donor_last_name, donor_email, donor_phone, donor_line_id,
-        is_test, donor_ip, donor_ua, risk_tier, phase
+        is_test, donor_ip, donor_ua, risk_tier, phase,
+        slip_image, slip_uploaded_at
       )
       VALUES (
         ${newRef()}, ${auth?.userId || null}, ${flow}, ${amount}, ${fee},
@@ -150,7 +164,8 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
         ${b.donorFirstName as string}, ${b.donorLastName as string},
         ${b.donorEmail as string}, ${b.donorPhone as string},
         ${(b.donorLineId as string) ?? null},
-        ${isTest}, ${ip}, ${ua}, ${tier}, ${phase}
+        ${isTest}, ${ip}, ${ua}, ${tier}, ${phase},
+        ${slipImage}, ${slipImage ? new Date().toISOString() : null}
       )
       RETURNING id, ref, flow, amount, fee_amount AS "feeAmount", destination,
                 pay_method AS "payMethod", status, niyyah,

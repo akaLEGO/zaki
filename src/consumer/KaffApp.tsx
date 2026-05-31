@@ -108,6 +108,10 @@ export function App() {
 
   const [payMethod, setPayMethod] = useState<PayMethod>('qr');
   const [niyyahConfirmed, setNiyyahConfirmed] = useState(false);
+  // True when the just-completed donation is awaiting slip verification
+  // (real bank/QR payment with a slip attached) → success screen shows the
+  // "รอตรวจสอบ" state instead of "สำเร็จ".
+  const [awaitingVerify, setAwaitingVerify] = useState(false);
 
   const { user, isSignedIn } = useUser();
   const [donor, setDonor] = useState<Donor>(() => {
@@ -272,11 +276,11 @@ export function App() {
     );
   };
 
-  const recordDonation = async () => {
+  const recordDonation = async (slip?: string | null) => {
     if (!activeFlow) return;
     track('donation_completed', {
       flow: activeFlow,
-      meta: { payMethod, amount: summary.amount, isTest: IS_TESTING_MODE },
+      meta: { payMethod, amount: summary.amount, isTest: IS_TESTING_MODE, withSlip: !!slip },
     });
     try {
       await apiFetch('/api/donations', {
@@ -293,10 +297,11 @@ export function App() {
           donorPhone:     donor.phone.trim(),
           donorLineId:    donor.lineId.trim() || undefined,
           // Tag this row as test so admin can filter/purge before going live.
-          // Flips off when VITE_KAFF_TESTING_MODE=false is set on Vercel.
           isTest: IS_TESTING_MODE,
-          // Server picks initial status: 'paid' if a partner handles this flow
-          // (Qurban → Ummatee), 'completed' otherwise.
+          // When a slip is attached the server starts the donation in 'pending'
+          // for admin verification. Server picks 'paid' (partner) / 'completed'
+          // otherwise.
+          slipImage: slip || undefined,
         }),
       });
       void data.refresh();
@@ -417,16 +422,16 @@ export function App() {
       />;
       break;
     case 'pay-qr':
-      view = <QRPayment amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={() => { void recordDonation(); setScreen('success'); }} />;
+      view = <QRPayment amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={(slip) => { setAwaitingVerify(!IS_TESTING_MODE && !!slip); void recordDonation(slip); setScreen('success'); }} />;
       break;
     case 'pay-bank':
-      view = <BankTransfer amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={() => { void recordDonation(); setScreen('success'); }} />;
+      view = <BankTransfer amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={(slip) => { setAwaitingVerify(!IS_TESTING_MODE && !!slip); void recordDonation(slip); setScreen('success'); }} />;
       break;
     case 'pay-usdc':
-      view = <BaseUSDCPayment amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={() => { void recordDonation(); setScreen('success'); }} />;
+      view = <BaseUSDCPayment amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={(slip) => { setAwaitingVerify(false); void recordDonation(slip); setScreen('success'); }} />;
       break;
     case 'success':
-      view = <SuccessScreen summary={{ ...summary, payMethod }} donor={donor} onHome={goHome} />;
+      view = <SuccessScreen summary={{ ...summary, payMethod }} donor={donor} pending={awaitingVerify} onHome={goHome} />;
       break;
     default:
       view = <HomeScreen onService={openService} tab={tab} onTab={handleTab} />;

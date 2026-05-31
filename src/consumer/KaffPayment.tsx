@@ -43,6 +43,107 @@ function TestingBanner() {
   );
 }
 
+// Compress an image File to a small JPEG data URL entirely in the browser,
+// so the slip we upload is ~50-100KB instead of multi-MB. Caps the longest
+// edge at 1100px and re-encodes at quality 0.7.
+function compressImageToDataUrl(file: File, maxEdge = 1100, quality = 0.7): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('read failed'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('decode failed'));
+      img.onload = () => {
+        const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { reject(new Error('no canvas ctx')); return; }
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// Slip upload zone — used on QR + bank screens. Lets the payer attach a
+// transfer-confirmation image; the donation then lands in 'pending' for
+// admin verification.
+function SlipUpload({ slip, onSlip }: { slip: string | null; onSlip: (dataUrl: string | null) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const handleFile = async (file: File | undefined) => {
+    if (!file) return;
+    setErr(null); setBusy(true);
+    try {
+      const dataUrl = await compressImageToDataUrl(file);
+      onSlip(dataUrl);
+    } catch {
+      setErr('อ่านรูปไม่สำเร็จ ลองใหม่อีกครั้ง');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div style={{ width: '100%', marginTop: 16 }}>
+      <div style={{ fontSize: 13, color: Z.muted, fontWeight: 600, marginBottom: 8, padding: '0 4px' }}>
+        แนบสลิปการโอน <span style={{ color: Z.danger }}>*</span>
+      </div>
+      {slip ? (
+        <div style={{
+          position: 'relative', borderRadius: 16, overflow: 'hidden',
+          border: `1.5px solid ${Z.line}`, background: '#fff',
+        }}>
+          <img src={slip} alt="สลิปการโอน" style={{ width: '100%', display: 'block', maxHeight: 320, objectFit: 'contain', background: '#f3f3f3' }} />
+          <button onClick={() => onSlip(null)} style={{
+            position: 'absolute', top: 10, right: 10,
+            width: 32, height: 32, borderRadius: 999,
+            background: 'rgba(14,26,20,0.72)', color: '#fff',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(4px)', fontSize: 16, fontWeight: 700, lineHeight: 1,
+          }}>✕</button>
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0,
+            padding: '8px 12px', background: 'linear-gradient(0deg, rgba(14,26,20,0.7), transparent)',
+            color: '#fff', fontSize: 12, fontWeight: 600,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}><Icon name="check" size={14} color="#fff" /> แนบสลิปแล้ว · แตะ ✕ เพื่อเปลี่ยน</div>
+        </div>
+      ) : (
+        <label style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          gap: 8, padding: '28px 16px', borderRadius: 16,
+          border: `1.5px dashed ${Z.line}`, background: '#fff',
+          cursor: 'pointer', textAlign: 'center',
+        }}>
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            style={{ display: 'none' }}
+            onChange={e => { void handleFile(e.target.files?.[0]); e.currentTarget.value = ''; }}
+          />
+          <div style={{
+            width: 44, height: 44, borderRadius: 12, background: Z.sageSoft,
+            color: Z.forest, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}><Icon name="download" size={22} /></div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: Z.ink }}>
+            {busy ? 'กำลังเตรียมรูป…' : 'แตะเพื่อแนบสลิป'}
+          </div>
+          <div style={{ fontSize: 12, color: Z.muted }}>ถ่ายรูปหรือเลือกจากคลัง · เจ้าหน้าที่จะตรวจสอบก่อนยืนยัน</div>
+        </label>
+      )}
+      {err && <div style={{ marginTop: 6, fontSize: 12, color: Z.danger }}>{err}</div>}
+    </div>
+  );
+}
+
 export type PayMethod = 'qr' | 'bank' | 'usdc';
 
 export interface Summary {
@@ -288,8 +389,9 @@ function FeeRows({ flow: _flow, amount }: { flow: string; amount: number }) {
   );
 }
 
-export function QRPayment({ amount, onBack, onConfirm }: { amount: number; onBack: () => void; onConfirm: () => void }) {
+export function QRPayment({ amount, onBack, onConfirm }: { amount: number; onBack: () => void; onConfirm: (slip: string | null) => void }) {
   const [secs, setSecs] = useState(600);
+  const [slip, setSlip] = useState<string | null>(null);
   useEffect(() => {
     const t = setInterval(() => setSecs(s => Math.max(0, s - 1)), 1000);
     return () => clearInterval(t);
@@ -358,13 +460,20 @@ export function QRPayment({ amount, onBack, onConfirm }: { amount: number; onBac
             }}>{b.n}</div>
           ))}
         </div>
+
+        {!IS_TESTING_MODE && <SlipUpload slip={slip} onSlip={setSlip} />}
       </div>
 
       <StickyBottom>
-        <GoldButton onClick={onConfirm}>
+        <GoldButton
+          disabled={!IS_TESTING_MODE && !slip}
+          onClick={() => onConfirm(slip)}
+        >
           {IS_TESTING_MODE
             ? <>ดูใบเสร็จทดสอบ <Icon name="arrowRight" size={20} /></>
-            : <>โอนแล้ว ยืนยัน <Icon name="check" size={20} /></>}
+            : !slip
+              ? 'แนบสลิปก่อนยืนยัน'
+              : <>ยืนยันการโอน <Icon name="check" size={20} /></>}
         </GoldButton>
       </StickyBottom>
     </div>
@@ -419,8 +528,9 @@ function FakeQR({ size = 200, style = {} }: { size?: number; style?: CSSProperti
   );
 }
 
-export function BankTransfer({ amount, onBack, onConfirm }: { amount: number; onBack: () => void; onConfirm: () => void }) {
+export function BankTransfer({ amount, onBack, onConfirm }: { amount: number; onBack: () => void; onConfirm: (slip: string | null) => void }) {
   const [copied, setCopied] = useState<string | null>(null);
+  const [slip, setSlip] = useState<string | null>(null);
   const copy = (key: string, text: string) => {
     if (navigator.clipboard) navigator.clipboard.writeText(text);
     setCopied(key);
@@ -479,15 +589,22 @@ export function BankTransfer({ amount, onBack, onConfirm }: { amount: number; on
           fontSize: 12.5, color: '#5a4400', lineHeight: 1.5,
         }}>
           <b>📩 หลังโอนเสร็จ</b><br />
-          กรุณาส่งสลิปมาที่ <b style={{ color: '#3d2c08' }}>donate@zaki.app</b> หรือแคปกดปุ่มยืนยันด้านล่าง — ระบบจะตรวจสอบและออกใบเสร็จภายใน 1 ชั่วโมง
+          แนบสลิปการโอนด้านล่าง แล้วกดยืนยัน — เจ้าหน้าที่จะตรวจสอบและออกใบเสร็จให้ภายใน 24 ชั่วโมง
         </div>
+
+        {!IS_TESTING_MODE && <SlipUpload slip={slip} onSlip={setSlip} />}
       </div>
 
       <StickyBottom>
-        <GoldButton onClick={onConfirm}>
+        <GoldButton
+          disabled={!IS_TESTING_MODE && !slip}
+          onClick={() => onConfirm(slip)}
+        >
           {IS_TESTING_MODE
             ? <>ดูใบเสร็จทดสอบ <Icon name="arrowRight" size={20} /></>
-            : <>โอนแล้ว ยืนยัน <Icon name="check" size={20} /></>}
+            : !slip
+              ? 'แนบสลิปก่อนยืนยัน'
+              : <>ยืนยันการโอน <Icon name="check" size={20} /></>}
         </GoldButton>
       </StickyBottom>
     </div>
@@ -503,7 +620,7 @@ interface RateResponse {
   error?: string;
 }
 
-export function BaseUSDCPayment({ amount, onBack, onConfirm }: { amount: number; onBack: () => void; onConfirm: () => void }) {
+export function BaseUSDCPayment({ amount, onBack, onConfirm }: { amount: number; onBack: () => void; onConfirm: (slip: string | null) => void }) {
   const [rateInfo, setRateInfo] = useState<RateResponse | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -612,7 +729,7 @@ export function BaseUSDCPayment({ amount, onBack, onConfirm }: { amount: number;
       </div>
 
       <StickyBottom>
-        <GoldButton onClick={onConfirm}>
+        <GoldButton onClick={() => onConfirm(null)}>
           {IS_TESTING_MODE
             ? <>ดูใบเสร็จทดสอบ <Icon name="arrowRight" size={20} /></>
             : <>โอนแล้ว ยืนยัน <Icon name="check" size={20} /></>}
@@ -622,7 +739,7 @@ export function BaseUSDCPayment({ amount, onBack, onConfirm }: { amount: number;
   );
 }
 
-export function SuccessScreen({ summary, donor, onHome }: { summary: Summary; donor?: Donor; onHome: () => void }) {
+export function SuccessScreen({ summary, donor, pending, onHome }: { summary: Summary; donor?: Donor; pending?: boolean; onHome: () => void }) {
   const [animated, setAnimated] = useState(false);
   const [policy, setPolicy] = useState<PolicyKind | null>(null);
   useEffect(() => {
@@ -725,12 +842,16 @@ export function SuccessScreen({ summary, donor, onHome }: { summary: Summary; do
           </svg>
         </div>
         <div style={{ marginTop: 20, fontSize: 22, fontWeight: 800, letterSpacing: '-0.01em' }}>
-          {IS_TESTING_MODE ? 'ใบเสร็จทดสอบ' : 'บริจาคสำเร็จแล้ว'}
+          {IS_TESTING_MODE ? 'ใบเสร็จทดสอบ' : pending ? 'ได้รับแจ้งการโอนแล้ว' : 'บริจาคสำเร็จแล้ว'}
         </div>
         <div style={{ marginTop: 6, fontSize: 13.5, color: Z.gold, fontWeight: 600 }}>
-          {IS_TESTING_MODE ? 'ระบบทดสอบ · ไม่มีเงินถูกหัก' : 'คุณคือมือบน · You are the Upper Hand'}
+          {IS_TESTING_MODE ? 'ระบบทดสอบ · ไม่มีเงินถูกหัก'
+            : pending ? 'รอเจ้าหน้าที่ตรวจสอบสลิป'
+            : 'คุณคือมือบน · You are the Upper Hand'}
         </div>
-        <div style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{impact}</div>
+        <div style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
+          {pending ? 'เราจะยืนยันและออกใบเสร็จให้ภายใน 24 ชม.' : impact}
+        </div>
         {IS_TESTING_MODE && (
           <div style={{
             marginTop: 14, padding: '6px 12px',

@@ -1160,6 +1160,7 @@ interface DonationRow {
   donorPhone: string | null;
   donorLineId: string | null;
   isTest: boolean;
+  hasSlip?: boolean;
   createdAt: string;
 }
 
@@ -1394,6 +1395,8 @@ interface DonationDetail extends DonationRow {
   customerConfirmedAt: string | null;
   refundedAt: string | null;
   refundRef: string | null;
+  slipImage: string | null;
+  slipUploadedAt: string | null;
 }
 
 function TransactionDrawer({ id, partners, onClose, onChange }: {
@@ -1513,12 +1516,40 @@ function TransactionDrawer({ id, partners, onClose, onChange }: {
             </ACard>
           )}
 
+          {donation.slipImage && (
+            <ACard title="สลิปการโอน" padding={12}>
+              <a href={donation.slipImage} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
+                <img
+                  src={donation.slipImage}
+                  alt="สลิปการโอน"
+                  style={{ width: '100%', borderRadius: 10, display: 'block', maxHeight: 420, objectFit: 'contain', background: '#f3f3f3' }}
+                />
+              </a>
+              {donation.slipUploadedAt && (
+                <div style={{ marginTop: 8, fontSize: 11.5, color: AZ.muted }}>
+                  แนบเมื่อ {donation.slipUploadedAt} · แตะรูปเพื่อดูเต็ม
+                </div>
+              )}
+            </ACard>
+          )}
+
           <div>
             <div style={{ fontSize: 11, color: AZ.muted, fontWeight: 700, letterSpacing: '0.08em', marginBottom: 8 }}>WORKFLOW</div>
             {donation.status === 'pending' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <ABtn kind="primary" icon="check" onClick={() => transition('paid')} disabled={busy}>Mark as Paid</ABtn>
-                <ABtn kind="danger" icon="x" onClick={() => transition('failed')} disabled={busy}>Mark Failed</ABtn>
+                <div style={{ fontSize: 12.5, color: AZ.muted, lineHeight: 1.5, marginBottom: 2 }}>
+                  {donation.slipImage
+                    ? 'ตรวจสอบสลิปด้านบนให้ตรงกับยอด แล้วอนุมัติ'
+                    : 'ไม่มีสลิปแนบ — ตรวจ statement ธนาคารก่อนอนุมัติ'}
+                </div>
+                <ABtn kind="primary" icon="check"
+                  onClick={() => transition(donation.partnerId ? 'paid' : 'completed')}
+                  disabled={busy}>
+                  {donation.partnerId ? 'อนุมัติ → ส่งต่อ partner' : 'อนุมัติการชำระเงิน'}
+                </ABtn>
+                <ABtn kind="danger" icon="x" onClick={() => transition('failed')} disabled={busy}>
+                  ปฏิเสธ (สลิปไม่ถูกต้อง)
+                </ABtn>
               </div>
             )}
             {donation.status === 'paid' && (
