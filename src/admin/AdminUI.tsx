@@ -24,7 +24,7 @@ export type IconName =
   | 'plus' | 'search' | 'edit' | 'trash' | 'check' | 'x' | 'chev' | 'chevR' | 'eye'
   | 'flag' | 'bell' | 'user' | 'flame' | 'arrow' | 'download' | 'refresh' | 'money'
   | 'sparkle' | 'riba' | 'zakat' | 'qurban' | 'sadaqah' | 'moon' | 'book' | 'water'
-  | 'bolt' | 'hospital' | 'road' | 'toilet' | 'community';
+  | 'bolt' | 'hospital' | 'road' | 'toilet' | 'community' | 'logout';
 
 interface AIconProps {
   name: IconName;
@@ -50,6 +50,7 @@ export function AIcon({ name, size = 20, color = 'currentColor', strokeWidth = 1
     check: <g {...p}><path d="m5 12 5 5 9-11"/></g>,
     x: <g {...p}><path d="M6 6l12 12M18 6l-12 12"/></g>,
     chev: <g {...p}><path d="m6 9 6 6 6-6"/></g>,
+    logout: <g {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></g>,
     chevR: <g {...p}><path d="m9 6 6 6-6 6"/></g>,
     eye: <g {...p}><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></g>,
     flag: <g {...p}><path d="M5 21V4h12l-2 4 2 4H5"/></g>,

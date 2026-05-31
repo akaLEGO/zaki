@@ -185,12 +185,8 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
               }}>เข้าสู่ระบบ</button>
             </SignInButton>
           )}
-          <button style={{
-            height: 34, padding: '0 12px', borderRadius: 999,
-            background: '#fff', color: Z.forest,
-            border: `1px solid ${Z.line}`,
-            fontSize: 12, fontWeight: 700, letterSpacing: '0.05em',
-          }}>EN</button>
+          {/* EN/TH toggle deferred to V1.1 (i18n). Removed the dead button
+              for V1 so users don't tap a no-op. App is Thai-only for now. */}
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import { AZ, AIcon } from './AdminUI';
 import type { IconName } from './AdminUI';
 import { ChromeWindow } from './BrowserWindow';
@@ -24,6 +25,14 @@ interface NavItem {
 interface NavGroup { label: string; items: NavItem[] }
 
 function Sidebar({ screen, setScreen }: { screen: ScreenId; setScreen: (s: ScreenId) => void }) {
+  const { user } = useUser();
+  const { signOut } = useClerk();
+  const adminName = user?.fullName
+    || user?.firstName
+    || user?.primaryEmailAddress?.emailAddress?.split('@')[0]
+    || 'Admin';
+  const adminEmail = user?.primaryEmailAddress?.emailAddress || '';
+  const adminInitial = (adminName.trim()[0] || 'A').toUpperCase();
   const groups: NavGroup[] = [
     { label: 'OVERVIEW', items: [
       { id: 'dashboard', icon: 'dashboard', label: 'Dashboard' },
@@ -132,21 +141,31 @@ function Sidebar({ screen, setScreen }: { screen: ScreenId; setScreen: (s: Scree
         padding: '12px 14px', borderTop: '1px solid rgba(255,255,255,0.06)',
         display: 'flex', alignItems: 'center', gap: 10,
       }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 999,
-          background: 'linear-gradient(135deg, #2EC27E 0%, #1F8A5B 100%)',
-          color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontWeight: 700, fontSize: 14,
-        }}>น</div>
+        {user?.imageUrl ? (
+          <img src={user.imageUrl} alt={adminName} style={{
+            width: 36, height: 36, borderRadius: 999, objectFit: 'cover',
+          }} />
+        ) : (
+          <div style={{
+            width: 36, height: 36, borderRadius: 999,
+            background: 'linear-gradient(135deg, #2EC27E 0%, #1F8A5B 100%)',
+            color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 700, fontSize: 14,
+          }}>{adminInitial}</div>
+        )}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 700 }}>เนตร W.</div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>super-admin</div>
+          <div style={{ fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{adminName}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{adminEmail || 'ผู้ดูแลระบบ'}</div>
         </div>
-        <button style={{
-          width: 28, height: 28, borderRadius: 7,
-          color: 'rgba(255,255,255,0.5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}><AIcon name="chev" size={14} color="rgba(255,255,255,0.5)" /></button>
+        <button
+          onClick={() => signOut()}
+          title="ออกจากระบบ"
+          style={{
+            width: 28, height: 28, borderRadius: 7,
+            color: 'rgba(255,255,255,0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        ><AIcon name="logout" size={15} color="rgba(255,255,255,0.5)" /></button>
       </div>
       <div style={{
         padding: '8px 14px 12px',
