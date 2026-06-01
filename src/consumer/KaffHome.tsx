@@ -447,7 +447,7 @@ export function ProfileScreen({ tab, onTab, onHistory }: { tab: Tab; onTab: (t: 
         <ForestHeader compact>
           <div style={{ marginTop: 14, fontSize: 22, fontWeight: 700 }}>ยินดีต้อนรับ</div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginTop: 4 }}>
-            เข้าสู่ระบบเพื่อเก็บประวัติการบริจาคและใบเสร็จลดหย่อนภาษี
+            เข้าสู่ระบบเพื่อเก็บประวัติการบริจาคและใบเสร็จออนไลน์
           </div>
         </ForestHeader>
         <div style={{ padding: '40px 20px', textAlign: 'center' }}>
@@ -467,13 +467,11 @@ export function ProfileScreen({ tab, onTab, onHistory }: { tab: Tab; onTab: (t: 
   const initial = name.charAt(0).toUpperCase();
   const memberSince = user?.createdAt ? new Date(user.createdAt).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }) : '';
 
+  // V1: only rows that actually do something. Unbuilt items (follow orgs,
+  // privacy prefs, tax-receipt PDF, language) are hidden until implemented
+  // so the menu has no dead taps. Re-add them as they ship.
   const rows = [
-    { label: 'ตั้งค่าโปรไฟล์', sub: user?.primaryEmailAddress?.emailAddress || 'ชื่อ · อีเมล · LINE', onClick: () => {} },
-    { label: 'ที่ปรึกษาชะรีอะฮ์', sub: 'อ่านคำชี้แจง · ถามคำถาม', onClick: () => {} },
-    { label: 'องค์กรที่ติดตาม', sub: 'จัดการรายชื่อ', onClick: () => {} },
-    { label: 'ตั้งค่าความเป็นส่วนตัว', sub: 'ค่าเริ่มต้น: ไม่ระบุชื่อ', onClick: () => {} },
-    { label: 'ใบเสร็จลดหย่อนภาษี', sub: 'ดาวน์โหลด PDF รวมทั้งปี', onClick: () => {} },
-    { label: 'ภาษา · Language', sub: 'ไทย / English', onClick: () => {} },
+    { label: 'ประวัติการบริจาค', sub: 'ดูรายการ + ใบเสร็จย้อนหลัง', onClick: onHistory },
     { label: 'ออกจากระบบ', sub: '', onClick: () => signOut() },
   ];
   return (

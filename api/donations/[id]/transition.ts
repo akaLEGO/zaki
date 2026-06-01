@@ -54,7 +54,12 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
   const to = b.to as Status;
   const note = (b.note as string | undefined) ?? null;
 
-  const [current] = await sql`SELECT status, partner_id AS "partnerId" FROM donations WHERE id = ${id}`;
+  const [current] = await sql`
+    SELECT status, partner_id AS "partnerId", amount, is_test AS "isTest",
+           campaign_id AS "campaignId", org_id AS "orgId",
+           counted_in_raised AS "countedInRaised"
+    FROM donations WHERE id = ${id}
+  `;
   if (!current) return res.status(404).json({ error: 'donation not found' });
   const from = current.status as Status;
 
@@ -101,6 +106,21 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
     INSERT INTO donation_events (donation_id, from_status, to_status, actor, note)
     VALUES (${id}, ${from}, ${to}, ${'admin:' + admin.userId}, ${note})
   `;
+
+  // When a donation first reaches 'completed', add its amount to the linked
+  // campaign/org progress total (once, non-test only). counted_in_raised
+  // guards against any double-count.
+  if (to === 'completed' && !current.isTest && !current.countedInRaised) {
+    const amt = Number(current.amount) || 0;
+    if (current.campaignId) {
+      await sql`UPDATE campaigns SET raised = raised + ${amt} WHERE id = ${current.campaignId}`;
+    } else if (current.orgId) {
+      await sql`UPDATE orgs SET raised = raised + ${amt} WHERE id = ${current.orgId}`;
+    }
+    if (current.campaignId || current.orgId) {
+      await sql`UPDATE donations SET counted_in_raised = TRUE WHERE id = ${id}`;
+    }
+  }
 
   await audit(req, 'donations.transition', String(id), admin.userId, { from, to, ...b });
   return res.json(row);

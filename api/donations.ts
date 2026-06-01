@@ -84,6 +84,10 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
       // Client-compressed base64 data URL of the transfer slip (~50-100KB).
       // Cap at ~800k chars (~600KB image) as a guardrail.
       slipImage:      { type: 'string', max: 800_000 },
+      // Funding target — Sadaqah → campaignId, Riba → orgId. Used to move
+      // the campaign/org progress bar when the donation completes.
+      campaignId:     { type: 'string', max: 64, pattern: /^[a-z0-9-]+$/ },
+      orgId:          { type: 'string', max: 64, pattern: /^[a-z0-9-]+$/ },
     });
     if (!v.ok) return res.status(400).json({ error: v.error });
     const b = v.value as Record<string, unknown>;
@@ -154,7 +158,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
         status, niyyah, partner_id,
         donor_first_name, donor_last_name, donor_email, donor_phone, donor_line_id,
         is_test, donor_ip, donor_ua, risk_tier, phase,
-        slip_image, slip_uploaded_at
+        slip_image, slip_uploaded_at, campaign_id, org_id
       )
       VALUES (
         ${newRef()}, ${auth?.userId || null}, ${flow}, ${amount}, ${fee},
@@ -165,7 +169,8 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
         ${b.donorEmail as string}, ${b.donorPhone as string},
         ${(b.donorLineId as string) ?? null},
         ${isTest}, ${ip}, ${ua}, ${tier}, ${phase},
-        ${slipImage}, ${slipImage ? new Date().toISOString() : null}
+        ${slipImage}, ${slipImage ? new Date().toISOString() : null},
+        ${(b.campaignId as string) ?? null}, ${(b.orgId as string) ?? null}
       )
       RETURNING id, ref, flow, amount, fee_amount AS "feeAmount", destination,
                 pay_method AS "payMethod", status, niyyah,
@@ -188,6 +193,19 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
               ${partnerId ? `auto-assigned to partner ${partnerId}` : null})
     `;
     await audit(req, 'donations.create', String((row as { ref: string }).ref), auth?.userId ?? null, { ...b, partnerId, initialStatus });
+
+    // Move the campaign/org progress bar only when the donation is already
+    // 'completed' at creation (no slip → testing / USDC auto-complete) and is
+    // not a test. Slip-bearing donations start 'pending' and get counted on
+    // admin approval instead (see transition endpoint).
+    const campaignId = (b.campaignId as string | undefined) ?? null;
+    const orgId = (b.orgId as string | undefined) ?? null;
+    if (initialStatus === 'completed' && !isTest && (campaignId || orgId)) {
+      const donationId = (row as { id: number }).id;
+      if (campaignId) await sql`UPDATE campaigns SET raised = raised + ${amount} WHERE id = ${campaignId}`;
+      else if (orgId) await sql`UPDATE orgs SET raised = raised + ${amount} WHERE id = ${orgId}`;
+      await sql`UPDATE donations SET counted_in_raised = TRUE WHERE id = ${donationId}`;
+    }
 
     // Fire-and-forget the receipt email. Errors here MUST NOT bubble up — the
     // donation is already committed, the donor's flow shouldn't fail just

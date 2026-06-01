@@ -302,6 +302,10 @@ export function App() {
           // for admin verification. Server picks 'paid' (partner) / 'completed'
           // otherwise.
           slipImage: slip || undefined,
+          // Funding target → moves the progress bar when the donation
+          // completes. Riba → org, Sadaqah → campaign.
+          orgId:      activeFlow === 'riba' ? (selectedOrg || undefined) : undefined,
+          campaignId: activeFlow === 'sadaqah' ? (campaign || undefined) : undefined,
         }),
       });
       void data.refresh();
