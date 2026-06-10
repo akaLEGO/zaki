@@ -32,11 +32,13 @@ interface ServiceDeckItem {
 // + emphasis), HomeScreen will merge it on top of these defaults so the
 // admin can re-prioritize without a code push.
 export const SERVICE_DECK: ServiceDeckItem[] = [
-  { id: 'qurban',     bg: '#7B5E2C', fg: '#fff',     accent: '#F0D88E', ribbon: 'QURBAN',     hook: 'เลือกทำกุรบ่านให้พี่น้องทั่วโลก', sub: 'เปรียบเทียบ 4 ประเทศ · ร่วมกับ Ummatee', icon: 'qurban', featured: true, featuredBadge: '🔥 ใกล้อีดิลอัฎฮา' },
-  { id: 'riba',       bg: '#0D3B2E', fg: '#fff',     accent: '#C9A94A', ribbon: 'RIBA',       hook: 'ไม่รู้จะทำยังไงกับดอกเบี้ยที่มี?',          sub: 'เคลียร์ให้เกิดประโยชน์',     icon: 'riba' },
+  // Post-Eid season: Riba (Kaff's flagship differentiator) leads; Qurban
+  // moves to the bottom until next Dhul-Hijjah.
+  { id: 'riba',       bg: '#0D3B2E', fg: '#fff',     accent: '#C9A94A', ribbon: 'RIBA',       hook: 'ไม่รู้จะทำยังไงกับดอกเบี้ยที่มี?',          sub: 'เคลียร์ให้เกิดประโยชน์ · 100% ถึงผู้รับ', icon: 'riba', featured: true },
   { id: 'zakat',      bg: '#C9A94A', fg: '#1f1707', accent: '#0D3B2E', ribbon: 'ZAKAT',      hook: 'รู้ได้ไงว่าซะกาตให้ได้ประโยชน์สูงสุด?',     sub: 'คำนวณ 2.5% · เลือกผู้รับ',  icon: 'zakat' },
-  { id: 'compulsory', bg: '#3B5E48', fg: '#fff',     accent: '#E8D58A', ribbon: 'WAJIB',      hook: 'ฟิดยะห์ · ฟิฏร · กัฟฟารอฮ์ ครบที่นี่',    sub: 'ระบบช่วยคำนวณให้',          icon: 'compulsory' },
   { id: 'sadaqah',    bg: '#4A8B6A', fg: '#fff',     accent: '#F5EDD3', ribbon: 'SADAQAH',    hook: 'บริจาคตามศรัทธา ถูกที่ถูกเวลา',             sub: 'แคมเปญที่เลือกมาให้คุณ',    icon: 'sadaqah' },
+  { id: 'compulsory', bg: '#3B5E48', fg: '#fff',     accent: '#E8D58A', ribbon: 'WAJIB',      hook: 'ฟิดยะห์ · ฟิฏร · กัฟฟารอฮ์ ครบที่นี่',    sub: 'ระบบช่วยคำนวณให้',          icon: 'compulsory' },
+  { id: 'qurban',     bg: '#7B5E2C', fg: '#fff',     accent: '#F0D88E', ribbon: 'QURBAN',     hook: 'เลือกทำกุรบ่านให้พี่น้องทั่วโลก', sub: 'เปรียบเทียบ 4 ประเทศ · ร่วมกับ Ummatee', icon: 'qurban' },
 ];
 
 export type CompulsoryWording = 'wajib' | 'duty' | 'complete' | 'compulsory';
@@ -55,6 +57,134 @@ interface HomeScreenProps {
   onTab: (t: Tab) => void;
   compulsoryWording?: CompulsoryWording;
   homeLayout?: HomeLayout;
+}
+
+// ─── Transparency / social proof ────────────────────────────────────────────
+// Strip under the header: verified totals + the latest donor (first name
+// only). Tapping opens a sheet with the per-flow breakdown. Data is public
+// /api/stats — completed + non-test donations only.
+
+interface StatsResponse {
+  totals: { count: number; amount: number; donors: number };
+  byFlow: { flow: string; count: number; amount: number }[];
+  recent: { firstName: string | null; flow: string; at: string }[];
+}
+
+const FLOW_TH: Record<string, string> = {
+  riba: 'เคลียร์ดอกเบี้ย', zakat: 'ซะกาต', fitrah: 'ฟิฏร', fidyah: 'ฟิดยะห์',
+  kaffarah: 'กัฟฟารอฮ์', qurban: 'กุรบ่าน', sadaqah: 'ศ่อดะเกาะฮ์',
+};
+
+function thaiTimeAgo(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(ms / 60_000);
+  if (m < 1) return 'เมื่อสักครู่';
+  if (m < 60) return `${m} นาทีที่แล้ว`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} ชม.ที่แล้ว`;
+  return `${Math.floor(h / 24)} วันที่แล้ว`;
+}
+
+function TransparencyStrip() {
+  const [stats, setStats] = useState<StatsResponse | null>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    apiFetch<StatsResponse>('/api/stats').then(setStats).catch(() => { /* strip just stays hidden */ });
+  }, []);
+
+  // Nothing verified yet → render nothing (an empty "฿0" strip would hurt
+  // trust more than help).
+  if (!stats || stats.totals.count === 0) return null;
+
+  const latest = stats.recent[0];
+
+  return (
+    <>
+      <button onClick={() => setOpen(true)} style={{
+        width: '100%', marginBottom: 12,
+        padding: '10px 14px', borderRadius: 14,
+        background: '#fff', border: `1.5px solid ${Z.line}`,
+        display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left',
+      }}>
+        <span style={{
+          width: 8, height: 8, borderRadius: 999, background: Z.sage, flexShrink: 0,
+          boxShadow: `0 0 0 3px ${Z.sageSoft}`,
+        }} />
+        <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: Z.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <b style={{ color: Z.forest }}>฿{stats.totals.amount.toLocaleString()}</b> ส่งถึงผู้รับแล้ว · {stats.totals.donors.toLocaleString()} ผู้ให้
+          {latest && <> · ล่าสุด {latest.firstName || 'ผู้ให้ท่านหนึ่ง'} {FLOW_TH[latest.flow] || latest.flow}</>}
+        </span>
+        <Icon name="chevDown" size={14} color={Z.muted} />
+      </button>
+
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{
+            position: 'fixed', inset: 0, background: 'rgba(14,26,20,0.45)', zIndex: 80,
+          }} />
+          <div style={{
+            position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 81,
+            maxWidth: 480, margin: '0 auto',
+            background: Z.surface, borderRadius: '24px 24px 0 0',
+            padding: '20px 20px 32px', maxHeight: '75vh', overflowY: 'auto',
+          }}>
+            <div style={{ width: 40, height: 4, borderRadius: 999, background: Z.line, margin: '0 auto 16px' }} />
+            <div style={{ fontSize: 17, fontWeight: 800, color: Z.forest }}>ความโปร่งใส · ตัวเลขจริง</div>
+            <div style={{ marginTop: 2, fontSize: 12, color: Z.muted }}>
+              เฉพาะรายการที่ยืนยันแล้ว · อัปเดตเรียลไทม์ · ไม่รวมรายการทดสอบ
+            </div>
+
+            <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div style={{ background: '#fff', borderRadius: 14, padding: 14, border: `1.5px solid ${Z.line}` }}>
+                <div style={{ fontSize: 11, color: Z.muted, fontWeight: 600 }}>ส่งถึงผู้รับแล้ว</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: Z.forest, fontVariantNumeric: 'tabular-nums' }}>฿{stats.totals.amount.toLocaleString()}</div>
+              </div>
+              <div style={{ background: '#fff', borderRadius: 14, padding: 14, border: `1.5px solid ${Z.line}` }}>
+                <div style={{ fontSize: 11, color: Z.muted, fontWeight: 600 }}>ผู้ให้ทั้งหมด</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: Z.forest, fontVariantNumeric: 'tabular-nums' }}>{stats.totals.donors.toLocaleString()} คน</div>
+              </div>
+            </div>
+
+            {stats.byFlow.length > 0 && (
+              <div style={{ marginTop: 12, background: '#fff', borderRadius: 14, border: `1.5px solid ${Z.line}`, overflow: 'hidden' }}>
+                {stats.byFlow.map((f, i) => (
+                  <div key={f.flow} style={{
+                    padding: '10px 14px', display: 'flex', justifyContent: 'space-between',
+                    borderTop: i ? `1px solid ${Z.line}` : 'none', fontSize: 13,
+                  }}>
+                    <span style={{ color: Z.ink, fontWeight: 600 }}>{FLOW_TH[f.flow] || f.flow}</span>
+                    <span style={{ color: Z.forest, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>฿{f.amount.toLocaleString()} · {f.count} ครั้ง</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {stats.recent.length > 0 && (
+              <>
+                <div style={{ marginTop: 14, fontSize: 12, color: Z.muted, fontWeight: 700, letterSpacing: '0.06em' }}>การให้ล่าสุด</div>
+                <div style={{ marginTop: 6, background: '#fff', borderRadius: 14, border: `1.5px solid ${Z.line}`, overflow: 'hidden' }}>
+                  {stats.recent.map((r, i) => (
+                    <div key={i} style={{
+                      padding: '10px 14px', display: 'flex', justifyContent: 'space-between', gap: 8,
+                      borderTop: i ? `1px solid ${Z.line}` : 'none', fontSize: 12.5,
+                    }}>
+                      <span style={{ color: Z.ink }}>🤲 {r.firstName || 'ผู้ให้ท่านหนึ่ง'} · {FLOW_TH[r.flow] || r.flow}</span>
+                      <span style={{ color: Z.muted, whiteSpace: 'nowrap' }}>{thaiTimeAgo(r.at)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <div style={{ marginTop: 14, fontSize: 11, color: Z.muted, textAlign: 'center', lineHeight: 1.5 }}>
+              ✓ 100% ของเงินบริจาคถึงผู้รับ — Kaff อยู่ได้ด้วยความเมตตาจากผู้ใช้
+            </div>
+          </div>
+        </>
+      )}
+    </>
+  );
 }
 
 export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib', homeLayout = 'stacked' }: HomeScreenProps) {
@@ -218,6 +348,7 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
             padding: '0 16px',
             WebkitOverflowScrolling: 'touch',
           }}>
+            <TransparencyStrip />
             <div style={{ position: 'relative', minHeight: totalHeight }}>
               {cards.map(({ s, top, height, isLast }, i) => {
                 const isFocused = focused === s.id;
@@ -263,6 +394,7 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
           overflowY: 'auto',
           display: 'flex', flexDirection: 'column', gap: 12,
         }}>
+          <TransparencyStrip />
           {deck.map(s => {
             const isFocused = focused === s.id;
             return (

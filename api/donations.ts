@@ -88,6 +88,9 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
       // the campaign/org progress bar when the donation completes.
       campaignId:     { type: 'string', max: 64, pattern: /^[a-z0-9-]+$/ },
       orgId:          { type: 'string', max: 64, pattern: /^[a-z0-9-]+$/ },
+      // "อุทิศแด่ / ทำในนามของ" — dedication giving (e.g. on behalf of a
+      // deceased parent). Optional; shown on receipt + share card + email.
+      dedication:     { type: 'string', max: 200 },
     });
     if (!v.ok) return res.status(400).json({ error: v.error });
     const b = v.value as Record<string, unknown>;
@@ -158,7 +161,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
         status, niyyah, partner_id,
         donor_first_name, donor_last_name, donor_email, donor_phone, donor_line_id,
         is_test, donor_ip, donor_ua, risk_tier, phase,
-        slip_image, slip_uploaded_at, campaign_id, org_id
+        slip_image, slip_uploaded_at, campaign_id, org_id, dedication
       )
       VALUES (
         ${newRef()}, ${auth?.userId || null}, ${flow}, ${amount}, ${fee},
@@ -170,7 +173,8 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
         ${(b.donorLineId as string) ?? null},
         ${isTest}, ${ip}, ${ua}, ${tier}, ${phase},
         ${slipImage}, ${slipImage ? new Date().toISOString() : null},
-        ${(b.campaignId as string) ?? null}, ${(b.orgId as string) ?? null}
+        ${(b.campaignId as string) ?? null}, ${(b.orgId as string) ?? null},
+        ${(b.dedication as string) ?? null}
       )
       RETURNING id, ref, flow, amount, fee_amount AS "feeAmount", destination,
                 pay_method AS "payMethod", status, niyyah,
@@ -182,6 +186,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
                 donor_line_id    AS "donorLineId",
                 is_test AS "isTest",
                 risk_tier AS "riskTier",
+                dedication,
                 to_char(created_at, 'DD Mon YYYY HH24:MI') AS "createdAt"
     `;
     // Seed donation_events with the initial state so the admin timeline starts
@@ -217,6 +222,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
       flow: String(r.flow),
       destination: (r.destination as string | null) ?? null,
       niyyah: (r.niyyah as string | null) ?? null,
+      dedication: (r.dedication as string | null) ?? null,
       donorFirstName: String(r.donorFirstName ?? ''),
       donorLastName:  String(r.donorLastName ?? ''),
       donorEmail:     String(r.donorEmail ?? ''),

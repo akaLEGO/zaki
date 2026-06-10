@@ -35,6 +35,7 @@ export default withErrors(async function handler(req: VercelRequest, res: Vercel
            donor_ua   AS "donorUa",
            slip_image AS "slipImage",
            to_char(slip_uploaded_at, 'DD Mon YYYY HH24:MI') AS "slipUploadedAt",
+           dedication,
            to_char(partner_notified_at,   'DD Mon YYYY HH24:MI') AS "partnerNotifiedAt",
            to_char(partner_confirmed_at,  'DD Mon YYYY HH24:MI') AS "partnerConfirmedAt",
            to_char(customer_confirmed_at, 'DD Mon YYYY HH24:MI') AS "customerConfirmedAt",

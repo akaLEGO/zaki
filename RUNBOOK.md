@@ -36,6 +36,7 @@ db/008_funnel_events.sql funnel_events table + donations.phase
 db/009_tipping_model.sql flow='tip' + parent_donation_id
 db/010_slip_verification.sql  slip_image + slip_uploaded_at
 db/011_donation_targets.sql   campaign_id + org_id + counted_in_raised
+db/012_dedication_zakat_reminders.sql  dedication column + zakat_reminders table
 ```
 
 How: Neon → SQL Editor → paste each file's contents → Run. A green
@@ -81,6 +82,7 @@ Preview if you test there).
 | `KAFF_PHASE` | `closed_beta` | stamps donations + funnel rows; bump to `soft_launch` / `public` as you roll out |
 | `VITE_KAFF_TESTING_MODE` | `true` | **keep `true` until ready for real money** (see §4) |
 | `VITE_LIFF_ID` | `1234567890-AbCdEfGh` | only needed for `/liff.html` (LINE) — leave unset if not using LIFF yet |
+| `CRON_SECRET` | any random string | guards the daily zakat-reminder cron (vercel.json schedules it 08:00 ICT) |
 
 - [ ] Clerk keys set
 - [ ] PromptPay NGO + Kaff set (real accounts)

@@ -108,6 +108,9 @@ export function App() {
 
   const [payMethod, setPayMethod] = useState<PayMethod>('qr');
   const [niyyahConfirmed, setNiyyahConfirmed] = useState(false);
+  // Dedication giving — "อุทิศแด่ / ทำในนามของ" (e.g. deceased parent).
+  // Empty string = not dedicating; cleared when starting a new flow.
+  const [dedication, setDedication] = useState('');
   // True when the just-completed donation is awaiting slip verification
   // (real bank/QR payment with a slip attached) → success screen shows the
   // "รอตรวจสอบ" state instead of "สำเร็จ".
@@ -261,8 +264,8 @@ export function App() {
     }
   }, [activeFlow, ribaAmount, selectedOrg, zakatValues, asnaf, zakatRecipient, fitrahCount, fidyahDays, kaffType, qurbanCountry, qurbanAnimal, qurbanCowShares, campaign, iftarMeals]);
 
-  const goHome = () => { setScreen('home'); setTab('home'); setNiyyahConfirmed(false); setActiveFlow(null); };
-  const goCheckout = (flow: ActiveFlow) => { setActiveFlow(flow); setNiyyahConfirmed(false); setScreen('checkout'); };
+  const goHome = () => { setScreen('home'); setTab('home'); setNiyyahConfirmed(false); setActiveFlow(null); setDedication(''); };
+  const goCheckout = (flow: ActiveFlow) => { setActiveFlow(flow); setNiyyahConfirmed(false); setDedication(''); setScreen('checkout'); };
   const goPay = () => {
     track('donation_started', {
       flow: activeFlow ?? undefined,
@@ -306,6 +309,7 @@ export function App() {
           // completes. Riba → org, Sadaqah → campaign.
           orgId:      activeFlow === 'riba' ? (selectedOrg || undefined) : undefined,
           campaignId: activeFlow === 'sadaqah' ? (campaign || undefined) : undefined,
+          dedication: dedication.trim() || undefined,
         }),
       });
       void data.refresh();
@@ -414,6 +418,7 @@ export function App() {
         payMethod={payMethod} setPayMethod={setPayMethod}
         niyyahConfirmed={niyyahConfirmed} setNiyyahConfirmed={setNiyyahConfirmed}
         donor={donor} setDonor={setDonor}
+        dedication={dedication} setDedication={setDedication}
         onBack={() => {
           const map: Record<string, Screen> = {
             riba: 'riba-2', zakat: 'zakat-2',
@@ -435,7 +440,7 @@ export function App() {
       view = <BaseUSDCPayment amount={summary.amount} onBack={() => setScreen('checkout')} onConfirm={(slip) => { setAwaitingVerify(false); void recordDonation(slip); setScreen('success'); }} />;
       break;
     case 'success':
-      view = <SuccessScreen summary={{ ...summary, payMethod }} donor={donor} pending={awaitingVerify} onHome={goHome} />;
+      view = <SuccessScreen summary={{ ...summary, payMethod }} donor={donor} dedication={dedication} pending={awaitingVerify} onHome={goHome} />;
       break;
     default:
       view = <HomeScreen onService={openService} tab={tab} onTab={handleTab} />;

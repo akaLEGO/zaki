@@ -173,14 +173,18 @@ function donorComplete(d: Donor) {
          d.phone.trim().length >= 6;
 }
 
-export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirmed, setNiyyahConfirmed, donor, setDonor, onBack, onNext }: {
+export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirmed, setNiyyahConfirmed, donor, setDonor, dedication, setDedication, onBack, onNext }: {
   summary: Summary; payMethod: PayMethod; setPayMethod: (m: PayMethod) => void;
   niyyahConfirmed: boolean; setNiyyahConfirmed: (b: boolean) => void;
   donor: Donor; setDonor: (d: Donor) => void;
+  dedication: string; setDedication: (s: string) => void;
   onBack: () => void; onNext: () => void;
 }) {
   const isDonorComplete = donorComplete(donor);
   const update = (k: keyof Donor, v: string) => setDonor({ ...donor, [k]: v });
+  // Dedication is collapsed behind a checkbox to keep checkout clean; the
+  // name field only appears when ticked. Unticking clears it.
+  const [dedicating, setDedicating] = useState(dedication.trim() !== '');
   const [policy, setPolicy] = useState<PolicyKind | null>(null);
   const methods: { id: PayMethod; label: string; sub: string; icon: ZIconName }[] = [
     { id: 'qr', label: 'Thai QR (PromptPay)', sub: 'สแกนผ่านแอปธนาคาร', icon: 'qr' },
@@ -217,6 +221,58 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
             confirmed={niyyahConfirmed}
             onConfirm={() => setNiyyahConfirmed(!niyyahConfirmed)}
           />
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <button
+            onClick={() => {
+              const next = !dedicating;
+              setDedicating(next);
+              if (!next) setDedication('');
+            }}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+              padding: '12px 14px', background: '#fff',
+              border: `1.5px solid ${dedicating ? Z.gold : Z.line}`,
+              borderRadius: dedicating ? '14px 14px 0 0' : 14,
+              textAlign: 'left',
+            }}
+          >
+            <div style={{
+              width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+              border: `2px solid ${dedicating ? Z.forest : Z.line}`,
+              background: dedicating ? Z.forest : '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {dedicating && <Icon name="check" size={13} color="#fff" strokeWidth={3} />}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: Z.ink }}>🤲 ทำในนามของผู้อื่น / อุทิศแด่ผู้ล่วงลับ</div>
+              {!dedicating && <div style={{ fontSize: 11.5, color: Z.muted, marginTop: 1 }}>เช่น กุรบ่านแทนมารดา · ศ่อดะเกาะฮ์ญาริยะฮ์</div>}
+            </div>
+          </button>
+          {dedicating && (
+            <div style={{
+              padding: '12px 14px 14px', background: '#FBF6E4',
+              border: `1.5px solid ${Z.gold}`, borderTop: 'none',
+              borderRadius: '0 0 14px 14px',
+            }}>
+              <input
+                value={dedication}
+                onChange={e => setDedication(e.target.value)}
+                placeholder="ชื่อผู้ที่อุทิศให้ เช่น มารดา ฮัสนะห์"
+                autoFocus
+                style={{
+                  width: '100%', height: 40, padding: '0 12px',
+                  background: '#fff', border: `1.5px solid ${Z.goldSoft}`,
+                  borderRadius: 10, fontSize: 14, color: Z.ink, outline: 'none',
+                }}
+              />
+              <div style={{ marginTop: 6, fontSize: 11, color: '#7a5e10' }}>
+                ชื่อนี้จะปรากฏบนใบเสร็จและการ์ดแชร์
+              </div>
+            </div>
+          )}
         </div>
 
         <div style={{ marginTop: 18 }}>
@@ -739,7 +795,7 @@ export function BaseUSDCPayment({ amount, onBack, onConfirm }: { amount: number;
   );
 }
 
-export function SuccessScreen({ summary, donor, pending, onHome }: { summary: Summary; donor?: Donor; pending?: boolean; onHome: () => void }) {
+export function SuccessScreen({ summary, donor, dedication, pending, onHome }: { summary: Summary; donor?: Donor; dedication?: string; pending?: boolean; onHome: () => void }) {
   const [animated, setAnimated] = useState(false);
   const [policy, setPolicy] = useState<PolicyKind | null>(null);
   useEffect(() => {
@@ -758,8 +814,10 @@ export function SuccessScreen({ summary, donor, pending, onHome }: { summary: Su
     .join(' ');
   const donorDisplay = donorFullName ? `คุณ${donorFullName}` : 'ผู้บริจาค';
 
+  const dedicationName = dedication?.trim() || '';
   const shareText = [
     `${donorDisplay} ${summary.shortImpact || 'บริจาค'} ${fmtTHB(summary.amount)}`,
+    dedicationName ? `🤲 อุทิศแด่ ${dedicationName}` : '',
     summary.dest && summary.dest !== '—' ? `ส่งต่อให้ ${summary.dest}` : '',
     summary.impactText || '',
     '',
@@ -880,6 +938,7 @@ export function SuccessScreen({ summary, donor, pending, onHome }: { summary: Su
             <Row label="ปลายทาง" value={summary.dest} />
             <Row label="ประเภท" value={summary.type} />
             <Row label="วิธีชำระ" value={summary.payMethod === 'qr' ? 'Thai QR' : summary.payMethod === 'bank' ? 'โอนผ่านธนาคาร' : 'USDC บน Base'} />
+            {dedicationName && <Row label="อุทิศแด่" value={`🤲 ${dedicationName}`} valueColor="#7a5e10" />}
           </div>
         </div>
 
@@ -899,6 +958,9 @@ export function SuccessScreen({ summary, donor, pending, onHome }: { summary: Su
             whiteSpace: 'pre-line',
           }}>
             <span>{donorDisplay} {summary.shortImpact || 'เคลียร์ดอกเบี้ย'} {fmtTHB(summary.amount)}</span>
+            {dedicationName && (
+              <div style={{ fontWeight: 700, marginTop: 4, fontSize: 15 }}>🤲 อุทิศแด่ {dedicationName}</div>
+            )}
             {summary.impactText && (
               <div style={{ fontWeight: 500, marginTop: 4 }}>{summary.impactText}</div>
             )}
@@ -921,6 +983,8 @@ export function SuccessScreen({ summary, donor, pending, onHome }: { summary: Su
             </button>
           </div>
         </div>
+
+        {summary.flow === 'zakat' && donor?.email && <ZakatReminderCard donor={donor} />}
 
         <TipSection donor={donor} isTest={IS_TESTING_MODE} parentFlow={summary.flow} />
 
@@ -1156,6 +1220,75 @@ function TipSection({ donor, isTest, parentFlow }: {
         background: 'transparent', color: Z.muted,
         fontSize: 12.5, textDecoration: 'underline',
       }}>ครั้งหน้า</button>
+    </div>
+  );
+}
+
+// ─── ZakatReminderCard (hawl anniversary) ───────────────────────────────────
+// One-tap opt-in shown right after a Zakat payment. We already have the
+// donor's email from the form, so a single tap registers an annual lunar-
+// year reminder — no extra typing. Cron at /api/cron/zakat-reminders sends
+// the email and re-schedules next year automatically.
+
+function ZakatReminderCard({ donor }: { donor: Donor }) {
+  const [state, setState] = useState<'idle' | 'busy' | 'done' | 'error'>('idle');
+
+  const optIn = async () => {
+    setState('busy');
+    try {
+      await apiFetch('/api/zakat-reminder', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: donor.email.trim(),
+          name: donor.firstName.trim() || undefined,
+        }),
+      });
+      setState('done');
+    } catch {
+      setState('error');
+    }
+  };
+
+  if (state === 'done') {
+    return (
+      <div style={{
+        marginTop: 16, padding: '14px 16px',
+        background: Z.sageSoft, border: `1.5px solid ${Z.sage}`,
+        borderRadius: 14, display: 'flex', gap: 10, alignItems: 'center',
+      }}>
+        <Icon name="check" size={18} color={Z.forest} strokeWidth={2.5} />
+        <div style={{ fontSize: 12.5, color: Z.forest, lineHeight: 1.5 }}>
+          <b>ตั้งเตือนแล้ว</b> — เราจะส่งอีเมลเตือนเมื่อครบรอบเฮาวล์ปีหน้า (~1 ปีจันทรคติ)
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      marginTop: 16, padding: '14px 16px',
+      background: '#fff', border: `1.5px solid ${Z.line}`,
+      borderRadius: 14,
+    }}>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+        <div style={{ fontSize: 20 }}>📿</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: Z.ink }}>เตือนซะกาตปีหน้าอัตโนมัติ</div>
+          <div style={{ marginTop: 2, fontSize: 12, color: Z.muted, lineHeight: 1.5 }}>
+            ซะกาตครบกำหนดทุก 1 ปีจันทรคติ (เฮาวล์) — ให้เราส่งอีเมลเตือนเมื่อถึงรอบ จะได้ไม่พลาด
+          </div>
+        </div>
+      </div>
+      <button onClick={optIn} disabled={state === 'busy'} style={{
+        width: '100%', marginTop: 10, padding: '10px 14px', borderRadius: 10,
+        background: state === 'busy' ? '#9aa39e' : Z.forest, color: '#fff',
+        fontWeight: 700, fontSize: 13,
+      }}>
+        {state === 'busy' ? 'กำลังตั้งเตือน…' : `เตือนฉันที่ ${donor.email.trim()}`}
+      </button>
+      {state === 'error' && (
+        <div style={{ marginTop: 6, fontSize: 11.5, color: Z.danger }}>ตั้งเตือนไม่สำเร็จ ลองใหม่อีกครั้ง</div>
+      )}
     </div>
   );
 }

@@ -1397,6 +1397,7 @@ interface DonationDetail extends DonationRow {
   refundRef: string | null;
   slipImage: string | null;
   slipUploadedAt: string | null;
+  dedication: string | null;
 }
 
 function TransactionDrawer({ id, partners, onClose, onChange }: {
@@ -1472,6 +1473,7 @@ function TransactionDrawer({ id, partners, onClose, onChange }: {
               <div><span style={{ color: AZ.muted }}>Fee: </span>{donation.feeAmount ? fmtTHB(donation.feeAmount) : '—'}</div>
               <div style={{ gridColumn: '1 / -1' }}><span style={{ color: AZ.muted }}>ปลายทาง: </span>{donation.destination || '—'}</div>
               {donation.niyyah && <div style={{ gridColumn: '1 / -1' }}><span style={{ color: AZ.muted }}>เนียต: </span>{donation.niyyah}</div>}
+              {donation.dedication && <div style={{ gridColumn: '1 / -1' }}><span style={{ color: AZ.muted }}>อุทิศแด่: </span><strong>🤲 {donation.dedication}</strong></div>}
               {donation.partnerId && (
                 <div style={{ gridColumn: '1 / -1' }}>
                   <span style={{ color: AZ.muted }}>Partner: </span>

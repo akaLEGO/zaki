@@ -19,6 +19,7 @@ interface DonationForEmail {
   flow: string;            // 'riba' | 'zakat' | ...
   destination: string | null;
   niyyah: string | null;
+  dedication?: string | null;  // "อุทิศแด่ ..." — on-behalf-of giving
   donorFirstName: string;
   donorLastName: string;
   donorEmail: string;
@@ -81,6 +82,7 @@ function receiptHtml(d: DonationForEmail): string {
           <tr><td style="padding:7px 0;color:#6B6B6B;font-size:13px;border-top:1px solid #E6DFCF;">ประเภท</td><td style="text-align:right;font-size:13px;font-weight:600;border-top:1px solid #E6DFCF;">${flowLabel}</td></tr>
           <tr><td style="padding:7px 0;color:#6B6B6B;font-size:13px;border-top:1px solid #E6DFCF;">ปลายทาง</td><td style="text-align:right;font-size:13px;font-weight:600;border-top:1px solid #E6DFCF;">${dest}</td></tr>
           <tr><td style="padding:7px 0;color:#6B6B6B;font-size:13px;border-top:1px solid #E6DFCF;">วิธีชำระ</td><td style="text-align:right;font-size:13px;font-weight:600;border-top:1px solid #E6DFCF;">${methodLabel}</td></tr>
+          ${d.dedication ? `<tr><td style="padding:7px 0;color:#6B6B6B;font-size:13px;border-top:1px solid #E6DFCF;">อุทิศแด่</td><td style="text-align:right;font-size:13px;font-weight:700;color:#7a5e10;border-top:1px solid #E6DFCF;">${escapeHtml(d.dedication)}</td></tr>` : ''}
         </table>
       </div>
       ${niyyah ? `<div style="margin-top:16px;padding:14px 16px;background:#FBF6E4;border-left:3px solid #D4AF37;border-radius:10px;font-size:13px;color:#5a4400;font-style:italic;line-height:1.5;">"${niyyah}"</div>` : ''}
@@ -110,6 +112,51 @@ export async function sendDonationReceipt(donation: DonationForEmail): Promise<{
       to: donation.donorEmail,
       subject,
       html: receiptHtml(donation),
+    });
+    if (error) return { sent: false, reason: String(error) };
+    return { sent: true };
+  } catch (e) {
+    return { sent: false, reason: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+// Annual Zakat hawl reminder — sent by /api/cron/zakat-reminders when a
+// donor's lunar-year anniversary arrives.
+export async function sendZakatReminderEmail(email: string, name: string | null): Promise<{ sent: boolean; reason?: string }> {
+  const c = getClient();
+  if (!c) return { sent: false, reason: 'RESEND_API_KEY not configured' };
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!from) return { sent: false, reason: 'RESEND_FROM_EMAIL not configured' };
+
+  const who = name ? escapeHtml(name) : 'พี่น้องที่เคารพ';
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8" /></head>
+<body style="margin:0;padding:24px;background:#F5F1E8;font-family:-apple-system,'Segoe UI',system-ui,sans-serif;color:#0E1A14;">
+  <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(13,59,46,0.08);">
+    <div style="background:linear-gradient(180deg,#0D3B2E 0%,#0E1A14 100%);color:#fff;padding:32px 24px;text-align:center;">
+      <div style="font-size:13px;color:#D4AF37;font-weight:700;letter-spacing:0.12em;">KAFF</div>
+      <div style="margin-top:12px;font-size:22px;font-weight:800;">📿 ครบรอบเฮาวล์ซะกาตของคุณแล้ว</div>
+    </div>
+    <div style="padding:24px;line-height:1.7;font-size:14px;">
+      <p>อัสสลามุอะลัยกุม คุณ${who}</p>
+      <p>ปีจันทรคติได้หมุนครบรอบอีกครั้ง — ถึงเวลาทบทวนทรัพย์สินและชำระซะกาตประจำปีของคุณ
+      เครื่องคำนวณของ Kaff พร้อมช่วยคิด 2.5% และเลือกผู้รับจาก 8 อัศนาฟ</p>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="https://kaff.me/" style="display:inline-block;background:#D4AF37;color:#1a1a14;font-weight:700;padding:12px 28px;border-radius:12px;text-decoration:none;">คำนวณซะกาต →</a>
+      </div>
+      <p style="font-size:12px;color:#6B6B6B;">เราจะเตือนอีกครั้งในปีจันทรคติหน้าโดยอัตโนมัติ</p>
+    </div>
+    <div style="padding:16px 24px;background:#F5F1E8;text-align:center;font-size:11.5px;color:#6B6B6B;border-top:1px solid #E6DFCF;">
+      <strong style="color:#0D3B2E;">Kaff</strong> · <a href="https://kaff.me" style="color:#2A6041;">kaff.me</a>
+    </div>
+  </div>
+</body></html>`;
+
+  try {
+    const { error } = await c.emails.send({
+      from, to: email,
+      subject: '📿 ครบรอบเฮาวล์ — ถึงเวลาซะกาตประจำปีของคุณ · Kaff',
+      html,
     });
     if (error) return { sent: false, reason: String(error) };
     return { sent: true };
