@@ -472,16 +472,17 @@ export function App() {
           <p className="tag">"Be the Upper Hand" · เป็นมือที่พร้อมให้ ในหนทางที่ถูกต้อง — เคลียร์ดอกเบี้ย ซะกาต ฟิฏร กุรบ่าน ศ่อดะเกาะฮ์ ในที่เดียว</p>
 
           <div className="swatchrow">
-            <div className="s" style={{ background: '#0D3B2E' }} title="Forest"></div>
-            <div className="s" style={{ background: '#2EC27E' }} title="Sage"></div>
-            <div className="s" style={{ background: '#C9A94A' }} title="Gold"></div>
-            <div className="s" style={{ background: '#F5F8F5' }} title="Surface"></div>
-            <div className="s" style={{ background: '#0A0A0A' }} title="Ink"></div>
+            <div className="s" style={{ background: '#0D3B2E' }} title="green/800 — brand"></div>
+            <div className="s" style={{ background: '#2C7D53' }} title="green/600"></div>
+            <div className="s" style={{ background: '#B9F27C' }} title="lime — accent"></div>
+            <div className="s" style={{ background: '#C9A227' }} title="gold/600"></div>
+            <div className="s" style={{ background: '#8A7538' }} title="olive/700 — Qurban"></div>
+            <div className="s" style={{ background: '#F3F7F4' }} title="paper/green"></div>
           </div>
 
           <div className="meta">
             <b>Platform</b><span>iOS · 390 × 844</span>
-            <b>Type</b><span>Sarabun · Inter</span>
+            <b>Type</b><span>IBM Plex Sans Thai · Space Grotesk</span>
             <b>Screens</b><span>{SCREEN_GROUPS.length} flow</span>
             <b>Flow</b><span>3-tap max</span>
           </div>

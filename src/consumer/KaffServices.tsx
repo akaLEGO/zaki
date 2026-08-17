@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
-  Z, Icon, GoldButton, ForestHeader, StickyBottom,
-  Card, ProgressBar, MoneyField, Stepper, Chip, TrustBadge, fmtTHB, fmtPct,
+  Z, K, G, NUM, glass, Icon, GoldButton, ForestHeader, StickyBottom,
+  Card, ProgressBar, MoneyField, Stepper, Chip, TrustBadge, Eyebrow, Amount, fmtTHB, fmtPct,
 } from './KaffUI';
 import type { AsnafId } from '../shared/types';
 import { useData } from '../lib/data-context';
@@ -11,14 +11,14 @@ export function RibaEntry({ amount, setAmount, onBack, onNext }: {
 }) {
   const presets = [50, 100, 500, 1000];
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGold }}>
       <ForestHeader
         onBack={onBack}
         title="ไม่รู้จะทำยังไงกับดอกเบี้ยที่มี?"
         sub="เคลียร์ดอกเบี้ย (Riba) ให้เกิดประโยชน์สูงสุด ส่งต่อให้สาธารณประโยชน์โดยไม่หวังบุญ"
         right={
           <div style={{
-            padding: '6px 10px', background: 'rgba(201,169,74,0.16)', color: Z.gold,
+            padding: '7px 12px', ...glass('light'), color: Z.forest,
             borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: '0.06em',
           }}>RIBA · ดอกเบี้ย</div>
         }
@@ -40,8 +40,8 @@ export function RibaEntry({ amount, setAmount, onBack, onNext }: {
         </div>
 
         <div style={{
-          marginTop: 14, padding: 16, background: '#fff',
-          borderRadius: 18, border: `1.5px solid ${Z.line}`,
+          marginTop: 14, padding: 16, background: 'rgba(255,255,255,0.72)',
+          borderRadius: 18, border: `1px solid rgba(255,255,255,0.9)`,
         }}>
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
             <div style={{ color: Z.forest }}><Icon name="info" size={20} /></div>
@@ -67,7 +67,7 @@ export function RibaEntry({ amount, setAmount, onBack, onNext }: {
         )}
       </div>
 
-      <StickyBottom>
+      <StickyBottom tone="gold">
         <GoldButton disabled={!amount} onClick={onNext}>
           เลือกองค์กร <Icon name="arrowRight" size={20} />
         </GoldButton>
@@ -82,7 +82,7 @@ export function RibaOrgSelect({ amount, selectedOrg, setSelectedOrg, onBack, onN
   const { orgs: ORG_LIST } = useData();
   const [expanded, setExpanded] = useState<string | null>(null);
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGold }}>
       <ForestHeader
         onBack={onBack}
         title="เลือกองค์กรที่ต้องการส่งต่อ"
@@ -179,7 +179,7 @@ export function RibaOrgSelect({ amount, selectedOrg, setSelectedOrg, onBack, onN
         </div>
       </div>
 
-      <StickyBottom>
+      <StickyBottom tone="gold">
         <GoldButton disabled={!selectedOrg} onClick={onNext}>
           ถัดไป <Icon name="arrowRight" size={20} />
         </GoldButton>
@@ -201,12 +201,12 @@ export function ZakatCalc({ values, setValues, onBack, onNext }: {
   const setV = (k: keyof ZakatValues, v: number) => setValues({ ...values, [k]: v });
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGold }}>
       <ForestHeader
         onBack={onBack}
         title={<>รู้ได้ไงว่าซะกาตที่ให้<br />ได้ประโยชน์สูงสุด?</>}
         sub="คำนวณ 2.5% ของทรัพย์สินที่ครอบครองครบ 1 ปี"
-        right={<div style={{ padding: '6px 10px', background: 'rgba(201,169,74,0.16)', color: Z.gold, borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: '0.06em' }}>ZAKAT · ซะกาต</div>}
+        right={<div style={{ padding: '7px 12px', ...glass('light'), color: Z.forest, borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: '0.06em' }}>ZAKAT · ซะกาต</div>}
       />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 24px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -232,7 +232,7 @@ export function ZakatCalc({ values, setValues, onBack, onNext }: {
           </div>
           <div style={{ marginTop: 10, fontSize: 13, opacity: 0.7 }}>ซะกาตที่ต้องจ่าย (2.5%)</div>
           <div style={{
-            fontSize: 40, fontWeight: 800, letterSpacing: '-0.025em', marginTop: 2,
+            ...NUM, fontSize: 40, fontWeight: 700, letterSpacing: '-0.04em', marginTop: 2,
             fontVariantNumeric: 'tabular-nums',
           }}>{fmtTHB(zakat)}</div>
           <div style={{
@@ -254,7 +254,7 @@ export function ZakatCalc({ values, setValues, onBack, onNext }: {
         </div>
       </div>
 
-      <StickyBottom>
+      <StickyBottom tone="gold">
         <GoldButton disabled={!meetsNisab || zakat === 0} onClick={onNext}>
           เลือกกลุ่มผู้รับ <Icon name="arrowRight" size={20} />
         </GoldButton>
@@ -271,7 +271,7 @@ export function ZakatAsnaf({ zakatAmount, asnaf, setAsnaf, recipient, setRecipie
   const { asnaf: ASNAF, recipients: ASNAF_RECIPIENTS } = useData();
   const recipients = ASNAF_RECIPIENTS[asnaf] || [];
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGold }}>
       <ForestHeader
         onBack={onBack}
         title="เลือกกลุ่มที่ต้องการช่วย"
@@ -279,7 +279,7 @@ export function ZakatAsnaf({ zakatAmount, asnaf, setAsnaf, recipient, setRecipie
         compact
       />
       <div style={{
-        background: '#fff', borderBottom: `1px solid ${Z.line}`,
+        background: 'rgba(255,255,255,0.72)', borderBottom: `1px solid ${Z.line}`,
         padding: '12px 0',
       }}>
         <div style={{
@@ -361,7 +361,7 @@ export function ZakatAsnaf({ zakatAmount, asnaf, setAsnaf, recipient, setRecipie
         )}
       </div>
 
-      <StickyBottom>
+      <StickyBottom tone="gold">
         <GoldButton disabled={recipient === null} onClick={onNext}>
           ถัดไป <Icon name="arrowRight" size={20} />
         </GoldButton>
@@ -389,7 +389,7 @@ export function CompulsoryScreen({
     { id: 'kaffarah', label: 'Kaffarah', sub: 'กัฟฟารอฮ์' },
   ];
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGreen }}>
       <ForestHeader
         onBack={onBack}
         title="เปลี่ยนเรื่องวาญิบให้ง่ายยิ่งกว่า"
@@ -397,7 +397,7 @@ export function CompulsoryScreen({
         compact
       />
       <div style={{
-        background: '#fff', borderBottom: `1px solid ${Z.line}`,
+        background: 'rgba(255,255,255,0.72)', borderBottom: `1px solid ${Z.line}`,
         padding: '0 20px', display: 'flex', gap: 4,
       }}>
         {tabs.map(t => {
@@ -411,10 +411,12 @@ export function CompulsoryScreen({
               }}>
               {t.label}
               <div style={{ fontSize: 10, color: Z.muted, marginTop: 1 }}>{t.sub}</div>
+              {/* Wajib is a green context — gold stays reserved for
+                  Zakat / Qurban / Riba-cleanse. */}
               {active && (
                 <div style={{
                   position: 'absolute', bottom: 0, left: 4, right: 4,
-                  height: 3, background: Z.gold, borderRadius: 2,
+                  height: 3, background: Z.forest, borderRadius: 2,
                 }} />
               )}
             </button>
@@ -451,7 +453,7 @@ function FitrahPanel({ count, setCount }: { count: number; setCount: (n: number)
         วาญิบสำหรับมุสลิมทุกคน · 1 คน = ฿30 (เทียบเท่า 2.5 กก. ข้าว)
       </div>
 
-      <div style={{ marginTop: 30, padding: 22, background: '#fff', borderRadius: 22, border: `1.5px solid ${Z.line}` }}>
+      <div style={{ marginTop: 30, padding: 22, background: 'rgba(255,255,255,0.72)', borderRadius: 22, border: `1px solid rgba(255,255,255,0.9)` }}>
         <div style={{ fontSize: 12, color: Z.muted, fontWeight: 600, textAlign: 'center' }}>จำนวนสมาชิกในบ้าน</div>
         <div style={{ marginTop: 14 }}>
           <Stepper value={count} onChange={setCount} min={1} max={20} />
@@ -464,7 +466,7 @@ function FitrahPanel({ count, setCount }: { count: number; setCount: (n: number)
             <div style={{ fontSize: 11, color: Z.forest, fontWeight: 600 }}>รวมทั้งหมด</div>
             <div style={{ fontSize: 11, color: Z.muted }}>{count} คน × ฿30</div>
           </div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: Z.forest, letterSpacing: '-0.02em' }}>{fmtTHB(total)}</div>
+          <div style={{ ...NUM, fontSize: 28, fontWeight: 700, color: Z.forest, letterSpacing: '-0.03em' }}>{fmtTHB(total)}</div>
         </div>
       </div>
 
@@ -486,7 +488,7 @@ function FidyahPanel({ days, setDays }: { days: number; setDays: (n: number) => 
         สำหรับผู้ที่ไม่สามารถถือศีลอดได้ (สูงอายุ ป่วยเรื้อรัง ตั้งครรภ์) · 1 วัน = ฿15
       </div>
 
-      <div style={{ marginTop: 30, padding: 22, background: '#fff', borderRadius: 22, border: `1.5px solid ${Z.line}` }}>
+      <div style={{ marginTop: 30, padding: 22, background: 'rgba(255,255,255,0.72)', borderRadius: 22, border: `1px solid rgba(255,255,255,0.9)` }}>
         <div style={{ fontSize: 12, color: Z.muted, fontWeight: 600, textAlign: 'center' }}>จำนวนวันที่ขาดบวช</div>
         <div style={{ marginTop: 14 }}>
           <Stepper value={days} onChange={setDays} min={1} max={30} />
@@ -499,7 +501,7 @@ function FidyahPanel({ days, setDays }: { days: number; setDays: (n: number) => 
             <div style={{ fontSize: 11, color: Z.forest, fontWeight: 600 }}>รวมทั้งหมด</div>
             <div style={{ fontSize: 11, color: Z.muted }}>{days} วัน × ฿15</div>
           </div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: Z.forest, letterSpacing: '-0.02em' }}>{fmtTHB(total)}</div>
+          <div style={{ ...NUM, fontSize: 28, fontWeight: 700, color: Z.forest, letterSpacing: '-0.03em' }}>{fmtTHB(total)}</div>
         </div>
       </div>
     </div>
@@ -596,18 +598,18 @@ export function QurbanPrices({ selected, setSelected, animal, setAnimal, cowShar
     ? selectedOption.price * (animal === 'cow' ? cowShares : 1)
     : 0;
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGold }}>
       <ForestHeader
         onBack={onBack}
         title="อยากทำกุรบ่านแต่ราคาสูงไป?"
         sub="ค้นหากุรบ่านในแบบที่พอดีกับคุณ"
-        right={<div style={{ padding: '6px 10px', background: 'rgba(201,169,74,0.16)', color: Z.gold, borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: '0.06em' }}>QURBAN · กุรบ่าน</div>}
+        right={<div style={{ padding: '7px 12px', ...glass('light'), color: Z.forest, borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: '0.06em' }}>QURBAN · กุรบ่าน</div>}
       />
       <div style={{ flex: 1, overflowY: 'auto', padding: '18px 16px 24px' }}>
 
         <div style={{
-          background: '#fff', padding: 4, borderRadius: 14,
-          border: `1.5px solid ${Z.line}`, display: 'flex', gap: 4,
+          background: 'rgba(255,255,255,0.72)', padding: 4, borderRadius: 14,
+          border: `1px solid rgba(255,255,255,0.9)`, display: 'flex', gap: 4,
           marginBottom: 16,
         }}>
           {animals.map(a => (
@@ -631,7 +633,7 @@ export function QurbanPrices({ selected, setSelected, animal, setAnimal, cowShar
         {filteredOptions.length === 0 ? (
           <div style={{
             padding: '24px 16px', textAlign: 'center',
-            background: '#fff', borderRadius: 14, border: `1.5px dashed ${Z.line}`,
+            background: 'rgba(255,255,255,0.72)', borderRadius: 14, border: `1px dashed rgba(13,59,46,0.22)`,
             color: Z.muted, fontSize: 13.5, lineHeight: 1.5,
           }}>
             ยังไม่มีตัวเลือก {animal === 'goat' ? 'แพะ' : 'วัว'} ในระบบ<br />
@@ -702,7 +704,7 @@ export function QurbanPrices({ selected, setSelected, animal, setAnimal, cowShar
                 }}
               >−</button>
               <div style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{cowShares}<span style={{ fontSize: 16, opacity: 0.55 }}>/7</span></div>
+                <div style={{ ...NUM, fontSize: 32, fontWeight: 700, lineHeight: 1 }}>{cowShares}<span style={{ fontSize: 16, opacity: 0.55 }}>/7</span></div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 4 }}>
                   {cowShares === 7 ? 'วัวเต็มตัว · ทำคนเดียว' : `ร่วม ${cowShares} ส่วน · ${7 - cowShares} ส่วนที่ระบบจัดสรร`}
                 </div>
@@ -733,7 +735,7 @@ export function QurbanPrices({ selected, setSelected, animal, setAnimal, cowShar
 
         <div style={{
           marginTop: 14, padding: '10px 14px',
-          background: '#fff', border: `1.5px solid ${Z.line}`,
+          background: 'rgba(255,255,255,0.72)', border: `1px solid rgba(255,255,255,0.9)`,
           borderRadius: 14, display: 'flex', alignItems: 'center', gap: 10,
         }}>
           <div style={{
@@ -747,8 +749,8 @@ export function QurbanPrices({ selected, setSelected, animal, setAnimal, cowShar
         </div>
       </div>
 
-      <StickyBottom>
-        <GoldButton disabled={!selected} onClick={onNext}>
+      <StickyBottom tone="gold">
+        <GoldButton tone="gold" disabled={!selected} onClick={onNext}>
           ดำเนินการต่อ <Icon name="arrowRight" size={20} />
         </GoldButton>
       </StickyBottom>
@@ -761,7 +763,7 @@ export function QurbanLocation({ location, setLocation, onBack, onNext }: {
 }) {
   const { qurbanLocations: QURBAN_LOCATIONS } = useData();
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGold }}>
       <ForestHeader onBack={onBack} title="เลือกพื้นที่แจกจ่าย" sub="เนื้อกุรบ่านจะแจกในวันอีดิลอัฎฮา" compact />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 24px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -794,8 +796,8 @@ export function QurbanLocation({ location, setLocation, onBack, onNext }: {
         </div>
       </div>
 
-      <StickyBottom>
-        <GoldButton disabled={!location} onClick={onNext}>
+      <StickyBottom tone="gold">
+        <GoldButton tone="gold" disabled={!location} onClick={onNext}>
           ยืนยันการจอง <Icon name="arrowRight" size={20} />
         </GoldButton>
       </StickyBottom>
@@ -820,19 +822,19 @@ export function SadaqahCampaigns({ campaign, setCampaign, iftarMeals, setIftarMe
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGreen }}>
       <ForestHeader
         onBack={onBack}
         title="บริจาคตามศรัทธา ให้ถูกที่ถูกเวลา"
         sub="แคมเปญที่ทีม Kaff คัดมาแล้ว"
-        right={<div style={{ padding: '6px 10px', background: 'rgba(201,169,74,0.16)', color: Z.gold, borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: '0.06em' }}>SADAQAH</div>}
+        right={<div style={{ padding: '7px 12px', ...glass('light'), color: Z.forest, borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: '0.06em' }}>SADAQAH</div>}
       />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 0 24px' }}>
 
         <div style={{ padding: '0 16px' }}>
           <Card padding={0} style={{
             overflow: 'hidden',
-            background: '#fff',
+            background: 'rgba(255,255,255,0.72)',
             border: `2px solid ${campaign === featured.id ? Z.forest : Z.line}`,
           }}>
             <div style={{
@@ -905,7 +907,7 @@ export function SadaqahCampaigns({ campaign, setCampaign, iftarMeals, setIftarMe
             return (
               <button key={c.id} onClick={() => setCampaign(c.id)} style={{
                 flex: '0 0 220px', textAlign: 'left',
-                background: '#fff', borderRadius: 18, padding: 0,
+                background: 'rgba(255,255,255,0.72)', borderRadius: 18, padding: 0,
                 border: `2px solid ${isSel ? Z.forest : Z.line}`,
                 overflow: 'hidden',
                 transition: 'border-color .15s',

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Z, Icon, ForestHeader, BottomNav } from './KaffUI';
+import { Z, K, G, glass, Icon, ForestHeader, BottomNav } from './KaffUI';
 import type { Tab, ZIconName } from './KaffUI';
 import { DISPLAY_VERSION } from '../lib/version';
 
@@ -84,12 +84,12 @@ export function FAQScreen({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void })
   }, [query]);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: Z.surface, overflowY: 'auto', position: 'relative' }}>
+    <div style={{ width: '100%', height: '100%', background: G.paperGreen, overflowY: 'auto', position: 'relative' }}>
       <ForestHeader title="คำถามที่พบบ่อย" sub="ทุกฟีเจอร์ของ Kaff · อธิบายให้เข้าใจง่าย" compact />
 
       <div style={{ padding: '18px 16px 120px' }}>
         <div style={{
-          background: '#fff', borderRadius: 16, border: `1.5px solid ${Z.line}`,
+          background: 'rgba(255,255,255,0.72)', borderRadius: 16, border: `1px solid rgba(255,255,255,0.9)`,
           padding: '4px 14px', display: 'flex', alignItems: 'center', gap: 10,
         }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={Z.muted} strokeWidth="1.8" strokeLinecap="round">
@@ -131,7 +131,7 @@ export function FAQScreen({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void })
               <div style={{ fontSize: 14, fontWeight: 700, color: Z.forest, letterSpacing: '-0.005em' }}>{g.title}</div>
               <div style={{ marginLeft: 'auto', fontSize: 11, color: Z.muted }}>{g.qs.length} คำถาม</div>
             </div>
-            <div style={{ background: '#fff', borderRadius: 18, border: `1.5px solid ${Z.line}`, overflow: 'hidden' }}>
+            <div style={{ background: 'rgba(255,255,255,0.72)', borderRadius: 18, border: `1px solid rgba(255,255,255,0.9)`, overflow: 'hidden' }}>
               {g.qs.map((item, qi) => {
                 const id = `${g.id}-${qi}`;
                 const isOpen = open === id;

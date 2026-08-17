@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import {
-  Z, Icon, GoldButton, ForestHeader, StickyBottom, NiyyahBox, KaffMark, fmtTHB,
+  Z, K, G, NUM, glass, Icon, GoldButton, ForestHeader, StickyBottom, NiyyahBox, KaffMark,
+  Eyebrow, Amount, Spinner, fmtTHB,
 } from './KaffUI';
 import type { ZIconName } from './KaffUI';
 // Fee imports kept commented for future re-introduction if policy changes.
@@ -98,7 +99,7 @@ function SlipUpload({ slip, onSlip }: { slip: string | null; onSlip: (dataUrl: s
       {slip ? (
         <div style={{
           position: 'relative', borderRadius: 16, overflow: 'hidden',
-          border: `1.5px solid ${Z.line}`, background: '#fff',
+          border: `1px solid rgba(255,255,255,0.9)`, background: 'rgba(255,255,255,0.72)',
         }}>
           <img src={slip} alt="สลิปการโอน" style={{ width: '100%', display: 'block', maxHeight: 320, objectFit: 'contain', background: '#f3f3f3' }} />
           <button onClick={() => onSlip(null)} style={{
@@ -119,7 +120,7 @@ function SlipUpload({ slip, onSlip }: { slip: string | null; onSlip: (dataUrl: s
         <label style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           gap: 8, padding: '28px 16px', borderRadius: 16,
-          border: `1.5px dashed ${Z.line}`, background: '#fff',
+          border: `1px dashed rgba(13,59,46,0.22)`, background: 'rgba(255,255,255,0.72)',
           cursor: 'pointer', textAlign: 'center',
         }}>
           <input
@@ -193,17 +194,17 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
   ];
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGreen }}>
       <ForestHeader onBack={onBack} title="ตรวจสอบและยืนยัน" sub="โอนเงินตามจิตเจตนา · ยืนยันก่อนชำระ" compact />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 24px' }}>
 
         <div style={{
-          background: '#fff', borderRadius: 22, padding: 18,
-          border: `1.5px solid ${Z.line}`,
+          background: 'rgba(255,255,255,0.72)', borderRadius: 22, padding: 18,
+          border: `1px solid rgba(255,255,255,0.9)`,
         }}>
           <div style={{ fontSize: 11, color: Z.muted, letterSpacing: '0.08em', fontWeight: 600 }}>คุณกำลังบริจาค</div>
           <div style={{
-            fontSize: 42, fontWeight: 800, color: Z.forest,
+            ...NUM, fontSize: 42, fontWeight: 700, color: Z.forest,
             letterSpacing: '-0.025em', marginTop: 2, lineHeight: 1.05,
             fontVariantNumeric: 'tabular-nums',
           }}>{fmtTHB(summary.amount)}</div>
@@ -232,7 +233,7 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
             }}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-              padding: '12px 14px', background: '#fff',
+              padding: '12px 14px', background: 'rgba(255,255,255,0.72)',
               border: `1.5px solid ${dedicating ? Z.gold : Z.line}`,
               borderRadius: dedicating ? '14px 14px 0 0' : 14,
               textAlign: 'left',
@@ -264,7 +265,7 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
                 autoFocus
                 style={{
                   width: '100%', height: 40, padding: '0 12px',
-                  background: '#fff', border: `1.5px solid ${Z.goldSoft}`,
+                  background: 'rgba(255,255,255,0.72)', border: `1.5px solid ${Z.goldSoft}`,
                   borderRadius: 10, fontSize: 14, color: Z.ink, outline: 'none',
                 }}
               />
@@ -277,7 +278,7 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
 
         <div style={{ marginTop: 18 }}>
           <div style={{ fontSize: 13, color: Z.muted, fontWeight: 600, marginBottom: 8, padding: '0 4px' }}>ข้อมูลผู้บริจาค</div>
-          <div style={{ background: '#fff', borderRadius: 18, border: `1.5px solid ${Z.line}`, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ background: 'rgba(255,255,255,0.72)', borderRadius: 18, border: `1px solid rgba(255,255,255,0.9)`, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <DonorField label="ชื่อ" value={donor.firstName} onChange={v => update('firstName', v)} placeholder="ชื่อจริง" required />
               <DonorField label="นามสกุล" value={donor.lastName} onChange={v => update('lastName', v)} placeholder="นามสกุล" required />
@@ -316,7 +317,7 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
 
         <div style={{ marginTop: 18 }}>
           <div style={{ fontSize: 13, color: Z.muted, fontWeight: 600, marginBottom: 8, padding: '0 4px' }}>วิธีชำระเงิน</div>
-          <div style={{ background: '#fff', borderRadius: 18, border: `1.5px solid ${Z.line}`, overflow: 'hidden' }}>
+          <div style={{ background: 'rgba(255,255,255,0.72)', borderRadius: 18, border: `1px solid rgba(255,255,255,0.9)`, overflow: 'hidden' }}>
             {methods.map((m, i) => {
               const isSel = payMethod === m.id;
               return (
@@ -340,7 +341,7 @@ export function CheckoutScreen({ summary, payMethod, setPayMethod, niyyahConfirm
                   <div style={{
                     width: 22, height: 22, borderRadius: 999,
                     border: `2px solid ${isSel ? Z.forest : Z.line}`,
-                    background: '#fff', position: 'relative',
+                    background: 'rgba(255,255,255,0.72)', position: 'relative',
                   }}>
                     {isSel && <div style={{
                       position: 'absolute', inset: 3, borderRadius: 999, background: Z.forest,
@@ -409,7 +410,7 @@ function DonorField({ label, value, onChange, placeholder, type = 'text', requir
         onChange={e => onChange(e.target.value)}
         style={{
           width: '100%', height: 40, padding: '0 12px',
-          background: '#fff', border: `1.5px solid ${error ? Z.danger : Z.line}`,
+          background: 'rgba(255,255,255,0.72)', border: `1.5px solid ${error ? Z.danger : Z.line}`,
           borderRadius: 10, fontSize: 14, color: Z.ink, outline: 'none',
           fontFamily: 'inherit',
         }}
@@ -456,7 +457,7 @@ export function QRPayment({ amount, onBack, onConfirm }: { amount: number; onBac
   const ss = String(secs % 60).padStart(2, '0');
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGreen }}>
       <ForestHeader onBack={onBack} title="สแกนเพื่อชำระ" sub="Thai QR · PromptPay · รองรับทุกธนาคาร" compact />
       <TestingBanner />
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -468,8 +469,8 @@ export function QRPayment({ amount, onBack, onConfirm }: { amount: number; onBac
         }}>{fmtTHB(amount)}</div>
 
         <div style={{
-          marginTop: 20, padding: 18, background: '#fff', borderRadius: 24,
-          border: `1.5px solid ${Z.line}`,
+          marginTop: 20, padding: 18, background: 'rgba(255,255,255,0.72)', borderRadius: 24,
+          border: `1px solid rgba(255,255,255,0.9)`,
           width: '100%',
           display: 'flex', flexDirection: 'column', alignItems: 'center',
         }}>
@@ -557,7 +558,7 @@ function FakeQR({ size = 200, style = {} }: { size?: number; style?: CSSProperti
   const cell = size / N;
   return (
     <div style={{
-      width: size, height: size, background: '#fff', position: 'relative',
+      width: size, height: size, background: 'rgba(255,255,255,0.72)', position: 'relative',
       ...style,
     }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -606,11 +607,11 @@ export function BankTransfer({ amount, onBack, onConfirm }: { amount: number; on
         { key: 'amt',  label: 'จำนวนเงิน',   value: '฿' + amount.toLocaleString(), big: true },
       ];
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGreen }}>
       <ForestHeader onBack={onBack} title="โอนผ่านธนาคาร" sub="คัดลอกแล้วเปิดแอปธนาคารของคุณ" compact />
       <TestingBanner />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 24px' }}>
-        <div style={{ background: '#fff', borderRadius: 20, border: `1.5px solid ${Z.line}`, overflow: 'hidden' }}>
+        <div style={{ background: 'rgba(255,255,255,0.72)', borderRadius: 20, border: `1px solid rgba(255,255,255,0.9)`, overflow: 'hidden' }}>
           {fields.map((f, i) => (
             <div key={f.key} style={{
               padding: '14px 16px',
@@ -708,7 +709,7 @@ export function BaseUSDCPayment({ amount, onBack, onConfirm }: { amount: number;
   };
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGreen }}>
       <ForestHeader onBack={onBack} title="USDC บน Base" sub="โอน USDC บน Base mainnet · low gas · ~1 นาที" compact />
       <TestingBanner />
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -728,8 +729,8 @@ export function BaseUSDCPayment({ amount, onBack, onConfirm }: { amount: number;
         </div>
 
         <div style={{
-          marginTop: 20, padding: 18, background: '#fff', borderRadius: 24,
-          border: `1.5px solid ${Z.line}`,
+          marginTop: 20, padding: 18, background: 'rgba(255,255,255,0.72)', borderRadius: 24,
+          border: `1px solid rgba(255,255,255,0.9)`,
           width: '100%',
           display: 'flex', flexDirection: 'column', alignItems: 'center',
         }}>
@@ -765,7 +766,7 @@ export function BaseUSDCPayment({ amount, onBack, onConfirm }: { amount: number;
 
         <div style={{
           marginTop: 14, padding: 12, borderRadius: 12,
-          background: '#fff', border: `1.5px solid ${Z.line}`,
+          background: 'rgba(255,255,255,0.72)', border: `1px solid rgba(255,255,255,0.9)`,
           width: '100%', display: 'flex', gap: 10, alignItems: 'flex-start',
         }}>
           <div style={{ fontSize: 20 }}>📱</div>
@@ -867,7 +868,7 @@ export function SuccessScreen({ summary, donor, dedication, pending, onHome }: {
   const impact = impactLines[summary.type] || 'สร้างผลกระทบจริงในชุมชน';
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: Z.surface }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGreen }}>
       <div style={{
         background: `linear-gradient(180deg, ${Z.forest} 0%, ${Z.forestDeep} 100%)`,
         color: '#fff', padding: '60px 20px 36px',
@@ -876,21 +877,21 @@ export function SuccessScreen({ summary, donor, dedication, pending, onHome }: {
         textAlign: 'center',
       }}>
         <div style={{
-          width: 84, height: 84, margin: '0 auto', borderRadius: 999,
-          background: Z.sage,
+          width: 92, height: 92, margin: '0 auto', borderRadius: 999,
+          background: K.lime,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           position: 'relative',
           boxShadow: animated
-            ? '0 0 0 12px rgba(46,194,126,0.18), 0 0 0 28px rgba(46,194,126,0.08)'
-            : '0 0 0 0 rgba(46,194,126,0.18), 0 0 0 0 rgba(46,194,126,0)',
+            ? '0 0 0 12px rgba(185,242,124,0.18), 0 0 0 28px rgba(185,242,124,0.08)'
+            : '0 0 0 0 rgba(185,242,124,0.18), 0 0 0 0 rgba(185,242,124,0)',
           transform: animated ? 'scale(1)' : 'scale(0.5)',
           transitionProperty: 'box-shadow, transform',
           transitionDuration: '1.2s, .5s',
           transitionTimingFunction: 'ease, cubic-bezier(.34, 1.56, .64, 1)',
         }}>
-          <svg width="44" height="44" viewBox="0 0 44 44">
+          <svg width="46" height="46" viewBox="0 0 44 44">
             <path d="M10 22 19 31 35 14"
-              fill="none" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
+              fill="none" stroke="#123322" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
               style={{
                 strokeDasharray: 60,
                 strokeDashoffset: animated ? 0 : 60,
@@ -921,7 +922,7 @@ export function SuccessScreen({ summary, donor, dedication, pending, onHome }: {
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 24px' }}>
-        <div style={{ background: '#fff', borderRadius: 20, padding: 18, border: `1.5px solid ${Z.line}` }}>
+        <div style={{ background: 'rgba(255,255,255,0.72)', borderRadius: 20, padding: 18, border: `1px solid rgba(255,255,255,0.9)` }}>
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             paddingBottom: 14, borderBottom: `1px dashed ${Z.line}`,
@@ -1118,11 +1119,11 @@ function TipSection({ donor, isTest, parentFlow }: {
     return (
       <div style={{
         marginTop: 16, padding: 18,
-        background: '#fff', border: `1.5px solid ${Z.line}`,
+        background: 'rgba(255,255,255,0.72)', border: `1px solid rgba(255,255,255,0.9)`,
         borderRadius: 18,
       }}>
         <div style={{ fontSize: 13, color: Z.muted, fontWeight: 600 }}>สนับสนุน Kaff</div>
-        <div style={{ fontSize: 28, fontWeight: 800, color: Z.forest, letterSpacing: '-0.01em', marginTop: 2 }}>
+        <div style={{ ...NUM, fontSize: 28, fontWeight: 700, color: Z.forest, letterSpacing: '-0.03em', marginTop: 2 }}>
           {fmtTHB(amount)}
         </div>
         <div style={{ marginTop: 6, fontSize: 12, color: Z.muted, lineHeight: 1.5 }}>
@@ -1158,7 +1159,7 @@ function TipSection({ donor, isTest, parentFlow }: {
   return (
     <div style={{
       marginTop: 16, padding: '18px 16px',
-      background: '#fff', border: `1.5px solid ${Z.line}`,
+      background: 'rgba(255,255,255,0.72)', border: `1px solid rgba(255,255,255,0.9)`,
       borderRadius: 16,
     }}>
       <div style={{ textAlign: 'center', fontSize: 15, fontWeight: 700, color: Z.ink }}>
@@ -1173,7 +1174,7 @@ function TipSection({ donor, isTest, parentFlow }: {
         {TIP_PRESETS.map(a => (
           <button key={a} onClick={() => pickAmount(a)} style={{
             padding: '12px 8px', borderRadius: 12,
-            background: '#fff', border: `1.5px solid ${Z.line}`,
+            background: 'rgba(255,255,255,0.72)', border: `1px solid rgba(255,255,255,0.9)`,
             color: Z.forest, fontWeight: 700, fontSize: 15,
             fontVariantNumeric: 'tabular-nums',
             transition: 'background .12s, border .12s',
@@ -1201,7 +1202,7 @@ function TipSection({ donor, isTest, parentFlow }: {
             placeholder="ระบุจำนวน (บาท)"
             style={{
               flex: 1, height: 40, padding: '0 12px',
-              border: `1.5px solid ${Z.line}`, borderRadius: 10,
+              border: `1px solid rgba(255,255,255,0.9)`, borderRadius: 10,
               fontSize: 14, color: Z.ink, outline: 'none',
               fontVariantNumeric: 'tabular-nums',
             }}
@@ -1267,7 +1268,7 @@ function ZakatReminderCard({ donor }: { donor: Donor }) {
   return (
     <div style={{
       marginTop: 16, padding: '14px 16px',
-      background: '#fff', border: `1.5px solid ${Z.line}`,
+      background: 'rgba(255,255,255,0.72)', border: `1px solid rgba(255,255,255,0.9)`,
       borderRadius: 14,
     }}>
       <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>

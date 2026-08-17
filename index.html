@@ -15,14 +15,15 @@
 <link rel="apple-touch-icon" href="/kaff-app-icon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   html, body {
     margin: 0; padding: 0;
-    background: #F5F1E8;
-    /* Manrope for Latin, Sarabun for Thai (auto-fallback), Arabic font for ك */
-    font-family: 'Manrope', 'Sarabun', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
-    color: #0E1A14;
+    background: #0D3B2E;
+    /* IBM Plex Sans Thai for Thai + UI, Space Grotesk for numerals/labels
+       (applied per-element via the NUM token), Arabic font for ك */
+    font-family: 'IBM Plex Sans Thai', 'Space Grotesk', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+    color: #0D3B2E;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
@@ -31,17 +32,37 @@
   input { font-family: inherit; }
 
   :root {
-    --forest: #2A6041;
-    --forest-deep: #0E1A14;
-    --sage: #2EC27E;
-    --sage-soft: #E6EDE8;
-    --gold: #D4AF37;
-    --gold-soft: #F4E4B7;
-    --surface: #F5F1E8;
+    --forest: #0D3B2E;
+    --forest-deep: #061A14;
+    --sage: #2C7D53;
+    --sage-soft: #E6EFE9;
+    --gold: #C9A227;
+    --gold-soft: #EBD79A;
+    --lime: #B9F27C;
+    --lime-tint: #DCFFB0;
+    --olive: #8A7538;
+    --surface: #F3F7F4;
     --paper: #FFFFFF;
-    --ink: #0E1A14;
-    --muted: #6B6B6B;
-    --line: #E6DFCF;
+    --ink: #0D3B2E;
+    --muted: #4d7a68;
+    --line: #DCE8E0;
+    --paper-green: linear-gradient(200deg,#F3F7F4 0%,#E6EFE9 45%,#CFE3D6 100%);
+    --paper-gold: linear-gradient(200deg,#FBF7EC 0%,#F0E9D6 45%,#DED5B8 100%);
+  }
+
+  /* Shared motion for the state primitives in KaffUI (Spinner / Skeleton /
+     check badges). Defined once globally so no screen re-declares them. */
+  @keyframes kaffSpin { to { transform: rotate(360deg); } }
+  @keyframes kaffShimmer {
+    0%   { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+  @keyframes kaffPop {
+    from { transform: scale(0.6); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   }
 
   .stage {
@@ -107,20 +128,22 @@
   /* Full-screen production mode — no iPhone frame, no design panel */
   .app-fullscreen {
     width: 100%;
-    min-height: 100vh;
-    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
     background: #0D3B2E;
     display: flex;
     justify-content: center;
   }
+  /* Fixed-height shell: each screen is `height: 100%` with its own internal
+     scroller, so sticky CTAs and the tab bar stay pinned to the viewport
+     instead of being pushed below the fold by long content. */
   .app-fullscreen > .app-canvas {
     width: 100%;
     max-width: 480px;
-    min-height: 100vh;
-    min-height: 100dvh;
-    background: #F5F1E8;
+    height: 100%;
+    background: var(--paper-green);
     position: relative;
-    overflow-x: hidden;
+    overflow: hidden;
   }
 </style>
 </head>

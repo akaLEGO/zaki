@@ -9,13 +9,13 @@
 <link rel="icon" type="image/svg+xml" href="/kaff-favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   html, body {
     margin: 0; padding: 0;
-    background: #F5F1E8;
-    font-family: 'Manrope', 'Sarabun', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
-    color: #0E1A14;
+    background: #0D3B2E;
+    font-family: 'IBM Plex Sans Thai', 'Space Grotesk', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+    color: #0D3B2E;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
@@ -23,25 +23,45 @@
   button { font-family: inherit; cursor: pointer; border: none; background: none; padding: 0; color: inherit; }
   input { font-family: inherit; }
 
+  /* Kept in sync with index.html — the LIFF entry mounts the same consumer
+     App, so it needs the same tokens and the same state-primitive motion. */
+  :root {
+    --forest: #0D3B2E;
+    --lime: #B9F27C;
+    --gold: #C9A227;
+    --paper-green: linear-gradient(200deg,#F3F7F4 0%,#E6EFE9 45%,#CFE3D6 100%);
+  }
+  @keyframes kaffSpin { to { transform: rotate(360deg); } }
+  @keyframes kaffShimmer {
+    0%   { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+  @keyframes kaffPop {
+    from { transform: scale(0.6); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+
   /* LIFF runs inside the LINE app, so we always want full-screen — no
      "design preview" mode, no iPhone frame. The .app-canvas is bounded to
      480px so it still looks ok if someone opens the LIFF URL on desktop. */
   .liff-stage {
     width: 100%;
-    min-height: 100vh;
-    min-height: 100dvh;
-    background: #F5F1E8;
+    height: 100vh;
+    height: 100dvh;
+    background: #0D3B2E;
     display: flex;
     justify-content: center;
   }
   .liff-stage > .app-canvas {
     width: 100%;
     max-width: 480px;
-    min-height: 100vh;
-    min-height: 100dvh;
-    background: #F5F1E8;
+    height: 100%;
+    background: var(--paper-green);
     position: relative;
-    overflow-x: hidden;
+    overflow: hidden;
   }
 
   /* Loading splash while LIFF SDK initializes. */
@@ -50,12 +70,12 @@
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     gap: 14px;
-    background: #0D3B2E; color: #fff;
-    font-family: 'Manrope', system-ui, sans-serif;
+    background: linear-gradient(180deg,#061A14 0%,#08231B 45%,#0D3B2E 100%); color: #f2fbf5;
+    font-family: 'IBM Plex Sans Thai', system-ui, sans-serif;
   }
   .liff-splash .glyph {
-    width: 60px; height: 60px; border-radius: 16px;
-    background: #D4AF37; color: #0D3B2E;
+    width: 60px; height: 60px; border-radius: 18px;
+    background: #B9F27C; color: #0D3B2E;
     display: flex; align-items: center; justify-content: center;
     font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 38px; font-weight: 600;
   }
