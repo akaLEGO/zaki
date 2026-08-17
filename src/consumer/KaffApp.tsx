@@ -326,6 +326,8 @@ export function App() {
     else if (t === 'profile') setScreen('profile');
   };
 
+  const goGive = () => openService('sadaqah');
+
   const openService = (s: ServiceId) => {
     track('service_picked', { flow: s, step: 'home' });
     if (s === 'riba') setScreen('riba-1');
@@ -345,13 +347,13 @@ export function App() {
       />;
       break;
     case 'history':
-      view = <HistoryScreen tab={tab} onTab={handleTab} onBack={() => { setScreen('home'); setTab('home'); }} />;
+      view = <HistoryScreen tab={tab} onTab={handleTab} onFab={goGive} onBack={() => { setScreen('home'); setTab('home'); }} />;
       break;
     case 'faq':
-      view = <FAQScreen tab={tab} onTab={handleTab} />;
+      view = <FAQScreen tab={tab} onTab={handleTab} onFab={goGive} />;
       break;
     case 'profile':
-      view = <ProfileScreen tab={tab} onTab={handleTab} onHistory={() => { setScreen('history'); setTab('history'); }} />;
+      view = <ProfileScreen tab={tab} onTab={handleTab} onFab={goGive} onHistory={() => { setScreen('history'); setTab('history'); }} />;
       break;
     case 'riba-1':
       view = <RibaEntry

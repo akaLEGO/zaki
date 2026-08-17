@@ -510,14 +510,6 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
   const name = user?.firstName || user?.username || '';
   const latest = stats?.recent[0];
 
-  const glassBtn: React.CSSProperties = {
-    width: 38, height: 38, borderRadius: 13,
-    ...glass('dark'),
-    color: K.onDark,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    position: 'relative',
-  };
-
   return (
     <div style={{
       width: '100%', height: '100%',
@@ -555,7 +547,9 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>{name || 'ยินดีต้อนรับ'}</div>
           </div>
-          {!isSignedIn ? (
+          {/* Only the sign-in pill lives here. Help and profile shortcuts
+              were removed — both duplicated tabs in the bottom bar. */}
+          {!isSignedIn && (
             <SignInButton mode="modal">
               <button style={{
                 height: 38, padding: '0 15px', borderRadius: 999,
@@ -563,14 +557,7 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
                 fontSize: 12.5, fontWeight: 700, letterSpacing: '0.02em',
               }}>เข้าสู่ระบบ</button>
             </SignInButton>
-          ) : (
-            <button onClick={() => onTab('profile')} style={glassBtn} aria-label="โปรไฟล์">
-              <Icon name="profile" size={19} />
-            </button>
           )}
-          <button onClick={() => onTab('faq')} style={glassBtn} aria-label="คำถามที่พบบ่อย">
-            <Icon name="faq" size={19} />
-          </button>
         </div>
 
         {/* Hero — giving total for the current Hijri year. With nothing
@@ -716,8 +703,8 @@ const FLOW_LABEL: Record<string, string> = {
   kaffarah: 'Kaffarah', qurban: 'Qurban', sadaqah: 'Sadaqah',
 };
 
-export function HistoryScreen({ onBack, tab, onTab }: {
-  onBack: () => void; tab?: Tab; onTab?: (t: Tab) => void;
+export function HistoryScreen({ onBack, tab, onTab, onFab }: {
+  onBack: () => void; tab?: Tab; onTab?: (t: Tab) => void; onFab?: () => void;
 }) {
   const { isSignedIn, isLoaded } = useUser();
   const [items, setItems] = useState<DonationRow[]>([]);
@@ -760,7 +747,7 @@ export function HistoryScreen({ onBack, tab, onTab }: {
             ))}
           </div>
         </div>
-        {tab && onTab && <BottomNav tab={tab} onTab={onTab} />}
+        {tab && onTab && <BottomNav tab={tab} onTab={onTab} onFab={onFab} />}
       </div>
     );
   }
@@ -777,7 +764,7 @@ export function HistoryScreen({ onBack, tab, onTab }: {
             <GoldButton full={false}>เข้าสู่ระบบ / สมัครใหม่</GoldButton>
           </SignInButton>
         </div>
-        {tab && onTab && <BottomNav tab={tab} onTab={onTab} />}
+        {tab && onTab && <BottomNav tab={tab} onTab={onTab} onFab={onFab} />}
       </div>
     );
   }
@@ -787,7 +774,7 @@ export function HistoryScreen({ onBack, tab, onTab }: {
       <div style={{ width: '100%', height: '100%', background: G.paperGreen, position: 'relative' }}>
         <ForestHeader onBack={onBack} title="ประวัติการบริจาค" compact />
         <div style={{ padding: 40, color: '#c0392b', fontSize: 13 }}>โหลดไม่สำเร็จ: {err}</div>
-        {tab && onTab && <BottomNav tab={tab} onTab={onTab} />}
+        {tab && onTab && <BottomNav tab={tab} onTab={onTab} onFab={onFab} />}
       </div>
     );
   }
@@ -856,7 +843,7 @@ export function HistoryScreen({ onBack, tab, onTab }: {
   );
 }
 
-export function ProfileScreen({ tab, onTab, onHistory }: { tab: Tab; onTab: (t: Tab) => void; onHistory: () => void }) {
+export function ProfileScreen({ tab, onTab, onHistory, onFab }: { tab: Tab; onTab: (t: Tab) => void; onHistory: () => void; onFab?: () => void }) {
   const { user, isSignedIn, isLoaded } = useUser();
   const { signOut } = useClerk();
   const [ytd, setYtd] = useState<number | null>(null);
@@ -886,7 +873,7 @@ export function ProfileScreen({ tab, onTab, onHistory }: { tab: Tab; onTab: (t: 
             หรือบริจาคแบบไม่ระบุชื่อต่อได้จากหน้าหลัก
           </div>
         </div>
-        <BottomNav tab={tab} onTab={onTab} />
+        <BottomNav tab={tab} onTab={onTab} onFab={onFab} />
       </div>
     );
   }
@@ -993,7 +980,7 @@ export function ProfileScreen({ tab, onTab, onHistory }: { tab: Tab; onTab: (t: 
         </div>
       </div>
 
-      <BottomNav tab={tab} onTab={onTab} />
+      <BottomNav tab={tab} onTab={onTab} onFab={onFab} />
     </div>
   );
 }

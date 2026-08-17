@@ -68,7 +68,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
   },
 ];
 
-export function FAQScreen({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void }) {
+export function FAQScreen({ tab, onTab, onFab }: { tab: Tab; onTab: (t: Tab) => void; onFab?: () => void }) {
   const [open, setOpen] = useState<string | null>(null);
   const [query, setQuery] = useState('');
 
@@ -216,7 +216,7 @@ export function FAQScreen({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void })
         </div>
       </div>
 
-      <BottomNav tab={tab} onTab={onTab} />
+      <BottomNav tab={tab} onTab={onTab} onFab={onFab} />
       <style>{`
         @keyframes faqExpand {
           from { opacity: 0; max-height: 0; }
