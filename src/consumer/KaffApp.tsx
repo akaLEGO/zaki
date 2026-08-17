@@ -73,7 +73,7 @@ export function App() {
   } = data;
   const [tweaks, setTweak] = useTweaks<Tweaks>({
     compulsoryWording: 'wajib',
-    homeLayout: 'stacked',
+    homeLayout: 'grid',
   });
 
   const [screen, setScreen] = useState<Screen>('home');
@@ -322,6 +322,7 @@ export function App() {
     setTab(t);
     if (t === 'home') setScreen('home');
     else if (t === 'faq') setScreen('faq');
+    else if (t === 'history') setScreen('history');
     else if (t === 'profile') setScreen('profile');
   };
 
@@ -344,13 +345,13 @@ export function App() {
       />;
       break;
     case 'history':
-      view = <HistoryScreen onBack={() => { setScreen('profile'); setTab('profile'); }} />;
+      view = <HistoryScreen tab={tab} onTab={handleTab} onBack={() => { setScreen('home'); setTab('home'); }} />;
       break;
     case 'faq':
       view = <FAQScreen tab={tab} onTab={handleTab} />;
       break;
     case 'profile':
-      view = <ProfileScreen tab={tab} onTab={handleTab} onHistory={() => setScreen('history')} />;
+      view = <ProfileScreen tab={tab} onTab={handleTab} onHistory={() => { setScreen('history'); setTab('history'); }} />;
       break;
     case 'riba-1':
       view = <RibaEntry
@@ -499,7 +500,8 @@ export function App() {
                   if ((g.key === 'pay-qr' || g.key === 'pay-bank' || g.key === 'success') && !activeFlow) setActiveFlow('riba');
                   if (g.key === 'home') setTab('home');
                   else if (g.key === 'faq') setTab('faq');
-                  else if (g.key === 'profile' || g.key === 'history') setTab('profile');
+                  else if (g.key === 'history') setTab('history');
+                  else if (g.key === 'profile') setTab('profile');
                 }}
               >{g.label}</button>
             ))}
@@ -539,8 +541,8 @@ export function App() {
           label="Cards"
           value={tweaks.homeLayout}
           options={[
-            { value: 'stacked', label: 'Stacked' },
-            { value: 'flat', label: 'Flat' },
+            { value: 'grid', label: 'Hero + 2×2' },
+            { value: 'stacked', label: 'Capsule deck' },
           ]}
           onChange={(v) => setTweak('homeLayout', v)}
         />

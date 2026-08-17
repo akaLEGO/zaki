@@ -120,7 +120,32 @@ export function Icon({ name, size = 24, color = 'currentColor', strokeWidth = 1.
     riba: <g {...p}><path d="M5 7c0 2.2 3.1 4 7 4s7-1.8 7-4-3.1-4-7-4-7 1.8-7 4Z"/><path d="M5 7v5c0 2.2 3.1 4 7 4s7-1.8 7-4V7"/><path d="M5 12v5c0 2.2 3.1 4 7 4s7-1.8 7-4v-5"/></g>,
     zakat: <g {...p}><path d="M12 3v18"/><path d="M16.5 6.5C16.5 5 14.5 4 12 4S7.5 5 7.5 6.5 9 9 12 9.5s4.5 1.5 4.5 3-2 2.5-4.5 2.5-4.5-1-4.5-2.5"/></g>,
     compulsory: <g {...p}><path d="M12 3 3 7v6c0 4.5 3.5 7.5 9 8 5.5-.5 9-3.5 9-8V7l-9-4Z"/><path d="m9 12 2 2 4-4"/></g>,
-    qurban: <g {...p}><ellipse cx="12" cy="12" rx="8.5" ry="6.2"/><path d="M10 8.5v7M10 11.5h5"/><circle cx="14" cy="9.5" r=".55" fill={color} stroke="none"/><circle cx="15.5" cy="13.5" r=".55" fill={color} stroke="none"/><circle cx="13" cy="14.5" r=".4" fill={color} stroke="none"/></g>,
+    // Standing cow — side-on body with a front-facing horned head, matching
+    // the client's reference. Redrawn as strokes (not the raster) so it takes
+    // the accent colour and stays crisp from the 18px chip up to the 112px
+    // blurred backdrop.
+    qurban: <g {...p}>
+      {/* Horns */}
+      <path d="M4.5 5.5C3.8 4.4 2.9 3.8 2 3.8c.1 1 .8 1.9 1.8 2.4"/>
+      <path d="M8.7 5.5c.7-1.1 1.6-1.7 2.5-1.7-.1 1-.8 1.9-1.8 2.4"/>
+      {/* Ears */}
+      <path d="M4 7.6c-1-.4-2-.4-2.6.1-.6.5-.4 1.3.4 1.7.8.3 1.8.2 2.5-.3"/>
+      <path d="M9.2 7.6c1-.4 2-.4 2.6.1.6.5.4 1.3-.4 1.7-.8.3-1.8.2-2.5-.3"/>
+      {/* Head */}
+      <path d="M4.3 6.2c.4-1.1 1.4-1.8 2.3-1.8s1.9.7 2.3 1.8c.5 1.4.6 3.2.2 4.6H4.1c-.4-1.4-.3-3.2.2-4.6Z"/>
+      {/* Muzzle + nostrils */}
+      <rect x="4.7" y="9.9" width="3.8" height="2.5" rx="1.25"/>
+      <circle cx="5.9" cy="11.1" r=".45" fill={color} stroke="none"/>
+      <circle cx="7.3" cy="11.1" r=".45" fill={color} stroke="none"/>
+      {/* Body — starts behind the head, rounded rump on the right */}
+      <path d="M9 8.4h8.7c1.9 0 3.4 1.5 3.4 3.4v1.9c0 1.2-1 2.2-2.2 2.2H8.8"/>
+      {/* Chest line down from the head into the front leg */}
+      <path d="M4.4 12.4v3.4"/>
+      {/* Legs */}
+      <path d="M4.4 15.8v3.9M8.8 15.8v3.9M16.6 15.9v3.8M19.6 15.9v3.8"/>
+      {/* Tail */}
+      <path d="M20.9 11.4c.8.3 1.3 1.1 1.3 2v3.3"/>
+    </g>,
     faq: <g {...p}><circle cx="12" cy="12" r="9"/><path d="M9.2 9.4c0-1.5 1.3-2.6 2.9-2.6 1.7 0 2.9 1.1 2.9 2.5 0 1.7-2.9 2-2.9 3.7"/><circle cx="12" cy="16.4" r=".8" fill={color} stroke="none"/></g>,
     sadaqah: <g {...p}><path d="M5 11h3l3-3c1 0 2 1 2 2l-1 2h4c1 0 2 1 2 2 0 .5-.5 1-1 1l1 1c0 .5-.5 1-1 1l.5 1c0 .5-.5 1-1 1H10c-3 0-5-1-5-3v-5Z"/></g>,
     hospital: <g {...p}><rect x="4" y="6" width="16" height="14" rx="1.5"/><path d="M4 10h16"/><path d="M12 13v4M10 15h4"/></g>,
@@ -821,7 +846,7 @@ export function TrustBadge({ children }: { children?: ReactNode }) {
   );
 }
 
-export type Tab = 'home' | 'faq' | 'profile';
+export type Tab = 'home' | 'faq' | 'history' | 'profile';
 
 /**
  * Bottom tab bar — the white sheet from the handoff, full-bleed with a 28px
@@ -831,9 +856,12 @@ export type Tab = 'home' | 'faq' | 'profile';
 export function BottomNav({ tab, onTab, onFab, children }: {
   tab: Tab; onTab: (t: Tab) => void; onFab?: () => void; children?: ReactNode;
 }) {
+  // Four tabs so the FAB sits dead centre with two on each side, matching
+  // the handoff's 5-slot bar. Without the FAB they simply spread evenly.
   const items: { id: Tab; icon: ZIconName; label: string }[] = [
     { id: 'home', icon: 'home', label: 'หน้าหลัก' },
     { id: 'faq', icon: 'faq', label: 'คำถาม' },
+    { id: 'history', icon: 'history', label: 'ประวัติ' },
     { id: 'profile', icon: 'profile', label: 'โปรไฟล์' },
   ];
   const left = onFab ? items.slice(0, 2) : items;

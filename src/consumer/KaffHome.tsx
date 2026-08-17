@@ -16,13 +16,26 @@ interface ServiceDeckItem {
   bg: string;
   /** Body text colour on that fill. */
   fg: string;
-  /** Eyebrow + icon-chip colour. */
+  /** Eyebrow + icon-chip colour on the solid fill. */
   accent: string;
+  /**
+   * Eyebrow + icon colour on the translucent grid tiles. The tiles sit on
+   * dark glass, so services with a dark `accent` (Zakat, Sadaqah) need a
+   * light one here to stay legible.
+   */
+  tileAccent: string;
   ribbon: string;
   /** Card title — 16px/600. */
   hook: string;
   /** Meta line under the title — 11px. */
   sub: string;
+  /**
+   * Compact title + meta for the 2-up grid tiles. Tiles are only ~160px
+   * wide and Thai has no word spaces, so the browser breaks long strings
+   * mid-word (ซะ|กาต). These are pre-shortened to wrap cleanly.
+   */
+  short: string;
+  shortSub: string;
   icon: ZIconName;
   /** Featured = the one card that gets the round accent arrow button. */
   featured?: boolean;
@@ -48,15 +61,16 @@ interface ServiceDeckItem {
 export const SERVICE_DECK: ServiceDeckItem[] = [
   // Post-Eid season: Riba (Kaff's flagship differentiator) leads; Qurban
   // moves to the bottom until next Dhul-Hijjah.
-  { id: 'riba',       bg: 'linear-gradient(120deg,#08231B,#0D3B2E 70%)',        fg: K.onDark,   accent: K.gold500, ribbon: 'RIBA',    hook: 'แยกดอกเบี้ยออกจากบัญชี',       sub: 'ส่งต่อสาธารณประโยชน์ · 100% ถึงผู้รับ', icon: 'riba', featured: true },
-  { id: 'zakat',      bg: 'linear-gradient(120deg,#D8B54A,#C9A227 75%)',        fg: K.inkGold,  accent: '#5a4a10', ribbon: 'ZAKAT',   hook: 'คำนวณและจ่ายซะกาต',           sub: 'คำนวณ 2.5% · เลือกผู้รับ 8 อัศนาฟ',   icon: 'zakat' },
-  { id: 'sadaqah',    bg: 'linear-gradient(120deg,#5FB47C,#3E9A63 78%)',        fg: '#123322',  accent: '#0D3B2E', ribbon: 'SADAQAH', hook: 'บริจาคตามศรัทธา',             sub: 'แคมเปญที่ทีม Kaff คัดมาแล้ว',        icon: 'sadaqah' },
-  { id: 'compulsory', bg: 'linear-gradient(120deg,#2C7D53,#1F6544 80%)',        fg: K.onDark,   accent: K.lime,    ribbon: 'WAJIB',   hook: 'ฟิดยะห์ · ฟิฏร · กัฟฟารอฮ์',   sub: 'ระบบช่วยคำนวณให้',                  icon: 'compulsory' },
-  { id: 'qurban',     bg: 'linear-gradient(120deg,#8A7538,#6E5A2A 80%)',        fg: K.onDark,   accent: K.gold300, ribbon: 'QURBAN',  hook: 'เลือกทำกุรบานทั่วโลก',         sub: 'เปรียบเทียบราคา · ร่วมกับ Ummatee',   icon: 'qurban' },
+  { id: 'riba',       bg: 'linear-gradient(120deg,#08231B,#0D3B2E 70%)', fg: K.onDark,  accent: K.gold500, tileAccent: K.gold500, ribbon: 'RIBA',    hook: 'แยกดอกเบี้ยออกจากบัญชี',     sub: 'ส่งต่อสาธารณประโยชน์ · 100% ถึงผู้รับ', short: 'แยกดอกเบี้ย',  shortSub: '100% ถึงผู้รับ',   icon: 'riba', featured: true },
+  { id: 'zakat',      bg: 'linear-gradient(120deg,#D8B54A,#C9A227 75%)', fg: K.inkGold, accent: '#5a4a10', tileAccent: '#F2DC96', ribbon: 'ZAKAT',   hook: 'คำนวณและจ่ายซะกาต',         sub: 'คำนวณ 2.5% · เลือกผู้รับ 8 อัศนาฟ',   short: 'คำนวณซะกาต',   shortSub: 'ทรัพย์สิน 2.5%',   icon: 'zakat' },
+  { id: 'sadaqah',    bg: 'linear-gradient(120deg,#5FB47C,#3E9A63 78%)', fg: '#123322', accent: '#0D3B2E', tileAccent: '#A9EE8E', ribbon: 'SADAQAH', hook: 'บริจาคตามศรัทธา',           sub: 'แคมเปญที่ทีม Kaff คัดมาแล้ว',        short: 'บริจาค',        shortSub: 'แคมเปญคัดสรร',     icon: 'sadaqah' },
+  { id: 'compulsory', bg: 'linear-gradient(120deg,#2C7D53,#1F6544 80%)', fg: K.onDark,  accent: K.lime,    tileAccent: K.lime, ribbon: 'WAJIB',   hook: 'ฟิดยะห์ · ฟิฏร · กัฟฟารอฮ์', sub: 'ระบบช่วยคำนวณให้',                  short: 'ฟิดยะห์ · ฟิฏร', shortSub: 'ระบบคำนวณให้',     icon: 'compulsory' },
+  { id: 'qurban',     bg: 'linear-gradient(120deg,#8A7538,#6E5A2A 80%)', fg: K.onDark,  accent: K.gold300, tileAccent: '#F2DC96', ribbon: 'QURBAN',  hook: 'เลือกทำกุรบานทั่วโลก',       sub: 'เปรียบเทียบราคา · ร่วมกับ Ummatee',   short: 'กุรบาน',        shortSub: 'เทียบราคาทั่วโลก', icon: 'qurban' },
 ];
 
 export type CompulsoryWording = 'wajib' | 'duty' | 'complete' | 'compulsory';
-export type HomeLayout = 'stacked' | 'flat';
+/** 'grid' = featured hero + 2×2 tiles (default) · 'stacked' = capsule deck. */
+export type HomeLayout = 'grid' | 'stacked';
 
 export const COMPULSORY_WORDINGS: Record<CompulsoryWording, { ribbon: string; hook: string }> = {
   wajib:      { ribbon: 'WAJIB',      hook: 'ฟิดยะห์ · ฟิฏร · กัฟฟารอฮ์ ครบที่นี่' },
@@ -260,7 +274,206 @@ function PillarCard({ s, onClick, pressed, onPress, onRelease }: {
   );
 }
 
-export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib', homeLayout = 'stacked' }: HomeScreenProps) {
+/**
+ * The highlighted service — full-width hero card at the top of Home, with a
+ * pill CTA and two peek layers below it so it reads as the top of a deck.
+ * Only one service is featured at a time (see SERVICE_DECK).
+ */
+function FeaturedCard({ s, onClick, pressed, onPress, onRelease }: {
+  s: ServiceDeckItem; onClick: () => void;
+  pressed: boolean; onPress: () => void; onRelease: () => void;
+}) {
+  const onDark = s.fg === K.onDark;
+  return (
+    <div style={{ position: 'relative', paddingBottom: 13 }}>
+      <button
+        onClick={onClick}
+        onMouseEnter={onPress} onMouseLeave={onRelease}
+        onTouchStart={onPress} onTouchEnd={onRelease}
+        style={{
+          position: 'relative', zIndex: 3,
+          display: 'block', width: '100%',
+          background: s.bg, color: s.fg,
+          borderRadius: 28,
+          padding: '16px 18px 16px',
+          textAlign: 'left',
+          boxShadow: pressed
+            ? '0 22px 40px rgba(0,0,0,.30)'
+            : '0 16px 34px rgba(0,0,0,.24)',
+          transform: pressed ? 'translateY(-4px)' : 'none',
+          transition: 'transform .12s ease-out, box-shadow .12s ease-out',
+          cursor: 'pointer',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Oversized blurred glyph under the content, same depth layer as
+            the grid tiles. */}
+        <div style={{
+          position: 'absolute', right: -30, top: -18, pointerEvents: 'none',
+          opacity: 0.16, filter: 'blur(2.5px)',
+          transform: 'rotate(-10deg)',
+          color: s.accent,
+        }}>
+          <Icon name={s.icon} size={150} color={s.accent} strokeWidth={0.9} />
+        </div>
+
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Eyebrow color={s.accent}>{s.ribbon}</Eyebrow>
+          {s.featuredBadge && (
+            <span style={{
+              padding: '2px 8px', borderRadius: 999,
+              background: s.accent, color: '#08231B',
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.04em',
+            }}>{s.featuredBadge}</span>
+          )}
+        </div>
+
+        <div style={{
+          position: 'relative',
+          marginTop: 9, fontSize: 21, fontWeight: 700, lineHeight: 1.32,
+          letterSpacing: '-0.015em', color: s.fg, textWrap: 'balance',
+          textShadow: onDark ? '0 1px 10px rgba(0,0,0,0.28)' : 'none',
+        } as React.CSSProperties}>{s.hook}</div>
+
+        <div style={{
+          position: 'relative',
+          marginTop: 6, fontSize: 12.5, lineHeight: 1.5,
+          color: onDark ? 'rgba(255,255,255,0.80)' : s.fg,
+          opacity: onDark ? 1 : 0.78,
+        }}>{s.sub}</div>
+
+        {/* Pill CTA + round arrow. In normal flow, not absolute — an
+            absolute row overlapped the meta line on longer copy. */}
+        <div style={{
+          position: 'relative',
+          marginTop: 14,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+        }}>
+          <span style={{
+            height: 38, padding: '0 18px', borderRadius: 999,
+            ...(onDark ? glass('dark', true) : { background: 'rgba(255,255,255,0.42)', border: '1px solid rgba(255,255,255,0.55)' }),
+            color: s.fg, fontSize: 13.5, fontWeight: 600,
+            display: 'inline-flex', alignItems: 'center',
+          }}>เริ่มเลย</span>
+          <span style={{
+            width: 38, height: 38, borderRadius: 999, flexShrink: 0,
+            background: s.accent, color: '#08231B',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'transform .2s',
+            transform: pressed ? 'translateX(2px)' : 'none',
+          }}>
+            <Icon name="arrowRight" size={18} strokeWidth={2.2} color="#08231B" />
+          </span>
+        </div>
+      </button>
+
+      {/* Peek layers — the deck sitting under the featured card. */}
+      <div style={{
+        position: 'absolute', zIndex: 2, left: 13, right: 13, bottom: 6,
+        height: 22, borderRadius: 26,
+        background: 'rgba(255,255,255,0.14)',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+      }} />
+      <div style={{
+        position: 'absolute', zIndex: 1, left: 28, right: 28, bottom: 0,
+        height: 22, borderRadius: 26,
+        background: 'rgba(255,255,255,0.08)',
+      }} />
+    </div>
+  );
+}
+
+/**
+ * One of the four secondary services, rendered as a 2-up grid tile.
+ * Tiles are glass rather than solid fills — the service colour comes
+ * through as a low-opacity wash so the home gradient stays readable
+ * behind them and the featured card keeps all the visual weight.
+ */
+function ServiceTile({ s, onClick, pressed, onPress, onRelease }: {
+  s: ServiceDeckItem; onClick: () => void;
+  pressed: boolean; onPress: () => void; onRelease: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={onPress} onMouseLeave={onRelease}
+      onTouchStart={onPress} onTouchEnd={onRelease}
+      style={{
+        position: 'relative',
+        display: 'flex', flexDirection: 'column',
+        ...glass('dark', true),
+        color: K.onDark,
+        borderRadius: 24,
+        padding: '13px 14px 14px',
+        minHeight: 128,
+        textAlign: 'left',
+        boxShadow: pressed
+          ? '0 18px 32px rgba(0,0,0,.26)'
+          : '0 10px 24px rgba(0,0,0,.16)',
+        transform: pressed ? 'translateY(-4px)' : 'none',
+        transition: 'transform .12s ease-out, box-shadow .12s ease-out',
+        cursor: 'pointer',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Dark scrim first — without it the tile lands on the same mid-green
+          as the page gradient and the text sinks into it. */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: 'linear-gradient(160deg, rgba(6,26,20,0.18), rgba(6,26,20,0.52))',
+      }} />
+      {/* Service-colour wash over the scrim. Straight alpha, not soft-light —
+          blending desaturated the golds into olive. */}
+      <div style={{
+        position: 'absolute', inset: 0, background: s.bg,
+        opacity: pressed ? 0.52 : 0.42,
+        transition: 'opacity .12s ease-out',
+        pointerEvents: 'none',
+      }} />
+      {/* Oversized blurred glyph bleeding off the corner, sitting under the
+          content — the depth layer from the reference. */}
+      <div style={{
+        position: 'absolute', right: -22, bottom: -20, pointerEvents: 'none',
+        opacity: 0.22, filter: 'blur(2px)',
+        transform: 'rotate(-12deg)',
+        color: s.tileAccent,
+      }}>
+        <Icon name={s.icon} size={112} color={s.tileAccent} strokeWidth={1} />
+      </div>
+
+      <div style={{
+        position: 'relative',
+        width: 34, height: 34, borderRadius: 12,
+        background: 'rgba(255,255,255,0.16)',
+        border: '1px solid rgba(255,255,255,0.22)',
+        color: s.tileAccent,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Icon name={s.icon} size={18} color={s.tileAccent} strokeWidth={1.7} />
+      </div>
+
+      <div style={{ flex: 1, minHeight: 8 }} />
+
+      <div style={{ position: 'relative' }}>
+        <Eyebrow color={s.tileAccent}>{s.ribbon}</Eyebrow>
+        <div style={{
+          marginTop: 4, fontSize: 15.5, fontWeight: 700, lineHeight: 1.3,
+          letterSpacing: '-0.005em', color: '#ffffff',
+          textShadow: '0 1px 8px rgba(0,0,0,0.30)',
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        } as React.CSSProperties}>{s.short}</div>
+        <div style={{
+          marginTop: 3, fontSize: 11, lineHeight: 1.4,
+          color: 'rgba(255,255,255,0.80)',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>{s.shortSub}</div>
+      </div>
+    </button>
+  );
+}
+
+export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib', homeLayout = 'grid' }: HomeScreenProps) {
   const { user, isSignedIn } = useUser();
   const [focused, setFocused] = useState<ServiceId | null>(null);
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -286,6 +499,11 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
     return { ...s, ribbon: w.ribbon, hook: w.hook };
   });
 
+  // The featured service takes the hero slot; the other four fill the 2×2
+  // grid. Falls back to the first entry if nothing is flagged featured.
+  const hero = deck.find(s => s.featured) || deck[0];
+  const rest = deck.filter(s => s.id !== hero?.id);
+
   const personal = myYtd !== null;
   const heroAmount = personal ? myYtd : (stats?.totals.amount ?? 0);
   const heroLabel = personal ? `ให้แล้วปี ${hijriYear()}` : 'ชุมชน Kaff ส่งถึงผู้รับแล้ว';
@@ -310,10 +528,14 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
       <div style={{ position: 'absolute', inset: 0, background: G.homeGlowA, pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', inset: 0, background: G.homeGlowB, pointerEvents: 'none' }} />
 
+      {/* Scrolls the full height and pads past the tab sheet instead of
+          stopping short of it — a fixed `bottom` inset clipped the last
+          row of tiles, since the sheet grows when the latest-giving row
+          is present. */}
       <div style={{
-        position: 'absolute', inset: 0, bottom: 84,
+        position: 'absolute', inset: 0,
         overflowY: 'auto', overflowX: 'hidden',
-        padding: '56px 18px 22px',
+        padding: '56px 18px calc(126px + env(safe-area-inset-bottom, 0px))',
         WebkitOverflowScrolling: 'touch',
       }}>
         {/* Header — avatar tile, greeting, two glass actions */}
@@ -405,24 +627,50 @@ export function HomeScreen({ onService, tab, onTab, compulsoryWording = 'wajib',
           </div>
         </div>
 
-        {/* The 5-pillar stack */}
-        <div style={{ marginTop: 28, paddingBottom: 4 }}>
-          {deck.map((s, i) => (
-            <div key={s.id} style={{
-              position: 'relative',
-              zIndex: i + 1,
-              marginTop: homeLayout === 'flat' ? (i ? 12 : 0) : (i ? -16 : 0),
-            }}>
-              <PillarCard
-                s={s}
-                onClick={() => onService(s.id)}
-                pressed={focused === s.id}
-                onPress={() => setFocused(s.id)}
+        {/* Services — one highlighted hero card, then the rest 2-up.
+            Falls back to the overlapping capsule stack via the tweak panel. */}
+        {homeLayout === 'grid' ? (
+          <div style={{ marginTop: 26, paddingBottom: 4 }}>
+            {hero && (
+              <FeaturedCard
+                s={hero}
+                onClick={() => onService(hero.id)}
+                pressed={focused === hero.id}
+                onPress={() => setFocused(hero.id)}
                 onRelease={() => setFocused(null)}
               />
+            )}
+            <div style={{
+              marginTop: 11,
+              display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 11,
+            }}>
+              {rest.map(s => (
+                <ServiceTile
+                  key={s.id}
+                  s={s}
+                  onClick={() => onService(s.id)}
+                  pressed={focused === s.id}
+                  onPress={() => setFocused(s.id)}
+                  onRelease={() => setFocused(null)}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : (
+          <div style={{ marginTop: 28, paddingBottom: 4 }}>
+            {deck.map((s, i) => (
+              <div key={s.id} style={{ position: 'relative', zIndex: i + 1, marginTop: i ? -16 : 0 }}>
+                <PillarCard
+                  s={s}
+                  onClick={() => onService(s.id)}
+                  pressed={focused === s.id}
+                  onPress={() => setFocused(s.id)}
+                  onRelease={() => setFocused(null)}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* White sheet — latest giving + tab bar with the give FAB */}
@@ -468,7 +716,9 @@ const FLOW_LABEL: Record<string, string> = {
   kaffarah: 'Kaffarah', qurban: 'Qurban', sadaqah: 'Sadaqah',
 };
 
-export function HistoryScreen({ onBack }: { onBack: () => void }) {
+export function HistoryScreen({ onBack, tab, onTab }: {
+  onBack: () => void; tab?: Tab; onTab?: (t: Tab) => void;
+}) {
   const { isSignedIn, isLoaded } = useUser();
   const [items, setItems] = useState<DonationRow[]>([]);
   const [ytd, setYtd] = useState(0);
@@ -510,6 +760,7 @@ export function HistoryScreen({ onBack }: { onBack: () => void }) {
             ))}
           </div>
         </div>
+        {tab && onTab && <BottomNav tab={tab} onTab={onTab} />}
       </div>
     );
   }
@@ -526,6 +777,7 @@ export function HistoryScreen({ onBack }: { onBack: () => void }) {
             <GoldButton full={false}>เข้าสู่ระบบ / สมัครใหม่</GoldButton>
           </SignInButton>
         </div>
+        {tab && onTab && <BottomNav tab={tab} onTab={onTab} />}
       </div>
     );
   }
@@ -535,6 +787,7 @@ export function HistoryScreen({ onBack }: { onBack: () => void }) {
       <div style={{ width: '100%', height: '100%', background: G.paperGreen, position: 'relative' }}>
         <ForestHeader onBack={onBack} title="ประวัติการบริจาค" compact />
         <div style={{ padding: 40, color: '#c0392b', fontSize: 13 }}>โหลดไม่สำเร็จ: {err}</div>
+        {tab && onTab && <BottomNav tab={tab} onTab={onTab} />}
       </div>
     );
   }
@@ -542,7 +795,7 @@ export function HistoryScreen({ onBack }: { onBack: () => void }) {
   return (
     <div style={{ width: '100%', height: '100%', background: G.paperGreen, overflowY: 'auto', position: 'relative' }}>
       <ForestHeader onBack={onBack} title="ประวัติการบริจาค" sub="ทุกอย่างเป็นความลับ · ดาวน์โหลดใบเสร็จได้ทุกเมื่อ" compact />
-      <div style={{ padding: '20px 16px 40px' }}>
+      <div style={{ padding: '20px 16px calc(126px + env(safe-area-inset-bottom, 0px))' }}>
         <div style={{
           background: 'rgba(255,255,255,0.72)', borderRadius: 22, padding: 18,
           border: `1px solid rgba(255,255,255,0.9)`,
@@ -646,7 +899,6 @@ export function ProfileScreen({ tab, onTab, onHistory }: { tab: Tab; onTab: (t: 
   // privacy prefs, tax-receipt PDF, language) are hidden until implemented
   // so the menu has no dead taps. Re-add them as they ship.
   const rows = [
-    { label: 'ประวัติการบริจาค', sub: 'ดูรายการ + ใบเสร็จย้อนหลัง', onClick: onHistory },
     { label: 'ออกจากระบบ', sub: '', onClick: () => signOut() },
   ];
   return (
