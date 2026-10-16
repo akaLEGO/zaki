@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
   Z, K, G, NUM, glass, Icon, GoldButton, ForestHeader, StickyBottom,
-  Card, ProgressBar, MoneyField, Stepper, Chip, TrustBadge, Eyebrow, Amount, fmtTHB, fmtPct,
+  Card, ProgressBar, MoneyField, Stepper, Chip, TrustBadge, Eyebrow, Amount,
+  EmptyState, Skeleton, fmtTHB, fmtPct,
 } from './KaffUI';
 import type { AsnafId } from '../shared/types';
 import { useData } from '../lib/data-context';
@@ -79,8 +80,32 @@ export function RibaEntry({ amount, setAmount, onBack, onNext }: {
 export function RibaOrgSelect({ amount, selectedOrg, setSelectedOrg, onBack, onNext }: {
   amount: number; selectedOrg: string | null; setSelectedOrg: (id: string) => void; onBack: () => void; onNext: () => void;
 }) {
-  const { orgs: ORG_LIST } = useData();
+  const { orgs: ORG_LIST, loading: dataLoading, error: dataError } = useData();
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  // Riba can only be routed to a vetted public-benefit organisation. With
+  // none configured the old screen showed an empty list above a CTA that
+  // could never enable — a dead end. Say so instead.
+  if (!dataLoading && ORG_LIST.length === 0) {
+    return (
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGold }}>
+        <ForestHeader onBack={onBack} title="เลือกองค์กรที่ต้องการส่งต่อ" compact />
+        <div style={{ flex: 1, overflowY: 'auto', padding: '14px 20px 24px' }}>
+          <EmptyState
+            icon={<Icon name="community" size={32} strokeWidth={1.8} color={Z.forest} />}
+            title="ยังไม่เปิดรับในตอนนี้"
+            body={dataError
+              ? 'โหลดรายชื่อองค์กรไม่สำเร็จ ลองใหม่อีกครั้ง'
+              : 'ดอกเบี้ยต้องส่งให้องค์กรสาธารณประโยชน์ที่ตรวจสอบแล้วเท่านั้น Kaff กำลังทำข้อตกลงกับองค์กรพันธมิตร และจะเปิดให้ส่งต่อทันทีที่พร้อม'}
+            primary={{ label: 'กลับหน้าหลัก', onClick: onBack }}
+          />
+          <div style={{ marginTop: 16 }}>
+            <TrustBadge>ยอดดอกเบี้ย {fmtTHB(amount)} ที่คุณกรอกไว้ ยังไม่ถูกเรียกเก็บ</TrustBadge>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGold }}>
       <ForestHeader
@@ -810,13 +835,40 @@ export function SadaqahCampaigns({ campaign, setCampaign, iftarMeals, setIftarMe
   iftarMeals: number; setIftarMeals: (n: number) => void;
   onBack: () => void; onNext: () => void;
 }) {
-  const { campaigns: CAMPAIGNS } = useData();
+  const { campaigns: CAMPAIGNS, loading: dataLoading, error: dataError } = useData();
   const featured = CAMPAIGNS.find(c => c.featured);
   const others = CAMPAIGNS.filter(c => !c.featured);
+
+  // No campaigns yet is a normal state, not an error: Kaff only lists a
+  // campaign once there is a real partner behind it. The old version
+  // rendered bare text with no header, which trapped the user on a screen
+  // with no way back.
   if (!featured) {
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: Z.muted }}>
-        ยังไม่มีแคมเปญในระบบ
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: G.paperGreen }}>
+        <ForestHeader onBack={onBack} title="บริจาคตามศรัทธา" compact />
+        <div style={{ flex: 1, overflowY: 'auto', padding: '14px 20px 24px' }}>
+          {dataLoading ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[0, 1, 2].map(i => (
+                <div key={i} style={{ ...glass('light', true), borderRadius: 22, padding: 16 }}>
+                  <Skeleton width="56%" height={14} />
+                  <Skeleton width="36%" height={11} style={{ marginTop: 8 }} />
+                  <Skeleton width="100%" height={8} style={{ marginTop: 14 }} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<Icon name="plant" size={32} strokeWidth={1.8} color={Z.forest} />}
+              title="ยังไม่เปิดรับในตอนนี้"
+              body={dataError
+                ? 'โหลดรายการแคมเปญไม่สำเร็จ ลองใหม่อีกครั้ง หรือกลับไปเลือกบริการอื่น'
+                : 'Kaff จะเปิดแคมเปญเมื่อมีองค์กรพันธมิตรที่ตรวจสอบแล้วรองรับ — เราไม่ขึ้นรายการที่ยังส่งต่อเงินให้ใครไม่ได้'}
+              primary={{ label: 'กลับหน้าหลัก', onClick: onBack }}
+            />
+          )}
+        </div>
       </div>
     );
   }
