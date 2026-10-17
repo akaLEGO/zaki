@@ -37,6 +37,7 @@ db/009_tipping_model.sql flow='tip' + parent_donation_id
 db/010_slip_verification.sql  slip_image + slip_uploaded_at
 db/011_donation_targets.sql   campaign_id + org_id + counted_in_raised
 db/012_dedication_zakat_reminders.sql  dedication column + zakat_reminders table
+db/013_reset_seed_figures.sql         zero the demo raised/received figures from seed.sql
 ```
 
 How: Neon → SQL Editor → paste each file's contents → Run. A green
