@@ -38,6 +38,7 @@ db/010_slip_verification.sql  slip_image + slip_uploaded_at
 db/011_donation_targets.sql   campaign_id + org_id + counted_in_raised
 db/012_dedication_zakat_reminders.sql  dedication column + zakat_reminders table
 db/013_reset_seed_figures.sql         zero the demo raised/received figures from seed.sql
+db/014_zakat_disbursement.sql         8-asnaf split + partner disbursement + recipient notice/thank-you
 ```
 
 How: Neon → SQL Editor → paste each file's contents → Run. A green
